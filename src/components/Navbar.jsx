@@ -25,12 +25,12 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-forest-green-900 shadow-lg sticky top-0 z-50" style={{backgroundColor: '#143314', position: 'sticky', top: '0', zIndex: 50}}>
+    <nav className="shadow-lg sticky top-0 z-50" style={{backgroundColor: '#b9f041', position: 'sticky', top: '0', zIndex: 50}}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <Link to="/" className="text-white text-2xl font-bold">
+            <Link to="/" className="text-green-950 text-2xl font-bold">
               TNFDRW
             </Link>
           </div>
@@ -42,7 +42,7 @@ const Navbar = () => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className="text-white hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200"
+                  className="text-green-950 hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200"
                 >
                   {item.name}
                 </Link>
@@ -53,7 +53,7 @@ const Navbar = () => {
                 <button
                   onMouseEnter={() => setIsDivisionsOpen(true)}
                   onMouseLeave={() => setIsDivisionsOpen(false)}
-                  className="text-white hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200 flex items-center"
+                  className="text-green-950 hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200 flex items-center"
                 >
                   Divisions
                   <ChevronDown className="ml-2 h-4 w-4" />

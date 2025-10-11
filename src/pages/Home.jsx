@@ -1,116 +1,189 @@
 import React from 'react';
-import { TreePine, Leaf, Users, BookOpen, Award, Globe } from 'lucide-react';
+import { FlaskConical, Sprout, BarChart4, Users, BookOpen, Globe, Award, ShoppingCart } from 'lucide-react';
+
+// --- Helper Components for Clean Structure ---
+
+const ValuePropositionSection = () => {
+    const features = [
+        {
+            icon: <FlaskConical className="h-6 w-6" />,
+            title: "Ecological Research & Innovation",
+            description: "Leading scientific studies in forest health, climate change adaptation, and species preservation.",
+        },
+        {
+            icon: <Sprout className="h-6 w-6" />,
+            title: "Modern Nursery Technology",
+            description: "Operating state-of-the-art facilities for high-quality, disease-resistant plant propagation and genetics.",
+        },
+        {
+            icon: <BarChart4 className="h-6 w-6" />,
+            title: "Data-Driven Forest Management",
+            description: "Utilizing GIS, remote sensing, and big data to inform sustainable forest policy and management.",
+        },
+        {
+            icon: <Users className="h-6 w-6" />,
+            title: "Training & Capacity Building",
+            description: "Providing expert training to field staff, academic institutions, and local communities.",
+        },
+        {
+            icon: <BookOpen className="h-6 w-6" />,
+            title: "Scientific Publications",
+            description: "Publishing peer-reviewed research, technical reports, and extension materials for wide dissemination.",
+        },
+        {
+            icon: <Globe className="h-6 w-6" />,
+            title: "Biodiversity Conservation",
+            description: "Focused efforts on endemic species conservation, habitat restoration, and protecting Tamil Nadu's rich biodiversity.",
+        },
+    ];
+
+    return (
+        <section className="py-16 bg-gray-50">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 className="text-4xl font-bold text-center text-green-900 mb-4">
+                    Our Core Focus and Activities
+                </h2>
+                <p className="text-xl text-center text-gray-600 max-w-3xl mx-auto mb-12">
+                    Our work spans vital aspects of scientific forestry, ecological innovation, and sustainable development.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {features.map((feature, index) => (
+                        <div key={index} className="bg-white rounded-xl border border-green-100 p-8 hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+                            <div className="flex justify-center items-center mb-4">
+                                <div className="p-4 rounded-full bg-lime-100 text-green-700">
+                                    {feature.icon}
+                                </div>
+                            </div>
+                            <h3 className="text-xl font-bold text-green-900 text-center mb-3">
+                                {feature.title}
+                            </h3>
+                            <p className="text-gray-600 text-center leading-relaxed">
+                                {feature.description}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const ImpactStatisticsSection = () => {
+    const stats = [
+        { count: '50+', label: 'Active Research Projects', icon: <FlaskConical className="h-8 w-8 text-lime-400" /> },
+        { count: '10K+', label: 'Saplings Propagated Annually', icon: <Sprout className="h-8 w-8 text-lime-400" /> },
+        { count: '100+', label: 'Scientific Publications', icon: <BookOpen className="h-8 w-8 text-lime-400" /> },
+        { count: '15+', label: 'Years of Service Excellence', icon: <Award className="h-8 w-8 text-lime-400" /> },
+    ];
+
+    return (
+        <section className="py-20 bg-green-900">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 className="text-4xl font-extrabold text-center text-white mb-12">
+                    Our Footprint of Growth 📈
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    {stats.map((stat, index) => (
+                        <div key={index} className="text-center p-4">
+                            <div className="flex justify-center mb-3">{stat.icon}</div>
+                            <div className="text-5xl font-extrabold text-lime-400 mb-1">
+                                {stat.count}
+                            </div>
+                            <div className="text-lg font-medium text-green-200">
+                                {stat.label}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    );
+};
+
+const CTASection = () => (
+    <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="bg-lime-50 border-l-8 border-green-700 p-8 md:p-12 rounded-lg shadow-xl flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                <div>
+                    <h2 className="text-3xl font-bold text-green-900 mb-3">
+                        Visit Our E-Shop for Quality Saplings
+                    </h2>
+                    <p className="text-lg text-gray-700 max-w-xl">
+                        Support our research and conservation efforts by purchasing high-quality, scientifically grown plants from our modern nurseries.
+                    </p>
+                </div>
+                <div className="mt-6 md:mt-0 flex-shrink-0">
+                    <a 
+                        href="/shop" 
+                        className="flex items-center justify-center px-8 py-3 bg-green-700 hover:bg-green-800 text-white font-bold rounded-lg shadow-md transition-colors duration-300"
+                    >
+                        <ShoppingCart className="h-5 w-5 mr-2" />
+                        Go to Shop
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+);
+
+const NewsUpdatesSection = () => (
+    <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-4xl font-bold text-green-900 mb-4">Latest Updates & News</h2>
+            <p className="text-lg text-gray-600 mb-8">
+                Stay informed on our latest discoveries, events, and important circulars.
+            </p>
+            {/* You would replace this placeholder with a component that fetches and displays the latest three posts */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                <div className="border p-6 rounded-lg shadow-sm">
+                    <p className="text-sm text-gray-500 mb-2">October 1, 2024</p>
+                    <h3 className="text-xl font-semibold text-green-800 mb-2">New Species Discovered in Western Ghats</h3>
+                    <p className="text-gray-600">Our team has identified a previously undocumented plant species in the Kodaikanal region...</p>
+                    <a href="/news/new-species" className="text-green-600 hover:text-green-800 mt-3 inline-block font-medium">Read More →</a>
+                </div>
+                <div className="border p-6 rounded-lg shadow-sm">
+                    <p className="text-sm text-gray-500 mb-2">September 15, 2024</p>
+                    <h3 className="text-xl font-semibold text-green-800 mb-2">Training Workshop on Drone Surveying</h3>
+                    <p className="text-gray-600">A five-day intensive training workshop was conducted for field officers on modern forest inventory techniques...</p>
+                    <a href="/news/workshop-drone" className="text-green-600 hover:text-green-800 mt-3 inline-block font-medium">Read More →</a>
+                </div>
+                <div className="border p-6 rounded-lg shadow-sm">
+                    <p className="text-sm text-gray-500 mb-2">August 28, 2024</p>
+                    <h3 className="text-xl font-semibold text-green-800 mb-2">Annual Research Publication Released</h3>
+                    <p className="text-gray-600">The 2024 volume features articles on bamboo cultivation and mangrove ecosystem restoration...</p>
+                    <a href="/publications/2024-annual" className="text-green-600 hover:text-green-800 mt-3 inline-block font-medium">Read More →</a>
+                </div>
+            </div>
+            <a href="/information" className="text-green-700 font-semibold hover:text-green-900 transition-colors duration-200 border-b-2 border-green-700 mt-12 inline-block">
+                View All News & Publications →
+            </a>
+        </div>
+    </section>
+);
+
+
+// --- Main Home Component (Page Body Content Only) ---
 
 const Home = () => {
-  const features = [
-    {
-      icon: <TreePine className="h-12 w-12 text-forest-green-600" />,
-      title: "Forest Research",
-      description: "Advanced research in forest ecology, biodiversity, and conservation strategies."
-    },
-    {
-      icon: <Leaf className="h-12 w-12 text-forest-green-600" />,
-      title: "Modern Nurseries",
-      description: "State-of-the-art nurseries for plant propagation and cultivation."
-    },
-    {
-      icon: <Users className="h-12 w-12 text-forest-green-600" />,
-      title: "Expert Faculty",
-      description: "Dedicated researchers and scientists with decades of experience."
-    },
-    {
-      icon: <BookOpen className="h-12 w-12 text-forest-green-600" />,
-      title: "Publications",
-      description: "Comprehensive research publications and scientific papers."
-    },
-    {
-      icon: <Award className="h-12 w-12 text-forest-green-600" />,
-      title: "Awards & Recognition",
-      description: "Recognized for excellence in forest research and conservation."
-    },
-    {
-      icon: <Globe className="h-12 w-12 text-forest-green-600" />,
-      title: "Global Impact",
-      description: "Contributing to global forest conservation and sustainability."
-    }
-  ];
+    return (
+        <div className="min-h-screen bg-white">
+            {/* 1. Key Value Proposition/Features Section */}
+            <ValuePropositionSection />
+            <hr className="border-green-100" />
+            
+            {/* 2. Impact Statistics/Numbers Section */}
+            <ImpactStatisticsSection />
+            <hr className="border-green-100" />
 
-  return (
-    <div className="py-12">
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-forest-green-800 mb-6">
-            Welcome to Tamil Nadu Forest Department Research Wing
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            We are committed to advancing forest research, conservation, and sustainable development 
-            through innovative scientific approaches and community engagement.
-          </p>
-        </div>
+            {/* 3. News & Updates Section */}
+            <NewsUpdatesSection />
+            <hr className="border-green-100" />
 
-        {/* Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {features.map((feature, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex flex-col items-center text-center">
-                <div className="mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-semibold text-forest-green-800 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            </div>
-          ))}
+            {/* 4. Secondary Call to Action (Focus on Shop/Product) */}
+            <CTASection />
         </div>
-
-        {/* Statistics Section */}
-        <div className="bg-forest-green-800 rounded-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-white text-center mb-8">
-            Our Impact in Numbers
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-300 mb-2">50+</div>
-              <div className="text-green-100">Research Projects</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-300 mb-2">25+</div>
-              <div className="text-green-100">Research Centers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-300 mb-2">100+</div>
-              <div className="text-green-100">Publications</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-green-300 mb-2">15+</div>
-              <div className="text-green-100">Years of Excellence</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Call to Action */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-forest-green-800 mb-4">
-            Join Our Mission
-          </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Be part of our journey towards a sustainable future through forest conservation and research.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-300">
-              Explore Research
-            </button>
-            <button className="border-2 border-forest-green-600 text-forest-green-600 hover:bg-forest-green-600 hover:text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-300">
-              Contact Us
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Home;

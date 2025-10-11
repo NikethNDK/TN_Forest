@@ -1,50 +1,57 @@
 import React from 'react';
-import { FileText, Download, Calendar, MapPin, Phone, Mail } from 'lucide-react';
+import { FileText, Download, Calendar, MapPin, Phone, Mail, Link } from 'lucide-react';
+
+// Using standard green/lime classes for visual consistency with previous components
+const ICON_COLOR = "text-lime-500";
+const TEXT_COLOR = "text-green-900";
+const BG_COLOR = "bg-green-700";
+const BUTTON_BG = "bg-lime-400";
+const BUTTON_TEXT = "text-green-900";
 
 const Information = () => {
   const informationSections = [
     {
       title: "Research Publications",
       description: "Access our latest research papers, reports, and scientific publications.",
-      icon: <FileText className="h-8 w-8 text-forest-green-600" />,
+      icon: <FileText className={`h-8 w-8 ${ICON_COLOR}`} />,
       items: [
-        "Annual Research Report 2024",
-        "Forest Conservation Guidelines",
-        "Biodiversity Assessment Report",
-        "Climate Change Impact Study"
+        { name: "Annual Research Report 2024", action: "Download", type: "file" },
+        { name: "Forest Conservation Guidelines", action: "Download", type: "file" },
+        { name: "Biodiversity Assessment Report", action: "Download", type: "file" },
+        { name: "Climate Change Impact Study", action: "Download", type: "file" },
       ]
     },
     {
       title: "Forms & Applications",
       description: "Download forms for research permits, collaborations, and partnerships.",
-      icon: <Download className="h-8 w-8 text-forest-green-600" />,
+      icon: <Download className={`h-8 w-8 ${ICON_COLOR}`} />,
       items: [
-        "Research Permit Application",
-        "Collaboration Agreement Form",
-        "Data Access Request Form",
-        "Publication Permission Form"
+        { name: "Research Permit Application", action: "Download", type: "file" },
+        { name: "Collaboration Agreement Form", action: "Download", type: "file" },
+        { name: "Data Access Request Form", action: "Download", type: "file" },
+        { name: "Publication Permission Form", action: "Download", type: "file" },
       ]
     },
     {
       title: "Events & Workshops",
       description: "Stay updated with our upcoming events, workshops, and conferences.",
-      icon: <Calendar className="h-8 w-8 text-forest-green-600" />,
+      icon: <Calendar className={`h-8 w-8 ${ICON_COLOR}`} />,
       items: [
-        "Forest Conservation Workshop - March 2024",
-        "Biodiversity Research Conference - May 2024",
-        "Nursery Management Training - July 2024",
-        "Annual Research Symposium - December 2024"
+        { name: "Forest Conservation Workshop - March 2024", action: "View Details", type: "link" },
+        { name: "Biodiversity Research Conference - May 2024", action: "View Details", type: "link" },
+        { name: "Nursery Management Training - July 2024", action: "View Details", type: "link" },
+        { name: "Annual Research Symposium - December 2024", action: "View Details", type: "link" },
       ]
     },
     {
-      title: "Contact Information",
-      description: "Get in touch with our research teams and administrative staff.",
-      icon: <Phone className="h-8 w-8 text-forest-green-600" />,
+      title: "Official Circulars",
+      description: "View important circulars and official announcements from the Research Wing.",
+      icon: <FileText className={`h-8 w-8 ${ICON_COLOR}`} />, // Reusing FileText or use a new icon
       items: [
-        "Main Office: +91 44 1234 5678",
-        "Research Division: +91 44 1234 5679",
-        "Email: info@tnfrd.gov.in",
-        "Emergency: +91 44 1234 5680"
+        { name: "New Research Grant Policy (Oct 2024)", action: "Download", type: "file" },
+        { name: "Office Holiday Schedule 2025", action: "Download", type: "file" },
+        { name: "Field Travel Guidelines Update", action: "Download", type: "file" },
+        { name: "Q3 Progress Report Submission", action: "Download", type: "file" },
       ]
     }
   ];
@@ -59,135 +66,142 @@ const Information = () => {
   ];
 
   return (
-    <div className="py-12">
+    <div className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         {/* Page Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-forest-green-800 mb-6">
+          <p className="text-lg font-semibold text-lime-600 mb-2 uppercase tracking-widest">
+            Resources & Access
+          </p>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-green-900 mb-4">
             Information Center
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Access important information, documents, and resources related to our research 
-            activities and forest conservation efforts.
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Quickly find the documents, applications, and contact details you need for 
+            collaboration and research with the T.N. Forest Department.
           </p>
         </div>
 
-        {/* Information Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+        {/* Information Sections (Grid) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-16">
           {informationSections.map((section, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center mb-6">
-                <div className="mr-4">{section.icon}</div>
+            <div key={index} className="bg-white rounded-xl shadow-2xl p-8 border-t-4 border-lime-500">
+              <div className="flex items-start mb-6 border-b pb-4 border-green-100">
+                <div className="p-3 bg-green-100 rounded-lg mr-4 flex-shrink-0">
+                  {section.icon}
+                </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-forest-green-800 mb-2">{section.title}</h2>
-                  <p className="text-gray-600">{section.description}</p>
+                  <h2 className="text-2xl font-bold text-green-900 mb-1">{section.title}</h2>
+                  <p className="text-gray-600 text-sm">{section.description}</p>
                 </div>
               </div>
-              <ul className="space-y-3">
+
+              <ul className="space-y-4">
                 {section.items.map((item, idx) => (
-                  <li key={idx} className="flex items-center text-gray-700 hover:text-forest-green-600 transition-colors">
-                    <span className="text-forest-green-600 mr-3">•</span>
-                    <span className="flex-1">{item}</span>
-                    <Download className="h-4 w-4 text-forest-green-600" />
+                  <li key={idx} className="flex items-center text-gray-700 hover:text-green-700 transition-colors cursor-pointer group">
+                    <span className={`text-lime-500 mr-3 font-extrabold`}>•</span>
+                    <span className="flex-1 font-medium">{item.name}</span>
+                    
+                    {/* Conditional Icon for File or Link */}
+                    {item.type === 'file' ? (
+                      <span className="flex items-center text-sm text-green-600 group-hover:text-green-700">
+                        {item.action} <Download className="h-4 w-4 ml-2" />
+                      </span>
+                    ) : (
+                      <span className="flex items-center text-sm text-green-600 group-hover:text-green-700">
+                        {item.action} <Link className="h-4 w-4 ml-2" />
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
             </div>
           ))}
         </div>
-
+        
         {/* Quick Links */}
-        <div className="bg-forest-green-50 rounded-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-forest-green-800 mb-6 text-center">
-            Quick Links
+        <div className={`bg-white rounded-xl shadow-xl p-8 mb-16 border-l-8 border-green-500`}>
+          <h2 className={`text-3xl font-bold ${TEXT_COLOR} mb-6 text-center`}>
+            Essential Resources
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {quickLinks.map((link, index) => (
               <a
                 key={index}
                 href={link.url}
-                className="bg-white rounded-lg p-4 text-center hover:bg-forest-green-100 transition-colors duration-200 shadow-sm hover:shadow-md"
+                className="p-4 text-center border border-green-200 rounded-lg hover:bg-lime-50 transition-all duration-200"
               >
-                <div className="text-sm font-medium text-forest-green-800">{link.name}</div>
+                <div className="text-base font-semibold text-green-800">{link.name}</div>
               </a>
             ))}
           </div>
         </div>
 
-        {/* Contact Information */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-forest-green-800 mb-6">Get in Touch</h2>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <MapPin className="h-5 w-5 text-forest-green-600 mr-3" />
-                <div>
-                  <div className="font-semibold text-gray-800">Main Office</div>
-                  <div className="text-gray-600">
-                    Forest Department Complex,<br />
-                    Chennai, Tamil Nadu 600006
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <Phone className="h-5 w-5 text-forest-green-600 mr-3" />
-                <div>
-                  <div className="font-semibold text-gray-800">Phone</div>
-                  <div className="text-gray-600">+91 44 1234 5678</div>
-                </div>
-              </div>
-              <div className="flex items-center">
-                <Mail className="h-5 w-5 text-forest-green-600 mr-3" />
-                <div>
-                  <div className="font-semibold text-gray-800">Email</div>
-                  <div className="text-gray-600">info@tnfrd.gov.in</div>
-                </div>
-              </div>
+        {/* Contact and Office Hours */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+          
+          {/* Contact Info Card */}
+          <div className="bg-white rounded-xl shadow-xl p-8 border-2 border-green-100">
+            <h2 className={`text-2xl font-bold ${TEXT_COLOR} mb-6 flex items-center`}>
+                <Phone className={`h-6 w-6 mr-3 ${ICON_COLOR}`} /> Get in Touch
+            </h2>
+            <div className="space-y-6">
+              <ContactDetail 
+                icon={MapPin} 
+                title="Main Office" 
+                detail="Forest Department Complex, Chennai, Tamil Nadu 600006" 
+                type="address"
+              />
+              <ContactDetail 
+                icon={Phone} 
+                title="General Enquiries" 
+                detail="+91 XXXXX XXXXX" // Placeholder
+                type="phone"
+              />
+              <ContactDetail 
+                icon={Mail} 
+                title="Research Email" 
+                detail="example@example.com" // Placeholder
+                type="email"
+              />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-forest-green-800 mb-6">Office Hours</h2>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Monday - Friday</span>
-                <span className="font-semibold text-gray-800">9:00 AM - 5:00 PM</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Saturday</span>
-                <span className="font-semibold text-gray-800">9:00 AM - 1:00 PM</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Sunday</span>
-                <span className="font-semibold text-gray-800">Closed</span>
-              </div>
+          {/* Office Hours Card */}
+          <div className={`rounded-xl shadow-xl p-8 ${BG_COLOR} text-white`}>
+            <h2 className="text-2xl font-bold text-lime-400 mb-6 flex items-center">
+                <Calendar className="h-6 w-6 mr-3 text-lime-400" /> Office Hours
+            </h2>
+            <div className="space-y-4">
+              <ScheduleItem day="Monday - Friday" hours="9:00 AM - 5:00 PM" />
+              <ScheduleItem day="Saturday" hours="9:00 AM - 1:00 PM" />
+              <ScheduleItem day="Sunday" hours="Closed" isClosed={true} />
             </div>
-            <div className="mt-6 p-4 bg-forest-green-50 rounded-lg">
-              <p className="text-sm text-forest-green-800">
-                <strong>Note:</strong> For urgent matters, please contact our emergency line 
-                or send an email to emergency@tnfrd.gov.in
+            <div className="mt-8 p-4 bg-green-900/50 rounded-lg border border-lime-400">
+              <p className="text-sm text-green-200">
+                <strong>Note:</strong> For urgent matters outside of these hours, please use the official **emergency contact** details provided in the latest circular.
               </p>
             </div>
           </div>
         </div>
 
-        {/* Newsletter Signup */}
-        <div className="text-center bg-forest-green-800 rounded-lg p-8">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Stay Updated
+        {/* Newsletter Signup (CTA) */}
+        <div className="text-center bg-green-900 rounded-xl p-10">
+          <h2 className="text-3xl font-bold text-lime-400 mb-4">
+            Subscribe to Our Research Bulletin
           </h2>
-          <p className="text-green-100 mb-6 max-w-2xl mx-auto">
-            Subscribe to our newsletter to receive the latest updates on research findings, 
-            events, and conservation efforts.
+          <p className="text-green-100 mb-8 max-w-2xl mx-auto text-lg">
+            Receive the latest official announcements, research findings, and event invitations directly in your inbox.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
             <input
               type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg border-0 focus:ring-2 focus:ring-forest-green-500"
+              placeholder="Enter your professional email address"
+              className="flex-1 px-5 py-3 rounded-lg border-0 focus:ring-4 focus:ring-lime-500 shadow-inner"
             />
-            <button className="bg-white text-forest-green-800 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors duration-300">
-              Subscribe
+            <button className={`${BUTTON_BG} ${BUTTON_TEXT} px-8 py-3 rounded-lg font-bold hover:bg-lime-300 transition-colors duration-300 shadow-lg`}>
+              Subscribe Now
             </button>
           </div>
         </div>
@@ -195,5 +209,24 @@ const Information = () => {
     </div>
   );
 };
+
+// --- Helper Components for Clean Structure ---
+
+const ContactDetail = ({ icon: Icon, title, detail, type }) => (
+    <div className="flex items-start">
+        <Icon className={`h-5 w-5 ${ICON_COLOR} mr-3 mt-1 flex-shrink-0`} />
+        <div>
+            <div className="font-semibold text-gray-800">{title}</div>
+            <div className={`text-gray-600 ${type === 'address' ? 'leading-snug' : ''}`}>{detail}</div>
+        </div>
+    </div>
+);
+
+const ScheduleItem = ({ day, hours, isClosed }) => (
+    <div className={`flex justify-between p-3 rounded-lg ${isClosed ? 'bg-green-600' : 'bg-green-600/50'}`}>
+        <span className="text-green-200">{day}</span>
+        <span className={`font-semibold ${isClosed ? 'text-lime-400' : 'text-white'}`}>{hours}</span>
+    </div>
+);
 
 export default Information;

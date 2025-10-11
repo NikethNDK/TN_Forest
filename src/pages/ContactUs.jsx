@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, Phone, Mail, Clock, Send, MessageCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, MessageCircle, GitBranch, AlertTriangle } from 'lucide-react';
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +18,7 @@ const ContactUs = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle form submission here
+    // In a real application, this would send data to an API endpoint
     console.log('Form submitted:', formData);
     alert('Thank you for your message! We will get back to you soon.');
     setFormData({ name: '', email: '', subject: '', message: '' });
@@ -26,255 +26,227 @@ const ContactUs = () => {
 
   const contactInfo = [
     {
-      icon: <MapPin className="h-6 w-6 text-forest-green-600" />,
-      title: "Main Office",
+      icon: <MapPin className="h-6 w-6 text-lime-500" />,
+      title: "Main Office Location",
       details: [
         "Forest Department Complex",
-        "Chennai, Tamil Nadu 600006",
-        "India"
-      ]
+        "Chennai, Tamil Nadu 600006, India"
+      ],
+      type: 'address'
     },
     {
-      icon: <Phone className="h-6 w-6 text-forest-green-600" />,
-      title: "Phone Numbers",
+      icon: <Phone className="h-6 w-6 text-lime-500" />,
+      title: "Phone & Emergency",
       details: [
-        "Main Office: +91 44 1234 5678",
-        "Research Division: +91 44 1234 5679",
-        "Emergency: +91 44 1234 5680"
-      ]
+        "General Office: +91 44 XXXXX 5678",
+        "Research Wing: +91 44 XXXXX 5679",
+        "Emergency Line: +91 44 XXXXX 5680"
+      ],
+      type: 'phone'
     },
     {
-      icon: <Mail className="h-6 w-6 text-forest-green-600" />,
+      icon: <Mail className="h-6 w-6 text-lime-500" />,
       title: "Email Addresses",
       details: [
         "General: info@tnfrd.gov.in",
         "Research: research@tnfrd.gov.in",
         "Emergency: emergency@tnfrd.gov.in"
-      ]
+      ],
+      type: 'email'
     },
-    {
-      icon: <Clock className="h-6 w-6 text-forest-green-600" />,
-      title: "Office Hours",
-      details: [
-        "Monday - Friday: 9:00 AM - 5:00 PM",
-        "Saturday: 9:00 AM - 1:00 PM",
-        "Sunday: Closed"
-      ]
-    }
   ];
 
   const researchCenters = [
-    {
-      name: "Thoppur Modern Nursery",
-      location: "Thoppur, Tamil Nadu",
-      phone: "+91 44 1234 5681",
-      email: "thoppur@tnfrd.gov.in"
-    },
-    {
-      name: "Kathipuram Research Center",
-      location: "Kathipuram, Tamil Nadu",
-      phone: "+91 44 1234 5682",
-      email: "kathipuram@tnfrd.gov.in"
-    },
-    {
-      name: "Melsangam Research Center",
-      location: "Melsangam, Tamil Nadu",
-      phone: "+91 44 1234 5683",
-      email: "melsangam@tnfrd.gov.in"
-    },
-    {
-      name: "Edaikal Research Center",
-      location: "Edaikal, Tamil Nadu",
-      phone: "+91 44 1234 5684",
-      email: "edaikal@tnfrd.gov.in"
-    },
-    {
-      name: "Aalvarmalai Research Center",
-      location: "Aalvarmalai, Tamil Nadu",
-      phone: "+91 44 1234 5685",
-      email: "aalvarmalai@tnfrd.gov.in"
-    }
+    { name: "Thoppur Modern Nursery", location: "Thoppur, TN", phone: "+91 XXXXX 5681", email: "thoppur@tnfrd.gov.in" },
+    { name: "Kathipuram Research Center", location: "Kathipuram, TN", phone: "+91 XXXXX 5682", email: "kathipuram@tnfrd.gov.in" },
+    { name: "Melsangam Research Center", location: "Melsangam, TN", phone: "+91 XXXXX 5683", email: "melsangam@tnfrd.gov.in" },
+    { name: "Edaikal Research Center", location: "Edaikal, TN", phone: "+91 XXXXX 5684", email: "edaikal@tnfrd.gov.in" },
+    { name: "Aalvarmalai Research Center", location: "Aalvarmalai, TN", phone: "+91 XXXXX 5685", email: "aalvarmalai@tnfrd.gov.in" },
+    { name: "Madurai Seed Center", location: "Madurai, TN", phone: "+91 XXXXX 5686", email: "madurai@tnfrd.gov.in" },
   ];
 
   return (
-    <div className="py-12">
+    <div className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
         {/* Page Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-forest-green-800 mb-6">
-            Contact Us
+          <p className="text-lg font-semibold text-lime-600 mb-2 uppercase tracking-widest">
+            Reach Out to Our Team
+          </p>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-green-900 mb-4">
+            Connect with the Research Wing
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Get in touch with us for inquiries, collaborations, or any questions 
-            about our research and conservation activities.
+          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            We welcome inquiries from researchers, collaborators, and the public. Use the form 
+            or reach us directly via phone and email.
           </p>
         </div>
 
-        {/* Contact Information Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {contactInfo.map((info, index) => (
-            <div key={index} className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
-              <div className="flex items-center mb-4">
-                <div className="mr-3">{info.icon}</div>
-                <h3 className="text-lg font-semibold text-forest-green-800">{info.title}</h3>
-              </div>
-              <ul className="space-y-2">
-                {info.details.map((detail, idx) => (
-                  <li key={idx} className="text-gray-600 text-sm">{detail}</li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Contact Form and Map */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
-          {/* Contact Form */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-forest-green-800 mb-6 flex items-center">
-              <MessageCircle className="h-6 w-6 mr-3" />
-              Send us a Message
+        {/* Contact Form and Information Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-20">
+            
+          {/* Main Contact Info (Left Column) */}
+          <div className="lg:col-span-1 space-y-8">
+            <h2 className="text-2xl font-bold text-green-900 border-b pb-3 mb-4">
+                Official Contact Points
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-green-500 focus:border-transparent"
-                  />
+            {contactInfo.map((info, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-md p-6 border-l-4 border-lime-500">
+                <div className="flex items-start mb-2">
+                  <div className="mr-3 mt-1 flex-shrink-0">{info.icon}</div>
+                  <h3 className="text-xl font-bold text-green-900">{info.title}</h3>
                 </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-green-500 focus:border-transparent"
-                  />
+                <ul className="space-y-1 pl-1">
+                  {info.details.map((detail, idx) => (
+                    <li key={idx} className="text-gray-700 text-base">
+                        {detail}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+            
+            {/* Office Hours Card */}
+            <div className="bg-green-800 text-white rounded-xl shadow-lg p-6">
+                <div className="flex items-center mb-4">
+                    <Clock className="h-6 w-6 text-lime-400 mr-3" />
+                    <h3 className="text-xl font-bold text-lime-400">Office Hours</h3>
                 </div>
-              </div>
-              
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                  Subject *
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-green-500 focus:border-transparent"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  required
-                  rows={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-forest-green-500 focus:border-transparent"
-                ></textarea>
-              </div>
-              
-              <button
-                type="submit"
-                className="w-full bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300 flex items-center justify-center"
-              >
-                <Send className="h-5 w-5 mr-2" />
-                Send Message
-              </button>
-            </form>
+                <div className="space-y-2 text-sm">
+                    <div className="flex justify-between border-b border-green-700 pb-1">
+                        <span className="text-green-200">Monday - Friday</span>
+                        <span className="font-semibold">9:00 AM - 5:00 PM</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-green-200">Saturday / Sunday</span>
+                        <span className="font-semibold text-lime-400">Closed</span>
+                    </div>
+                </div>
+            </div>
           </div>
-
-          {/* Map Placeholder */}
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-forest-green-800 mb-6 flex items-center">
-              <MapPin className="h-6 w-6 mr-3" />
-              Our Location
-            </h2>
-            <div className="bg-forest-green-100 rounded-lg h-64 flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="h-12 w-12 text-forest-green-600 mx-auto mb-4" />
-                <p className="text-forest-green-800 font-medium">Interactive Map</p>
-                <p className="text-forest-green-600 text-sm">Forest Department Complex, Chennai</p>
-              </div>
+            
+          {/* Contact Form & Map (Right Column) */}
+          <div className="lg:col-span-2 space-y-10">
+            
+            {/* Contact Form */}
+            <div className="bg-white rounded-xl shadow-2xl p-8 border-t-8 border-green-700">
+                <h2 className="text-3xl font-bold text-green-900 mb-6 flex items-center">
+                    <MessageCircle className="h-7 w-7 text-lime-600 mr-3" />
+                    Send a Direct Inquiry
+                </h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormInput name="name" label="Full Name" type="text" value={formData.name} onChange={handleInputChange} required />
+                        <FormInput name="email" label="Email Address" type="email" value={formData.email} onChange={handleInputChange} required />
+                    </div>
+                    <FormInput name="subject" label="Subject" type="text" value={formData.subject} onChange={handleInputChange} required />
+                    <div>
+                        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                            Message *
+                        </label>
+                        <textarea
+                            id="message"
+                            name="message"
+                            value={formData.message}
+                            onChange={handleInputChange}
+                            required
+                            rows={6}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-4 focus:ring-lime-500 focus:border-lime-500 transition-shadow"
+                            placeholder="Please provide details about your inquiry (e.g., collaboration proposal, data request, general question)."
+                        ></textarea>
+                    </div>
+                    
+                    <button
+                        type="submit"
+                        className="w-full bg-lime-500 hover:bg-lime-600 text-green-900 px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center shadow-lg text-lg"
+                    >
+                        <Send className="h-5 w-5 mr-3" />
+                        Submit Message
+                    </button>
+                </form>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
-              <p><strong>Address:</strong> Forest Department Complex, Chennai, Tamil Nadu 600006</p>
-              <p><strong>Landmark:</strong> Near Government Secretariat</p>
+
+            {/* Map Placeholder */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-green-900 mb-4 flex items-center">
+                    <MapPin className="h-6 w-6 text-green-700 mr-3" />
+                    Our Main Location
+                </h2>
+                <div className="bg-green-100 rounded-lg h-72 flex items-center justify-center border-2 border-green-300 overflow-hidden">
+                    {/* Placeholder for a Google Map embed */}
+                    <div className="text-center p-4">
+                        <MapPin className="h-10 w-10 text-green-700 mx-auto mb-2" />
+                        <p className="text-green-800 font-medium">Interactive Map Placeholder</p>
+                        <p className="text-gray-600 text-sm">Main Office: Chennai, Tamil Nadu</p>
+                    </div>
+                </div>
             </div>
           </div>
         </div>
 
-        {/* Research Centers */}
-        <div className="bg-forest-green-50 rounded-lg p-8 mb-16">
-          <h2 className="text-3xl font-bold text-forest-green-800 mb-6 text-center">
-            Research Centers
+        {/* Research Centers List */}
+        <div className={`bg-green-50 rounded-xl shadow-inner p-10 mb-16`}>
+          <h2 className={`text-3xl font-bold text-green-900 mb-8 text-center flex items-center justify-center`}>
+            <GitBranch className="h-7 w-7 text-lime-600 mr-3" />
+            Our Extended Research Centers
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {researchCenters.map((center, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-forest-green-800 mb-3">
-                  {center.name}
-                </h3>
+              <div key={index} className="bg-white rounded-lg shadow-md p-6 border-b-2 border-green-300 hover:shadow-lg transition-shadow">
+                <h3 className="text-xl font-semibold text-green-800 mb-3">{center.name}</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 text-forest-green-600 mr-2" />
-                    <span className="text-gray-600">{center.location}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 text-forest-green-600 mr-2" />
-                    <span className="text-gray-600">{center.phone}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 text-forest-green-600 mr-2" />
-                    <span className="text-gray-600">{center.email}</span>
-                  </div>
+                  <ContactDetailItem icon={MapPin} detail={center.location} />
+                  <ContactDetailItem icon={Phone} detail={center.phone} />
+                  <ContactDetailItem icon={Mail} detail={center.email} />
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Emergency Contact */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-          <h2 className="text-2xl font-bold text-red-800 mb-4">
-            Emergency Contact
-          </h2>
-          <p className="text-red-700 mb-4">
-            For urgent forest-related emergencies or wildlife rescue, contact our 24/7 emergency line:
-          </p>
-          <div className="text-3xl font-bold text-red-800 mb-2">
-            +91 44 1234 5680
+        {/* Emergency Contact Strip */}
+        <div className="bg-red-500/10 border-4 border-red-500 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between shadow-xl">
+          <div className="flex items-center mb-4 md:mb-0">
+            <AlertTriangle className="h-8 w-8 text-red-700 mr-4 flex-shrink-0" />
+            <div>
+              <h2 className="text-2xl font-bold text-red-800">24/7 Emergency Line</h2>
+              <p className="text-red-700 text-sm">For urgent forest fires, wildlife emergencies, or critical incidents.</p>
+            </div>
           </div>
-          <p className="text-red-600 text-sm">
-            Available 24/7 for forest fires, wildlife emergencies, and urgent conservation matters
-          </p>
+          <div className="text-4xl font-extrabold text-red-800 bg-white px-6 py-2 rounded-lg shadow-inner">
+            +91 44 XXXXX 5680
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+// --- Helper Components for Clean Structure ---
+
+const FormInput = ({ name, label, type, value, onChange, required }) => (
+    <div>
+        <label htmlFor={name} className="block text-sm font-medium text-gray-700 mb-2">
+            {label} {required ? '*' : ''}
+        </label>
+        <input
+            type={type}
+            id={name}
+            name={name}
+            value={value}
+            onChange={onChange}
+            required={required}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-4 focus:ring-lime-500 focus:border-lime-500 transition-shadow"
+        />
+    </div>
+);
+
+const ContactDetailItem = ({ icon: Icon, detail }) => (
+    <div className="flex items-center">
+        <Icon className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
+        <span className="text-gray-600">{detail}</span>
+    </div>
+);
 
 export default ContactUs;

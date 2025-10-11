@@ -10,11 +10,21 @@ const Header = () => {
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat'
             }}>
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-forest-green-900/80 to-forest-green-800/60"></div>
+      {/* Overlay - Stays on the outside */}
+      <div className="absolute inset-0 bg-black/40"></div>
       
-      {/* Content */}
+      {/* Content - This div handles centering all elements (Logo, Title, Text, Buttons) */}
       <div className="relative z-10 h-full flex flex-col justify-center items-center text-center px-4">
+        
+        {/* Logo - MOVED INSIDE the centering div */}
+        <img 
+          // Corrected Path: Reference public folder files directly from the root (/)
+          src="/logo192.png" 
+          alt="Tamil Nadu Forest Department Research Wing Logo"
+          // Added rounded-full class for an optional circular logo look
+          className="w-24 h-24 md:w-36 md:h-36 mb-6 rounded-full" 
+        />
+        
         <h1 className="text-4xl md:text-6xl font-bold text-white text-shadow mb-4">
           Welcome to Tamil Nadu Forest Department Research Wing
         </h1>
@@ -24,10 +34,25 @@ const Header = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4">
-          <button className="bg-white text-forest-green-800 px-8 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors duration-300 shadow-lg">
+          <button className="px-8 py-3 rounded-lg font-semibold transition-all duration-300 shadow-xl text-gray-800"
+          style={{ backgroundColor: '#8DD136', borderColor: '#8DD136',
+                    filter: 'brightness(1.1)' 
+                }}>
             Explore Research
           </button>
-          <button className="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-forest-green-800 transition-colors duration-300">
+          <button className="border-2 text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-300 shadow-lg"
+            style={{ 
+              borderColor: '#EAE8D9', 
+            }}
+            onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = '#EAE8D9';
+                e.currentTarget.style.color = '#333'; // Dark text on hover
+            }}
+            onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.color = 'white'; // White text off hover
+            }}
+          >
             Learn More
           </button>
         </div>
