@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f8fafc;
+  color: #1f2937;
+}
+
+.forest-gradient {
+  background: linear-gradient(135deg, #0a1a0a 0%, #143314 50%, #1a4d1a 100%);
+}
+
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Ensure navbar is visible */
+nav {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 50 !important;
+}
+
+/* Custom forest green colors */
+.bg-forest-green-900 {
+  background-color: #143314 !important;
+}
+
+.bg-forest-green-800 {
+  background-color: #163e16 !important;
+}
+
+.bg-forest-green-700 {
+  background-color: #1a4d1a !important;
+}
+
+.bg-forest-green-600 {
+  background-color: #1f5f1f !important;
+}
+
+.text-forest-green-800 {
+  color: #163e16 !important;
+}
+
+.text-forest-green-600 {
+  color: #1f5f1f !important;
+}
+
+.hover\:text-green-200:hover {
+  color: #dcf2dc !important;
+}
