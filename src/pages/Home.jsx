@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Calendar, ExternalLink, Play, Pause } from '
 
 const VideoHeroSection = () => {
   return (
-    <section className="relative w-full h-96 bg-gradient-to-r from-green-900 to-green-700 overflow-hidden">
+    <section className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden">
       {/* Video placeholder - replace src with actual video */}
       <div className="absolute inset-0 bg-black opacity-40"></div>
       <video 
@@ -11,9 +11,14 @@ const VideoHeroSection = () => {
         autoPlay 
         muted 
         loop
+        playsInline
         poster="https://images.unsplash.com/photo-1511497584788-876760111969?w=1200"
       >
         <source src="https://www.aiwc.res.in/uploads/videos/AIWC.mp4" type="video/mp4" />
+        {/* Fallback for browsers that don't support video */}
+        <div className="absolute inset-0 bg-cover bg-center" style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1511497584788-876760111969?w=1200)'
+        }}></div>
       </video>
     
     </section>
@@ -76,106 +81,213 @@ const NewsAndInfoSection = () => {
   ];
 
   return (
-    <section className="relative py-20 bg-gradient-to-b from-gray-50 to-white overflow-hidden">
-      <div className="relative">
-        {/* Latest News - Left Side (Fixed Position) */}
-        <div className="absolute left-0 top-0 w-80 bg-white shadow-xl rounded-r-2xl p-8 border-l-8 border-green-700">
-          <h2 className="text-2xl font-bold text-green-900 mb-6 flex items-center">
-            <span className="w-2 h-8 bg-lime-400 mr-3"></span>
-            Latest News
-          </h2>
-          <div className="space-y-6 max-h-96 overflow-y-auto pr-2">
-            {latestNews.map((news, index) => (
-              <div key={index} className="group">
-                <p className="text-xs text-gray-500 mb-1 flex items-center">
-                  <Calendar className="h-3 w-3 mr-1" /> {news.date}
-                </p>
-                <h3 className="font-bold text-green-800 mb-2 text-base group-hover:text-green-600 transition-colors">
-                  {news.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-2 line-clamp-2">{news.excerpt}</p>
-                <a href={news.link} className="text-green-600 hover:text-lime-600 text-sm font-semibold inline-flex items-center">
-                  Read more 
-                  <span className="ml-1 group-hover:ml-2 transition-all">→</span>
-                </a>
-                {index < latestNews.length - 1 && <hr className="mt-6 border-gray-200" />}
+    <section className="py-12 md:py-20 bg-gradient-to-b from-gray-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Mobile and Tablet Layout */}
+        <div className="lg:hidden space-y-8">
+          {/* Center Content - About Info */}
+          <div className="text-center">
+            <div className="mb-8">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-800 via-green-600 to-lime-500 mb-6">
+                Tamil Nadu Forest Research Department
+              </h1>
+              <div className="w-32 h-1 bg-gradient-to-r from-green-700 to-lime-400 mx-auto mb-8"></div>
+            </div>
+
+            <p className="text-lg sm:text-xl text-gray-700 leading-relaxed mb-6 max-w-3xl mx-auto">
+              Standing at the forefront of ecological innovation and sustainable forestry practices, we advance scientific understanding of our natural heritage through cutting-edge research in forest conservation, biodiversity protection, and climate change adaptation.
+            </p>
+            
+            <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-8 max-w-3xl mx-auto">
+              Our multidisciplinary team of scientists, researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-10">
+              <div className="group">
+                <div className="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
+                  <span className="text-2xl sm:text-3xl">🔬</span>
+                </div>
+                <h3 className="font-bold text-green-900 mb-2 text-sm sm:text-base">Research Excellence</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">Advanced facilities and cutting-edge studies across the state</p>
               </div>
-            ))}
+              
+              <div className="group">
+                <div className="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
+                  <span className="text-2xl sm:text-3xl">🌍</span>
+                </div>
+                <h3 className="font-bold text-green-900 mb-2 text-sm sm:text-base">Global Collaboration</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">Partnerships with international research institutions</p>
+              </div>
+              
+              <div className="group">
+                <div className="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
+                  <span className="text-2xl sm:text-3xl">👥</span>
+                </div>
+                <h3 className="font-bold text-green-900 mb-2 text-sm sm:text-base">Capacity Building</h3>
+                <p className="text-gray-600 text-xs sm:text-sm">Comprehensive training programs for forest personnel</p>
+              </div>
+            </div>
+
+            <button className="bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white px-6 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+              Discover Our Work
+            </button>
+          </div>
+
+          {/* Latest News - Mobile */}
+          <div className="bg-white shadow-xl rounded-2xl p-6 border-l-8 border-green-700">
+            <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-6 flex items-center">
+              <span className="w-2 h-6 sm:h-8 bg-lime-400 mr-3"></span>
+              Latest News
+            </h2>
+            <div className="space-y-4 max-h-80 overflow-y-auto">
+              {latestNews.slice(0, 3).map((news, index) => (
+                <div key={index} className="group">
+                  <p className="text-xs text-gray-500 mb-1 flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" /> {news.date}
+                  </p>
+                  <h3 className="font-bold text-green-800 mb-2 text-sm sm:text-base group-hover:text-green-600 transition-colors">
+                    {news.title}
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{news.excerpt}</p>
+                  <a href={news.link} className="text-green-600 hover:text-lime-600 text-xs sm:text-sm font-semibold inline-flex items-center">
+                    Read more 
+                    <span className="ml-1 group-hover:ml-2 transition-all">→</span>
+                  </a>
+                  {index < 2 && <hr className="mt-4 border-gray-200" />}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Events - Mobile */}
+          <div className="bg-white shadow-xl rounded-2xl p-6 border-r-8 border-lime-500">
+            <h2 className="text-xl sm:text-2xl font-bold text-green-900 mb-6 flex items-center justify-end">
+              Recent Events
+              <span className="w-2 h-6 sm:h-8 bg-green-700 ml-3"></span>
+            </h2>
+            <div className="space-y-4 max-h-80 overflow-y-auto">
+              {events.slice(0, 3).map((event, index) => (
+                <div key={index} className="group">
+                  <p className="text-xs text-gray-500 mb-1 flex items-center justify-end">
+                    {event.date} <Calendar className="h-3 w-3 ml-1" />
+                  </p>
+                  <h3 className="font-bold text-green-800 mb-2 text-sm sm:text-base text-right group-hover:text-lime-600 transition-colors">
+                    {event.title}
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm mb-2 text-right line-clamp-2">{event.excerpt}</p>
+                  <a href={event.link} className="text-green-600 hover:text-lime-600 text-xs sm:text-sm font-semibold inline-flex items-center float-right">
+                    <span className="mr-1 group-hover:mr-2 transition-all">←</span>
+                    View details
+                  </a>
+                  <div className="clear-both"></div>
+                  {index < 2 && <hr className="mt-4 border-gray-200" />}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Center Content - About Info */}
-        <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-          <div className="mb-8">
-            <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-800 via-green-600 to-lime-500 mb-6">
-              Tamil Nadu Forest Research Department
-            </h1>
-            <div className="w-32 h-1 bg-gradient-to-r from-green-700 to-lime-400 mx-auto mb-8"></div>
-          </div>
-
-          <p className="text-xl text-gray-700 leading-relaxed mb-6 max-w-3xl mx-auto">
-            Standing at the forefront of ecological innovation and sustainable forestry practices, we advance scientific understanding of our natural heritage through cutting-edge research in forest conservation, biodiversity protection, and climate change adaptation.
-          </p>
-          
-          <p className="text-lg text-gray-600 leading-relaxed mb-8 max-w-3xl mx-auto">
-            Our multidisciplinary team of scientists, researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-10">
-            <div className="group">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
-                <span className="text-3xl">🔬</span>
-              </div>
-              <h3 className="font-bold text-green-900 mb-2">Research Excellence</h3>
-              <p className="text-gray-600 text-sm">Advanced facilities and cutting-edge studies across the state</p>
-            </div>
-            
-            <div className="group">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
-                <span className="text-3xl">🌍</span>
-              </div>
-              <h3 className="font-bold text-green-900 mb-2">Global Collaboration</h3>
-              <p className="text-gray-600 text-sm">Partnerships with international research institutions</p>
-            </div>
-            
-            <div className="group">
-              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
-                <span className="text-3xl">👥</span>
-              </div>
-              <h3 className="font-bold text-green-900 mb-2">Capacity Building</h3>
-              <p className="text-gray-600 text-sm">Comprehensive training programs for forest personnel</p>
+        {/* Desktop Layout */}
+        <div className="hidden lg:block relative">
+          {/* Latest News - Left Side (Fixed Position) */}
+          <div className="absolute left-0 top-0 w-80 bg-white shadow-xl rounded-r-2xl p-8 border-l-8 border-green-700">
+            <h2 className="text-2xl font-bold text-green-900 mb-6 flex items-center">
+              <span className="w-2 h-8 bg-lime-400 mr-3"></span>
+              Latest News
+            </h2>
+            <div className="space-y-6 max-h-96 overflow-y-auto pr-2">
+              {latestNews.map((news, index) => (
+                <div key={index} className="group">
+                  <p className="text-xs text-gray-500 mb-1 flex items-center">
+                    <Calendar className="h-3 w-3 mr-1" /> {news.date}
+                  </p>
+                  <h3 className="font-bold text-green-800 mb-2 text-base group-hover:text-green-600 transition-colors">
+                    {news.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-2 line-clamp-2">{news.excerpt}</p>
+                  <a href={news.link} className="text-green-600 hover:text-lime-600 text-sm font-semibold inline-flex items-center">
+                    Read more 
+                    <span className="ml-1 group-hover:ml-2 transition-all">→</span>
+                  </a>
+                  {index < latestNews.length - 1 && <hr className="mt-6 border-gray-200" />}
+                </div>
+              ))}
             </div>
           </div>
 
-          <button className="bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
-            Discover Our Work
-          </button>
-        </div>
+          {/* Center Content - About Info */}
+          <div className="max-w-4xl mx-auto px-4 py-12 text-center">
+            <div className="mb-8">
+              <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-800 via-green-600 to-lime-500 mb-6">
+                Tamil Nadu Forest Research Department
+              </h1>
+              <div className="w-32 h-1 bg-gradient-to-r from-green-700 to-lime-400 mx-auto mb-8"></div>
+            </div>
 
-        {/* Recent Events - Right Side (Fixed Position) */}
-        <div className="absolute right-0 top-0 w-80 bg-white shadow-xl rounded-l-2xl p-8 border-r-8 border-lime-500">
-          <h2 className="text-2xl font-bold text-green-900 mb-6 flex items-center justify-end">
-            Recent Events
-            <span className="w-2 h-8 bg-green-700 ml-3"></span>
-          </h2>
-          <div className="space-y-6 max-h-96 overflow-y-auto pl-2">
-            {events.map((event, index) => (
-              <div key={index} className="group">
-                <p className="text-xs text-gray-500 mb-1 flex items-center justify-end">
-                  {event.date} <Calendar className="h-3 w-3 ml-1" />
-                </p>
-                <h3 className="font-bold text-green-800 mb-2 text-base text-right group-hover:text-lime-600 transition-colors">
-                  {event.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-2 text-right line-clamp-2">{event.excerpt}</p>
-                <a href={event.link} className="text-green-600 hover:text-lime-600 text-sm font-semibold inline-flex items-center float-right">
-                  <span className="mr-1 group-hover:mr-2 transition-all">←</span>
-                  View details
-                </a>
-                <div className="clear-both"></div>
-                {index < events.length - 1 && <hr className="mt-6 border-gray-200" />}
+            <p className="text-xl text-gray-700 leading-relaxed mb-6 max-w-3xl mx-auto">
+              Standing at the forefront of ecological innovation and sustainable forestry practices, we advance scientific understanding of our natural heritage through cutting-edge research in forest conservation, biodiversity protection, and climate change adaptation.
+            </p>
+            
+            <p className="text-lg text-gray-600 leading-relaxed mb-8 max-w-3xl mx-auto">
+              Our multidisciplinary team of scientists, researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-10">
+              <div className="group">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
+                  <span className="text-3xl">🔬</span>
+                </div>
+                <h3 className="font-bold text-green-900 mb-2">Research Excellence</h3>
+                <p className="text-gray-600 text-sm">Advanced facilities and cutting-edge studies across the state</p>
               </div>
-            ))}
+              
+              <div className="group">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
+                  <span className="text-3xl">🌍</span>
+                </div>
+                <h3 className="font-bold text-green-900 mb-2">Global Collaboration</h3>
+                <p className="text-gray-600 text-sm">Partnerships with international research institutions</p>
+              </div>
+              
+              <div className="group">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
+                  <span className="text-3xl">👥</span>
+                </div>
+                <h3 className="font-bold text-green-900 mb-2">Capacity Building</h3>
+                <p className="text-gray-600 text-sm">Comprehensive training programs for forest personnel</p>
+              </div>
+            </div>
+
+            <button className="bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+              Discover Our Work
+            </button>
+          </div>
+
+          {/* Recent Events - Right Side (Fixed Position) */}
+          <div className="absolute right-0 top-0 w-80 bg-white shadow-xl rounded-l-2xl p-8 border-r-8 border-lime-500">
+            <h2 className="text-2xl font-bold text-green-900 mb-6 flex items-center justify-end">
+              Recent Events
+              <span className="w-2 h-8 bg-green-700 ml-3"></span>
+            </h2>
+            <div className="space-y-6 max-h-96 overflow-y-auto pl-2">
+              {events.map((event, index) => (
+                <div key={index} className="group">
+                  <p className="text-xs text-gray-500 mb-1 flex items-center justify-end">
+                    {event.date} <Calendar className="h-3 w-3 ml-1" />
+                  </p>
+                  <h3 className="font-bold text-green-800 mb-2 text-base text-right group-hover:text-lime-600 transition-colors">
+                    {event.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-2 text-right line-clamp-2">{event.excerpt}</p>
+                  <a href={event.link} className="text-green-600 hover:text-lime-600 text-sm font-semibold inline-flex items-center float-right">
+                    <span className="mr-1 group-hover:mr-2 transition-all">←</span>
+                    View details
+                  </a>
+                  <div className="clear-both"></div>
+                  {index < events.length - 1 && <hr className="mt-6 border-gray-200" />}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -223,22 +335,22 @@ const ImageCarousel = () => {
   }, []);
 
   return (
-    <section className="py-12 bg-white">
+    <section className="py-8 sm:py-12 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-green-900 mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-green-900 mb-6 sm:mb-8">
           Gallery Highlights
         </h2>
         
         <div className="relative">
           <div className="overflow-hidden rounded-xl shadow-2xl">
-            <div className="relative h-96">
+            <div className="relative h-64 sm:h-80 md:h-96">
               <img
                 src={images[currentIndex].url}
                 alt={images[currentIndex].caption}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
-                <p className="text-white text-lg font-medium">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 sm:p-6">
+                <p className="text-white text-sm sm:text-lg font-medium">
                   {images[currentIndex].caption}
                 </p>
               </div>
@@ -247,35 +359,35 @@ const ImageCarousel = () => {
 
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all"
+            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all"
           >
-            <ChevronLeft className="h-6 w-6 text-green-800" />
+            <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6 text-green-800" />
           </button>
 
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-3 rounded-full shadow-lg transition-all"
+            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all"
           >
-            <ChevronRight className="h-6 w-6 text-green-800" />
+            <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6 text-green-800" />
           </button>
 
-          <div className="flex justify-center mt-6 space-x-2">
+          <div className="flex justify-center mt-4 sm:mt-6 space-x-2">
             {images.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'w-8 bg-green-700' : 'w-2 bg-gray-300'
+                  index === currentIndex ? 'w-6 sm:w-8 bg-green-700' : 'w-2 bg-gray-300'
                 }`}
               />
             ))}
           </div>
         </div>
 
-        <div className="text-center mt-8">
+        <div className="text-center mt-6 sm:mt-8">
           <a
             href="/gallery"
-            className="inline-block bg-green-700 hover:bg-green-800 text-white font-semibold px-8 py-3 rounded-lg shadow-md transition-colors"
+            className="inline-block bg-green-700 hover:bg-green-800 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md transition-colors text-sm sm:text-base"
           >
             See More Photos
           </a>
@@ -343,14 +455,44 @@ const LinksCarousel = () => {
      const duplicatedLinks = [...importantLinks, ...importantLinks];
 
   return (
-    <section className="py-12 bg-gradient-to-r from-green-50 to-lime-50 overflow-hidden">
+    <section className="py-8 sm:py-12 bg-gradient-to-r from-green-50 to-lime-50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-green-900 mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-green-900 mb-6 sm:mb-8">
           Important & Useful Links
         </h2>
 
+        {/* Mobile Grid Layout */}
+        <div className="lg:hidden grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          {importantLinks.slice(0, 6).map((link, index) => (
+            <a
+              key={index}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center bg-white rounded-lg p-4 sm:p-6 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-green-600 hover:border-lime-500"
+            >
+              <div className="mb-3 sm:mb-4 flex-shrink-0 flex items-center justify-center" style={{ height: '50px', width: '50px' }}>
+                <img
+                  src={link.icon}
+                  alt={`${link.title} Logo`}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+              
+              <h3 className="font-semibold text-green-800 text-center mb-2 flex-grow text-sm sm:text-base">
+                {link.title}
+              </h3>
+              <div className="flex justify-center items-center text-green-600 text-xs sm:text-sm">
+                <span className="mr-1">Visit</span>
+                <ExternalLink className="h-3 w-3" />
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {/* Desktop Carousel Layout */}
         <div 
-          className="relative"
+          className="hidden lg:block relative"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -398,7 +540,7 @@ const LinksCarousel = () => {
           )}
         </div>
 
-        <p className="text-center text-gray-600 text-sm mt-6">
+        <p className="text-center text-gray-600 text-xs sm:text-sm mt-4 sm:mt-6">
           {/* Hover to pause • Auto-scrolling */}
         </p>
       </div>
