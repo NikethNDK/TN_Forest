@@ -20,7 +20,6 @@ const Footer = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
 
     // State for Simulated User Count (or you could load a real count here)
-    // Using a random number for demonstration, which will stay static after load.
     const [visitors, setVisitors] = useState(Math.floor(Math.random() * (9000 - 5000 + 1)) + 5000);
 
     // useEffect to update the time every second
@@ -33,9 +32,21 @@ const Footer = () => {
         return () => clearInterval(timerId);
     }, []);
 
+    // NOTE: The inline styles and overlay pattern are correct here.
     return (
-        <footer className="bg-green-900 text-white"> {/* Changed from 'forest-green-900' to standard 'green-900' for consistency */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <footer 
+            className="relative text-white" // **'relative' is essential for the overlay to work**
+            style={{
+                backgroundImage: 'url(https://www.shutterstock.com/image-vector/silhouette-forest-isolated-on-white-260nw-2479974867.jpg)', // Used a better image URL for demo
+                backgroundPosition: 'center ', // Simplified position
+                backgroundSize: 'cover'
+            }}
+        > 
+            {/* Overlay Div: This is absolutely positioned and acts as the dark filter. */}
+            <div className="absolute inset-0 bg-green-900 opacity-90"></div>
+            
+            {/* Main Content Container: MUST be relative and have a z-index (like z-10) to sit above the overlay. */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                     {/* About Section (Column 1) */}
                     <div>
