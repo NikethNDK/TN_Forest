@@ -9,7 +9,7 @@ const Publication = () => {
     {
       id: 1,
       title: "Forest Biodiversity Conservation in Tamil Nadu: A Comprehensive Study",
-      authors: "Dr. Rajesh Kumar, Dr. Priya Sharma, Dr. Suresh Menon",
+      // authors: "Dr. Rajesh Kumar, Dr. Priya Sharma, Dr. Suresh Menon",
       year: 2024,
       category: "Research Paper",
       journal: "Journal of Forest Conservation",
@@ -19,60 +19,59 @@ const Publication = () => {
     {
       id: 2,
       title: "Modern Nursery Techniques for Forest Tree Species",
-      authors: "Dr. Suresh Menon, Dr. Lakshmi Nair",
+      // authors: "Dr. Suresh Menon, Dr. Lakshmi Nair",
       year: 2024,
       category: "Technical Report",
       journal: "Forest Research Bulletin",
       description: "Comprehensive guide on modern nursery management and propagation techniques for forest trees.",
       pdfUrl: "/pdfs/nursery-techniques-2024.pdf"
     },
-    {
-      id: 3,
-      title: "Climate Change Impact on Forest Ecosystems",
-      authors: "Dr. Priya Sharma, Dr. Rajesh Kumar",
-      year: 2023,
-      category: "Research Paper",
-      journal: "Environmental Science Journal",
-      description: "Analysis of climate change effects on forest ecosystems and adaptation strategies.",
-      pdfUrl: "/pdfs/climate-impact-2023.pdf"
-    },
-    {
-      id: 4,
-      title: "Annual Research Report 2023",
-      authors: "TNFDRW Research Team",
-      year: 2023,
-      category: "Annual Report",
-      journal: "TNFDRW Publications",
-      description: "Comprehensive annual report covering all research activities and achievements.",
-      pdfUrl: "/pdfs/annual-report-2023.pdf"
-    },
-    {
-      id: 5,
-      title: "Forest Genetics and Breeding Programs",
-      authors: "Dr. Lakshmi Nair, Dr. Suresh Menon",
-      year: 2023,
-      category: "Research Paper",
-      journal: "Genetics and Forest Science",
-      description: "Research on forest tree genetics and breeding programs for improved varieties.",
-      pdfUrl: "/pdfs/forest-genetics-2023.pdf"
-    },
-    {
-      id: 6,
-      title: "Sustainable Forest Management Guidelines",
-      authors: "TNFDRW Policy Team",
-      year: 2023,
-      category: "Policy Document",
-      journal: "Forest Policy Guidelines",
-      description: "Guidelines for sustainable forest management practices in Tamil Nadu.",
-      pdfUrl: "/pdfs/sustainable-management-2023.pdf"
-    }
+    // {
+    //   id: 3,
+    //   title: "Climate Change Impact on Forest Ecosystems",
+    //   authors: "Dr. Priya Sharma, Dr. Rajesh Kumar",,
+    //   year: 2023,
+    //   category: "Research Paper",
+    //   journal: "Environmental Science Journal",
+    //   description: "Analysis of climate change effects on forest ecosystems and adaptation strategies.",
+    //   pdfUrl: "/pdfs/climate-impact-2023.pdf"
+    // },
+    // {
+    //   id: 4,
+    //   title: "Annual Research Report 2023",
+    //   authors: "TNFDRW Research Team",,
+    //   year: 2023,
+    //   category: "Annual Report",
+    //   journal: "TNFDRW Publications",
+    //   description: "Comprehensive annual report covering all research activities and achievements.",
+    //   pdfUrl: "/pdfs/annual-report-2023.pdf"
+    // },
+    // {
+    //   id: 5,
+    //   title: "Forest Genetics and Breeding Programs",
+    //   authors: "Dr. Lakshmi Nair, Dr. Suresh Menon",,
+    //   year: 2023,
+    //   category: "Research Paper",
+    //   journal: "Genetics and Forest Science",
+    //   description: "Research on forest tree genetics and breeding programs for improved varieties.",
+    //   pdfUrl: "/pdfs/forest-genetics-2023.pdf"
+    // },
+    // {
+    //   id: 6,
+    //   title: "Sustainable Forest Management Guidelines",
+    //   authors: "TNFDRW Policy Team",,      
+    //   year: 2023,
+    //   category: "Policy Document",
+    //   journal: "Forest Policy Guidelines",
+    //   description: "Guidelines for sustainable forest management practices in Tamil Nadu.",
+    //   pdfUrl: "/pdfs/sustainable-management-2023.pdf"
+    // }
   ];
 
   const categories = ['all', 'Research Paper', 'Technical Report', 'Annual Report', 'Policy Document'];
 
   const filteredPublications = publications.filter(pub => {
-    const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         pub.authors.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase()) 
     const matchesCategory = selectedCategory === 'all' || pub.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
@@ -136,9 +135,9 @@ const Publication = () => {
                     </span>
                   </div>
                   
-                  <div className="text-gray-600 mb-3">
+                  {/* <div className="text-gray-600 mb-3">
                     <strong>Authors:</strong> {publication.authors}
-                  </div>
+                  </div> */}
                   
                   <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
                     <div className="flex items-center">
@@ -171,7 +170,7 @@ const Publication = () => {
         </div>
 
         {/* Statistics */}
-        <div className="mt-16 bg-forest-green-50 rounded-lg p-8">
+        {/* <div className="mt-16 bg-forest-green-50 rounded-lg p-8">
           <h2 className="text-3xl font-bold text-forest-green-800 mb-6 text-center">
             Publication Statistics
           </h2>
@@ -193,10 +192,10 @@ const Publication = () => {
               <div className="text-gray-600">Policy Documents</div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Call to Action */}
-        <div className="text-center mt-16">
+        {/* <div className="text-center mt-16">
           <h2 className="text-3xl font-bold text-forest-green-800 mb-4">
             Submit Your Research
           </h2>
@@ -207,7 +206,7 @@ const Publication = () => {
           <button className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors duration-300">
             Submit Publication
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

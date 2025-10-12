@@ -4,13 +4,13 @@ export const divisions = [
   {
     id: 1,
     name: "State Forest Research Division",
-    description: "Conducts research on forest ecology, biodiversity, and conservation strategies.",
+    // description: "Conducts research on forest ecology, biodiversity, and conservation strategies.",
     slug: "state-forest-research"
   },
   {
     id: 2,
     name: "Modern Nursery Division",
-    description: "Manages modern nurseries and research centers for plant propagation and cultivation.",
+    // description: "Manages modern nurseries and research centers for plant propagation and cultivation.",
     slug: "modern-nursery",
     researchCenters: [
       {
@@ -86,19 +86,19 @@ export const divisions = [
   {
     id: 3,
     name: "Forest Genetics Division",
-    description: "Focuses on genetic research and breeding programs for forest species.",
+    // description: "Focuses on genetic research and breeding programs for forest species.",
     slug: "forest-genetics"
   },
   {
     id: 4,
     name: "Industrial Wood Research Division",
-    description: "Research on wood properties and industrial applications.",
+    // description: "Research on wood properties and industrial applications.",
     slug: "industrial-wood"
   },
   {
     id: 5,
     name: "Agro Forestry Research Division",
-    description: "Studies integration of trees with agricultural systems.",
+    // description: "Studies integration of trees with agricultural systems.",
     slug: "agro-forestry"
   }
 ];

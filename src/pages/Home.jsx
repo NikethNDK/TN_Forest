@@ -399,7 +399,7 @@ const LinksCarousel = () => {
         </div>
 
         <p className="text-center text-gray-600 text-sm mt-6">
-          Hover to pause • Auto-scrolling
+          {/* Hover to pause • Auto-scrolling */}
         </p>
       </div>
 

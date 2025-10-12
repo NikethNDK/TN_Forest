@@ -32,28 +32,28 @@ const Information = () => {
         { name: "Publication Permission Form", action: "Download", type: "file" },
       ]
     },
-    {
-      title: "Events & Workshops",
-      description: "Stay updated with our upcoming events, workshops, and conferences.",
-      icon: <Calendar className={`h-8 w-8 ${ICON_COLOR}`} />,
-      items: [
-        { name: "Forest Conservation Workshop - March 2024", action: "View Details", type: "link" },
-        { name: "Biodiversity Research Conference - May 2024", action: "View Details", type: "link" },
-        { name: "Nursery Management Training - July 2024", action: "View Details", type: "link" },
-        { name: "Annual Research Symposium - December 2024", action: "View Details", type: "link" },
-      ]
-    },
-    {
-      title: "Official Circulars",
-      description: "View important circulars and official announcements from the Research Wing.",
-      icon: <FileText className={`h-8 w-8 ${ICON_COLOR}`} />, // Reusing FileText or use a new icon
-      items: [
-        { name: "New Research Grant Policy (Oct 2024)", action: "Download", type: "file" },
-        { name: "Office Holiday Schedule 2025", action: "Download", type: "file" },
-        { name: "Field Travel Guidelines Update", action: "Download", type: "file" },
-        { name: "Q3 Progress Report Submission", action: "Download", type: "file" },
-      ]
-    }
+    // {
+    //   title: "Events & Workshops",
+    //   description: "Stay updated with our upcoming events, workshops, and conferences.",
+    //   icon: <Calendar className={`h-8 w-8 ${ICON_COLOR}`} />,
+    //   items: [
+    //     { name: "Forest Conservation Workshop - March 2024", action: "View Details", type: "link" },
+    //     { name: "Biodiversity Research Conference - May 2024", action: "View Details", type: "link" },
+    //     { name: "Nursery Management Training - July 2024", action: "View Details", type: "link" },
+    //     { name: "Annual Research Symposium - December 2024", action: "View Details", type: "link" },
+    //   ]
+    // },
+    // {
+    //   title: "Official Circulars",
+    //   description: "View important circulars and official announcements from the Research Wing.",
+    //   icon: <FileText className={`h-8 w-8 ${ICON_COLOR}`} />, // Reusing FileText or use a new icon
+    //   items: [
+    //     { name: "New Research Grant Policy (Oct 2024)", action: "Download", type: "file" },
+    //     { name: "Office Holiday Schedule 2025", action: "Download", type: "file" },
+    //     { name: "Field Travel Guidelines Update", action: "Download", type: "file" },
+    //     { name: "Q3 Progress Report Submission", action: "Download", type: "file" },
+    //   ]
+    // }
   ];
 
   const quickLinks = [
@@ -104,7 +104,7 @@ const Information = () => {
                     <span className="flex-1 font-medium">{item.name}</span>
                     
                     {/* Conditional Icon for File or Link */}
-                    {item.type === 'file' ? (
+                    {/* {item.type === 'file' ? (
                       <span className="flex items-center text-sm text-green-600 group-hover:text-green-700">
                         {item.action} <Download className="h-4 w-4 ml-2" />
                       </span>
@@ -112,7 +112,7 @@ const Information = () => {
                       <span className="flex items-center text-sm text-green-600 group-hover:text-green-700">
                         {item.action} <Link className="h-4 w-4 ml-2" />
                       </span>
-                    )}
+                    )} */}
                   </li>
                 ))}
               </ul>
@@ -121,7 +121,7 @@ const Information = () => {
         </div>
         
         {/* Quick Links */}
-        <div className={`bg-white rounded-xl shadow-xl p-8 mb-16 border-l-8 border-green-500`}>
+        {/* <div className={`bg-white rounded-xl shadow-xl p-8 mb-16 border-l-8 border-green-500`}>
           <h2 className={`text-3xl font-bold ${TEXT_COLOR} mb-6 text-center`}>
             Essential Resources
           </h2>
@@ -136,13 +136,13 @@ const Information = () => {
               </a>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Contact and Office Hours */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
           
           {/* Contact Info Card */}
-          <div className="bg-white rounded-xl shadow-xl p-8 border-2 border-green-100">
+          {/* <div className="bg-white rounded-xl shadow-xl p-8 border-2 border-green-100">
             <h2 className={`text-2xl font-bold ${TEXT_COLOR} mb-6 flex items-center`}>
                 <Phone className={`h-6 w-6 mr-3 ${ICON_COLOR}`} /> Get in Touch
             </h2>
@@ -166,10 +166,10 @@ const Information = () => {
                 type="email"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Office Hours Card */}
-          <div className={`rounded-xl shadow-xl p-8 ${BG_COLOR} text-white`}>
+          {/* <div className={`rounded-xl shadow-xl p-8 ${BG_COLOR} text-white`}>
             <h2 className="text-2xl font-bold text-lime-400 mb-6 flex items-center">
                 <Calendar className="h-6 w-6 mr-3 text-lime-400" /> Office Hours
             </h2>
@@ -183,7 +183,7 @@ const Information = () => {
                 <strong>Note:</strong> For urgent matters outside of these hours, please use the official **emergency contact** details provided in the latest circular.
               </p>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Newsletter Signup (CTA) */}

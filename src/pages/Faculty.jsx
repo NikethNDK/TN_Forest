@@ -4,41 +4,41 @@ import { GraduationCap, Award, BookOpen, Globe, Brain, Leaf, TreePine, Zap, Sear
 const Faculty = () => {
   const facultyMembers = [
     {
-      name: "Dr. Rajesh Kumar",
+      name: "Director",
       position: "Director of Research",
-      specialization: "Forest Ecology & GIS",
+      // specialization: "Forest Ecology & GIS",
       experience: "25 years",
       education: "Ph.D. in Forest Sciences",
-      achievements: ["Published 50+ papers", "Led 20+ national research projects", "Lifetime Achievement Award 2019"],
+      achievements: ["Published 50+ papers", "Led 20+ national research projects"],
       image: 'https://via.placeholder.com/150/8DD136/FFFFFF?text=RK' // Placeholder for profile image
     },
     {
-      name: "Dr. Priya Sharma",
+      name: "Research Officer",
       position: "Senior Research Scientist",
-      specialization: "Biodiversity Conservation & Genetics",
+      // specialization: "Biodiversity Conservation & Genetics",
       experience: "20 years",
       education: "Ph.D. in Environmental Biology",
-      achievements: ["Species conservation expert", "International recognition", "Mentored 15+ Ph.D. students"],
+      achievements: ["Species conservation expert", "International recognition"],
       image: 'https://via.placeholder.com/150/8DD136/FFFFFF?text=PS' // Placeholder for profile image
     },
-    {
-      name: "Dr. Suresh Menon",
-      position: "Head - Modern Nursery Division",
-      specialization: "Plant Propagation & Silviculture",
-      experience: "18 years",
-      education: "Ph.D. in Botany",
-      achievements: ["Developed new propagation techniques", "Industry consultant", "Awarded for Nursery Management"],
-      image: 'https://via.placeholder.com/150/8DD136/FFFFFF?text=SM' // Placeholder for profile image
-    },
-    {
-      name: "Dr. Lakshmi Nair",
-      position: "Research Scientist",
-      specialization: "Forest Genetics & Biotechnology",
-      experience: "15 years",
-      education: "Ph.D. in Genetics",
-      achievements: ["Pioneering genetic diversity studies", "Managed international breeding programs", "Molecular research specialist"],
-      image: 'https://via.placeholder.com/150/8DD136/FFFFFF?text=LN' // Placeholder for profile image
-    }
+    // {
+    //   name: "Dr. Suresh Menon",
+    //   position: "Head - Modern Nursery Division",
+    //   specialization: "Plant Propagation & Silviculture",
+    //   experience: "18 years",
+    //   education: "Ph.D. in Botany",
+    //   achievements: ["Developed new propagation techniques", "Industry consultant", "Awarded for Nursery Management"],
+    //   image: 'https://via.placeholder.com/150/8DD136/FFFFFF?text=SM' // Placeholder for profile image
+    // },
+    // {
+    //   name: "Dr. Lakshmi Nair",
+    //   position: "Research Scientist",
+    //   specialization: "Forest Genetics & Biotechnology",
+    //   experience: "15 years",
+    //   education: "Ph.D. in Genetics",
+    //   achievements: ["Pioneering genetic diversity studies", "Managed international breeding programs", "Molecular research specialist"],
+    //   image: 'https://via.placeholder.com/150/8DD136/FFFFFF?text=LN' // Placeholder for profile image
+    // }
   ];
 
   // Helper component for the faculty card
@@ -59,17 +59,17 @@ const Faculty = () => {
           <h3 className="text-3xl font-bold text-green-900 mb-1">{member.name}</h3>
           <p className="text-xl font-semibold text-lime-600 mb-2">{member.position}</p>
           <p className="text-base text-gray-600 border-b border-green-100 pb-3 mb-4">
-            Specialization: <span className="font-medium text-green-800">{member.specialization}</span>
+            {/* Specialization: <span className="font-medium text-green-800">{member.specialization}</span> */}
           </p>
           
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="flex items-center text-gray-700">
-              <BookOpen className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
-              <span className="font-semibold">Edu:</span> {member.education}
+              {/* <BookOpen className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" /> */}
+              {/* <span className="font-semibold">Edu:</span> {member.education} */}
             </div>
             <div className="flex items-center text-gray-700">
-              <Award className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" />
-              <span className="font-semibold">Exp:</span> {member.experience}
+              {/* <Award className="h-4 w-4 text-green-600 mr-2 flex-shrink-0" /> */}
+              {/* <span className="font-semibold">Exp:</span> {member.experience} */}
             </div>
           </div>
         </div>

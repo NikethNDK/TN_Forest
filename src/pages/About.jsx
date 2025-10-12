@@ -22,7 +22,7 @@ const About = () => {
           </h1>
           <p className="text-xl md:text-2xl font-light max-w-4xl mx-auto">
             The Tamil Nadu Forest Department Research Wing is the scientific foundation 
-            for conservation, committed to **ecological innovation** and **sustainable forestry**.
+            for conservation, committed to ecological innovation and sustainable forestry.
           </p>
         </div>
       </div>
@@ -38,7 +38,7 @@ const About = () => {
                 <h2 className="text-2xl font-bold text-green-900">Our Mission</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
-                To conduct **cutting-edge research** in forest ecology, biodiversity conservation, 
+                To conduct cutting-edge researchin forest ecology, biodiversity conservation, 
                 and sustainable forest management, driving innovation for Tamil Nadu's natural heritage.
               </p>
             </div>
@@ -50,7 +50,7 @@ const About = () => {
                 <h2 className="text-2xl font-bold text-green-900">Our Vision</h2>
               </div>
               <p className="text-gray-700 leading-relaxed">
-                To be a **globally recognized center of excellence** in forest research, 
+                To be a globally recognized center of excellence in forest research, 
                 leading the way in conservation science and informing sustainable development 
                 for future generations.
               </p>
@@ -63,7 +63,7 @@ const About = () => {
                 <h2 className="text-2xl font-bold text-green-900">Our Values</h2>
               </div>
               <p className="text-gray-700 leading-relaxed font-medium">
-                **Excellence, Integrity, Innovation, Collaboration,** and **Environmental Stewardship** are the core principles guiding our daily work and strategic decisions.
+                Excellence, Integrity, Innovation, Collaboration, and Environmental Stewardship are the core principles guiding our daily work and strategic decisions.
               </p>
             </div>
           </div>
@@ -79,12 +79,12 @@ const About = () => {
                     A Legacy of Conservation
                 </h2>
                 <p className="text-green-200">
-                    Since 2008, driving scientific progress in South Indian forestry.
+                    driving scientific progress in South Indian forestry.
                 </p>
             </div>
             <div className="lg:w-2/3">
                 <p className="text-lg text-green-100 leading-relaxed mb-6">
-                    Established in **2008**, the Tamil Nadu Forest Department Research Wing has been at the 
+                    Tamil Nadu Forest Department Research Wing has been at the 
                     forefront of forest research in South India. Our formation marked a commitment to 
                     incorporate scientific rigor into practical forest management and policy.
                 </p>
@@ -92,51 +92,51 @@ const About = () => {
                     Our numerous research centers across Tamil Nadu have contributed significantly to understanding 
                     complex forest ecosystems, developing sustainable practices like modern propagation techniques, 
                     and securing critical biodiversity hotspots. We continuously evolve to meet the challenges of 
-                    **climate change** and **degradation**.
+                    climate change and degradation.
                 </p>
             </div>
         </div>
       </section>
 
       {/* 4. Key Achievements (Enhanced Stats Block) */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-extrabold text-green-900 mb-12 text-center">
+      {/* <section className="py-20"> */}
+        {/* <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> */}
+            {/* <h2 className="text-4xl font-extrabold text-green-900 mb-12 text-center">
                 Our Impact in Action
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+            </h2> */}
+            {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center"> */}
                 
                 {/* Achievement Block 1 */}
-                <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
+                {/* <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
                     <BarChart3 className="h-10 w-10 text-green-600 mx-auto mb-3" />
                     <div className="text-5xl font-extrabold text-green-800 mb-1">100+</div>
                     <div className="text-gray-600 font-semibold">Research Papers Published</div>
-                </div>
+                </div> */}
 
                 {/* Achievement Block 2 */}
-                <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
+                {/* <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
                     <TreePine className="h-10 w-10 text-green-600 mx-auto mb-3" />
                     <div className="text-5xl font-extrabold text-green-800 mb-1">50+</div>
                     <div className="text-gray-600 font-semibold">Major Research Projects Completed</div>
-                </div>
+                </div> */}
                 
                 {/* Achievement Block 3 */}
-                <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
+                {/* <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
                     <Leaf className="h-10 w-10 text-green-600 mx-auto mb-3" />
                     <div className="text-5xl font-extrabold text-green-800 mb-1">1000+</div>
                     <div className="text-gray-600 font-semibold">Hectares Under Restoration</div>
-                </div>
+                </div> */}
 
                 {/* Achievement Block 4 */}
-                <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
+                {/* <div className="p-6 bg-white rounded-lg shadow-xl border-b-4 border-lime-500">
                     <Award className="h-10 w-10 text-green-600 mx-auto mb-3" />
                     <div className="text-5xl font-extrabold text-green-800 mb-1">500+</div>
                     <div className="text-gray-600 font-semibold">Professionals Trained</div>
-                </div>
+                </div> */}
 
-            </div>
-        </div>
-      </section>
+            {/* </div> */}
+        {/* </div> */}
+      {/* </section> */}
 
       {/* 5. Team and Call to Action */}
       <section className="py-16 bg-white">
@@ -163,14 +163,14 @@ const About = () => {
             </div>
           </div>
 
-          <div className="mt-12">
+          {/* <div className="mt-12">
             <a 
                 href="/faculty" 
                 className="inline-flex items-center justify-center px-10 py-4 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow-md transition-colors duration-300 text-lg"
             >
                 View Full Faculty Directory
             </a>
-          </div>
+          </div> */}
         </div>
       </section>
 
