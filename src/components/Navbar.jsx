@@ -31,7 +31,7 @@ const Navbar = () => {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link to="/" className="text-green-950 text-2xl font-bold">
-              TNFDRW
+              {/* TNFDRW */}
             </Link>
           </div>
 
