@@ -34,13 +34,13 @@ const Header = () => {
         </p>
         
         {/* Buttons - Responsive sizing and layout with better mobile experience */}
-        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg">
-          <button className="px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2 md:py-3 rounded-lg font-semibold transition-all duration-300 shadow-xl text-gray-800 text-xs sm:text-sm md:text-base"
+        {/* <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg"> */}
+          {/* <button className="px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2 md:py-3 rounded-lg font-semibold transition-all duration-300 shadow-xl text-gray-800 text-xs sm:text-sm md:text-base"
           style={{ backgroundColor: '#8DD136', borderColor: '#8DD136',
                     filter: 'brightness(1.1)' 
                 }}>
             Explore Research
-          </button>
+          </button> */}
           {/* <button className="border-2 text-white px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2 md:py-3 rounded-lg font-semibold transition-colors duration-300 shadow-lg text-xs sm:text-sm md:text-base"
             style={{ 
               borderColor: '#EAE8D9', 
@@ -56,7 +56,7 @@ const Header = () => {
           >
             Learn More
           </button> */}
-        </div>
+        {/* </div> */}
       </div>
     </header>
   );
