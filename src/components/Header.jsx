@@ -41,7 +41,7 @@ const Header = () => {
                 }}>
             Explore Research
           </button>
-          <button className="border-2 text-white px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2 md:py-3 rounded-lg font-semibold transition-colors duration-300 shadow-lg text-xs sm:text-sm md:text-base"
+          {/* <button className="border-2 text-white px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-2 md:py-3 rounded-lg font-semibold transition-colors duration-300 shadow-lg text-xs sm:text-sm md:text-base"
             style={{ 
               borderColor: '#EAE8D9', 
             }}
@@ -55,7 +55,7 @@ const Header = () => {
             }}
           >
             Learn More
-          </button>
+          </button> */}
         </div>
       </div>
     </header>
