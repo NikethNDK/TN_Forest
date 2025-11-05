@@ -102,7 +102,23 @@ const NewsAndInfoSection = () => {
               Our multidisciplinary team of scientists, researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-10">
+            {/* Mission and Vision */}
+            <div className="max-w-3xl mx-auto mb-8 space-y-6">
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+                <h3 className="text-xl font-bold text-green-900 mb-3">Our Mission</h3>
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+                  To embrace innovation in soil health through biofertilizer solutions, produce high-quality climate-resilient seedlings for reforestation, supply superior forest tree seeds to stakeholders, and focus on conservation of rare, endangered, and threatened species for long-term environmental sustainability.
+                </p>
+              </div>
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-lime-500">
+                <h3 className="text-xl font-bold text-green-900 mb-3">Our Vision</h3>
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
+                  To be a leader in sustainable agroforestry and soil health through innovative biofertilizer production, advanced microbial inoculants, production of climate-resilient seedlings, supply of quality forest tree seeds, and fostering sustainable management practices in RET species for long-term ecological benefits.
+                </p>
+              </div>
+            </div>
+
+            {/* <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mb-10">
               <div className="group">
                 <div className="bg-green-100 w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
                   <span className="text-2xl sm:text-3xl">🔬</span>
@@ -130,7 +146,7 @@ const NewsAndInfoSection = () => {
 
             <button className="bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white px-6 sm:px-10 py-3 sm:py-4 rounded-full font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
               Discover Our Work
-            </button>
+            </button> */}
           </div>
 
           {/* Latest News - Mobile */}
@@ -236,7 +252,23 @@ const NewsAndInfoSection = () => {
                   Our multidisciplinary team of scientists, researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-6 xl:mb-10">
+                {/* Mission and Vision */}
+                <div className="max-w-4xl mx-auto mb-8 space-y-6">
+                  <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+                    <h3 className="text-xl font-bold text-green-900 mb-3">Our Mission</h3>
+                    <p className="text-gray-700 leading-relaxed text-sm xl:text-base">
+                      To embrace innovation in soil health through biofertilizer solutions, produce high-quality climate-resilient seedlings for reforestation, supply superior forest tree seeds to stakeholders, and focus on conservation of rare, endangered, and threatened species for long-term environmental sustainability.
+                    </p>
+                  </div>
+                  <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-lime-500">
+                    <h3 className="text-xl font-bold text-green-900 mb-3">Our Vision</h3>
+                    <p className="text-gray-700 leading-relaxed text-sm xl:text-base">
+                      To be a leader in sustainable agroforestry and soil health through innovative biofertilizer production, advanced microbial inoculants, production of climate-resilient seedlings, supply of quality forest tree seeds, and fostering sustainable management practices in RET species for long-term ecological benefits.
+                    </p>
+                  </div>
+                </div>
+
+                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-6 xl:mb-10">
                   <div className="group">
                     <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-lime-200 transition-colors">
                       <span className="text-3xl">🔬</span>
@@ -264,7 +296,7 @@ const NewsAndInfoSection = () => {
 
                 <button className="bg-gradient-to-r from-green-700 to-green-600 hover:from-green-800 hover:to-green-700 text-white px-10 py-4 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
                   Discover Our Work
-                </button>
+                </button> */}
               </div>
             </div>
 

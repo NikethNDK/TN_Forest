@@ -12,7 +12,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Faculty', path: '/faculty' },
-    { name: 'Information', path: '/information' },
+    // { name: 'Information', path: '/information' },
     { name: 'Publication', path: '/publication' },
     { name: 'Contact Us', path: '/contact' }
   ];
@@ -54,8 +54,8 @@ const Navbar = () => {
           </div>
 
            {/* Desktop Navigation */}
-           <div className="hidden md:block">
-             <div className="ml-10 flex items-center space-x-8">
+           <div className="hidden md:block flex-1">
+             <div className="flex items-center justify-center space-x-8 ml-8">
                <Link
                  to="/"
                  className="text-green-950 hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200"
@@ -108,12 +108,12 @@ const Navbar = () => {
                  Faculty
                </Link>
                
-               <Link
+               {/* <Link
                  to="/information"
                  className="text-green-950 hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200"
                >
                  Information
-               </Link>
+               </Link> */}
                
                <Link
                  to="/publication"
@@ -139,6 +139,9 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
+
+          {/* Spacer for right side to balance with logo */}
+          <div className="hidden md:block flex-shrink-0 w-20"></div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -194,13 +197,13 @@ const Navbar = () => {
                  Faculty
                </Link>
                
-               <Link
+               {/* <Link
                  to="/information"
                  className="text-white hover:text-green-200 block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200"
                  onClick={() => setIsMenuOpen(false)}
                >
                  Information
-               </Link>
+               </Link> */}
                
                <Link
                  to="/publication"
@@ -220,7 +223,7 @@ const Navbar = () => {
 
               <Link
                 to="/shop"
-                className="bg-forest-green-700 hover:bg-forest-green-600 text-white block px-4 py-3 rounded-md text-base font-medium flex items-center transition-colors duration-200"
+                className="bg-forest-green-700 hover:bg-forest-green-600 text-white px-4 py-3 rounded-md text-base font-medium flex items-center transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 <ShoppingCart className="h-5 w-5 mr-2" />

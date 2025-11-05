@@ -27,44 +27,46 @@ const About = () => {
         </div>
       </div>
       
-      {/* 2. Mission, Vision, Values (Updated Design) */}
+      {/* 2. Mission and Vision */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Mission */}
             <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-6">
                 <Target className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
                 <h2 className="text-2xl font-bold text-green-900">Our Mission</h2>
               </div>
-              <p className="text-gray-700 leading-relaxed">
-                To conduct cutting-edge researchin forest ecology, biodiversity conservation, 
-                and sustainable forest management, driving innovation for Tamil Nadu's natural heritage.
-              </p>
+              <div className="space-y-4">
+                <p className="text-gray-700 leading-relaxed">
+                  To embrace the drive for innovation in soil health by developing and scaling biofertilizer solutions that improve soil fertility, ecosystem resilience, and biodiversity and producing high-quality, climate-resilient tree seedlings to support reforestation and land restoration efforts and sustainable agroforestry.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  By providing superior forest tree seeds to government agencies, stakeholders, and communities, with an aim to promote widespread adoption of sustainable forestry practices. The efforts will also focus on the conservation and management of rare, endangered, and threatened (RET) species, ensuring ecological stability and long-term environmental sustainability.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Through collaborative research and strategic partnerships, we strive to be a catalyst for transformative change in forest and land management.
+                </p>
+              </div>
             </div>
 
             {/* Vision */}
             <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
-              <div className="flex items-center mb-4">
+              <div className="flex items-center mb-6">
                 <Eye className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
                 <h2 className="text-2xl font-bold text-green-900">Our Vision</h2>
               </div>
-              <p className="text-gray-700 leading-relaxed">
-                To be a globally recognized center of excellence in forest research, 
-                leading the way in conservation science and informing sustainable development 
-                for future generations.
-              </p>
-            </div>
-
-            {/* Values */}
-            <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
-              <div className="flex items-center mb-4">
-                <Users className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
-                <h2 className="text-2xl font-bold text-green-900">Our Values</h2>
+              <div className="space-y-4">
+                <p className="text-gray-700 leading-relaxed">
+                  To be a leader in sustainable agroforestry and soil health through innovative biofertilizer production and research, developing advanced microbial inoculants to enhance soil fertility and ecosystem productivity and biodiversity improvement.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  We envision the production of high-quality, climate-resilient seedlings to support reforestation and restoration efforts, while supplying quality forest tree seeds for the forest department, line departments and other stakeholders.
+                </p>
+                <p className="text-gray-700 leading-relaxed">
+                  Our vision extends to fostering sustainable management practices in rare, endangered, and threatened (RET) species for long-term ecological benefits, ensuring that our efforts contribute to a more resilient and sustainable future.
+                </p>
               </div>
-              <p className="text-gray-700 leading-relaxed font-medium">
-                Excellence, Integrity, Innovation, Collaboration, and Environmental Stewardship are the core principles guiding our daily work and strategic decisions.
-              </p>
             </div>
           </div>
         </div>
@@ -139,7 +141,7 @@ const About = () => {
       {/* </section> */}
 
       {/* 5. Team and Call to Action */}
-      <section className="py-16 bg-white">
+      {/* <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-green-900 mb-4">
             Meet Our Experts
@@ -171,8 +173,8 @@ const About = () => {
                 View Full Faculty Directory
             </a>
           </div> */}
-        </div>
-      </section>
+        {/* </div>
+      </section> */}
 
     </div>
   );
