@@ -5,40 +5,14 @@ import { divisions } from '../data/mockData';
 
 const ModernNurseryDivision = () => {
   const [selectedCenter, setSelectedCenter] = useState(null);
-  const [expandedProject, setExpandedProject] = useState(null);
-  const [carouselIndex, setCarouselIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState('all');
-  const [expandedCategories, setExpandedCategories] = useState([]);
   const modernNurseryDivision = divisions.find(div => div.slug === 'modern-nursery');
 
   const handleCenterSelect = (center) => {
     setSelectedCenter(center);
-    setExpandedProject(null); // Reset accordion when switching centers
-    setCarouselIndex(0); // Reset carousel
-    setActiveTab('all'); // Reset tabs
-    // Initialize expanded categories for center 5
-    if (center.id === 5 && center.projects) {
-      const categories = [...new Set(center.projects.map(p => p.category || 'Uncategorized'))];
-      setExpandedCategories(categories);
-    } else {
-      setExpandedCategories([]);
-    }
   };
 
-  const toggleProjectDetails = (projectId) => {
-    setExpandedProject(expandedProject === projectId ? null : projectId);
-  };
-
-  const nextCarousel = () => {
-    if (selectedCenter?.projects) {
-      setCarouselIndex((prev) => (prev + 1) % selectedCenter.projects.length);
-    }
-  };
-
-  const prevCarousel = () => {
-    if (selectedCenter?.projects) {
-      setCarouselIndex((prev) => (prev - 1 + selectedCenter.projects.length) % selectedCenter.projects.length);
-    }
+  const handleViewPDF = (pdfPath) => {
+    window.open(`/${pdfPath}`, '_blank');
   };
 
   return (
@@ -119,514 +93,151 @@ const ModernNurseryDivision = () => {
                   </p>
                 </div>
 
-                {/* Projects Section */}
+                {/* Experiments Section */}
                 <div className="bg-white rounded-lg shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-forest-green-800 mb-6 flex items-center">
                     <TreePine className="h-6 w-6 mr-3" />
-                    Current Projects
+                    Experiments
                   </h3>
                   
                   {/* Table View for First Center (Thoppur) */}
-                  {selectedCenter.id === 1 && selectedCenter.projects && (
+                  {selectedCenter.id === 1 && selectedCenter.experiments && (
                     <div className="space-y-3">
-                      {selectedCenter.projects.map((project) => (
-                        <div key={project.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                      {selectedCenter.experiments.map((experiment) => (
+                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
                           <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
                             {/* Image Placeholder */}
                             <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
                               <TreePine className="h-8 w-8 text-gray-400" />
                             </div>
-                            {/* Project Name */}
+                            {/* Experiment Info */}
                             <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-forest-green-800">
-                                {project.title}
+                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
+                                {experiment.title}
                               </h4>
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {experiment.description}
+                              </p>
                             </div>
-                            {/* View Details Button */}
+                            {/* View PDF Button */}
                             <button
-                              onClick={() => toggleProjectDetails(project.id)}
+                              onClick={() => handleViewPDF(experiment.pdfPath)}
                               className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
                             >
-                              View Details
+                              View PDF
                             </button>
                           </div>
-                          {/* Accordion Content */}
-                          {expandedProject === project.id && (
-                            <div className="border-t border-gray-200 bg-gray-50 p-4">
-                              <div className="space-y-2">
-                                <div>
-                                  <span className="font-semibold text-gray-700">Authors: </span>
-                                  <span className="text-gray-600">{project.authors}</span>
-                                </div>
-                                <div>
-                                  <span className="font-semibold text-gray-700">Status: </span>
-                                  <span className="text-gray-600">{project.status}</span>
-                                </div>
-                                <div>
-                                  <span className="font-semibold text-gray-700">Start Date: </span>
-                                  <span className="text-gray-600">{project.startDate}</span>
-                                </div>
-                                <div>
-                                  <span className="font-semibold text-gray-700">Description: </span>
-                                  <span className="text-gray-600">{project.description}</span>
-                                </div>
-                              </div>
-                            </div>
-                          )}
                         </div>
                       ))}
                     </div>
                   )}
 
                   {/* Grid View for Second Center (Harur) */}
-                  {selectedCenter.id === 2 && selectedCenter.projects && (
-                    <div className="space-y-6">
-                      {/* Render projects in rows of 3 */}
-                      {Array.from({ length: Math.ceil(selectedCenter.projects.length / 3) }, (_, rowIndex) => {
-                        const startIdx = rowIndex * 3;
-                        const endIdx = startIdx + 3;
-                        const rowProjects = selectedCenter.projects.slice(startIdx, endIdx);
-                        const hasExpandedInRow = rowProjects.some(p => expandedProject === p.id);
-                        const expandedProjectInRow = rowProjects.find(p => expandedProject === p.id);
-                        
-                        return (
-                          <React.Fragment key={rowIndex}>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                              {rowProjects.map((project) => {
-                                const isExpanded = expandedProject === project.id;
-                                return (
-                                  <div 
-                                    key={project.id}
-                                    className={`border rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
-                                      isExpanded 
-                                        ? 'border-forest-green-500 shadow-lg' 
-                                        : 'border-gray-200 hover:shadow-lg'
-                                    }`}
-                                    onClick={() => toggleProjectDetails(project.id)}
-                                  >
-                                    {/* Image Placeholder */}
-                                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                                      <TreePine className="h-16 w-16 text-gray-400" />
-                                    </div>
-                                    {/* Project Name */}
-                                    <div className="p-4">
-                                      <h4 className="text-base font-semibold text-forest-green-800 text-center">
-                                        {project.title}
-                                      </h4>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                            {/* Accordion Content - appears right below the row with the expanded project */}
-                            {hasExpandedInRow && expandedProjectInRow && (
-                              <div className="border border-gray-200 rounded-lg bg-gray-50 p-6">
-                                <div className="space-y-3">
-                                  <h4 className="text-xl font-bold text-forest-green-800 mb-4">
-                                    {expandedProjectInRow.title}
-                                  </h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                      <span className="font-semibold text-gray-700">Authors: </span>
-                                      <span className="text-gray-600">{expandedProjectInRow.authors}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-semibold text-gray-700">Status: </span>
-                                      <span className="text-gray-600">{expandedProjectInRow.status}</span>
-                                    </div>
-                                    <div>
-                                      <span className="font-semibold text-gray-700">Start Date: </span>
-                                      <span className="text-gray-600">{expandedProjectInRow.startDate}</span>
-                                    </div>
-                                    <div className="md:col-span-2">
-                                      <span className="font-semibold text-gray-700">Description: </span>
-                                      <span className="text-gray-600">{expandedProjectInRow.description}</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Style 3: Card with Side Details (Center 3 - Kalamavoor) */}
-                  {selectedCenter.id === 3 && selectedCenter.projects && (
-                    <div className="space-y-4">
-                      {selectedCenter.projects.map((project) => {
-                        const isExpanded = expandedProject === project.id;
-                        return (
-                          <div key={project.id} className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200">
-                            <div className="flex">
-                              <div className="flex-1 p-4">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="text-lg font-semibold text-forest-green-800 mb-2">
-                                      {project.title}
-                                    </h4>
-                                    <p className="text-gray-600 text-sm">{project.description}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => toggleProjectDetails(project.id)}
-                                    className="ml-4 bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
-                                  >
-                                    {isExpanded ? 'Hide' : 'View'} Details
-                                  </button>
-                                </div>
-                              </div>
-                              {isExpanded && (
-                                <div className="w-80 border-l border-gray-200 bg-gray-50 p-4">
-                                  <div className="space-y-2">
-                                    <div><span className="font-semibold text-gray-700">Authors: </span><span className="text-gray-600 text-sm">{project.authors}</span></div>
-                                    <div><span className="font-semibold text-gray-700">Status: </span><span className="text-gray-600 text-sm">{project.status}</span></div>
-                                    <div><span className="font-semibold text-gray-700">Start Date: </span><span className="text-gray-600 text-sm">{project.startDate}</span></div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Style 4: Timeline/Chronological View (Center 4 - Valkaradu) */}
-                  {selectedCenter.id === 4 && selectedCenter.projects && (
-                    <div className="relative">
-                      <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-300"></div>
-                      <div className="space-y-8">
-                        {selectedCenter.projects.map((project) => {
-                          const isExpanded = expandedProject === project.id;
-                          return (
-                            <div key={project.id} className="relative pl-12">
-                              <div className="absolute left-2 top-2 w-4 h-4 bg-forest-green-600 rounded-full border-4 border-white shadow-lg"></div>
-                              <div className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <Calendar className="h-4 w-4 text-gray-400" />
-                                      <span className="text-sm text-gray-500">{project.startDate}</span>
-                                    </div>
-                                    <h4 className="text-lg font-semibold text-forest-green-800 mb-2">
-                                      {project.title}
-                                    </h4>
-                                    <p className="text-gray-600 text-sm mb-3">{project.description}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => toggleProjectDetails(project.id)}
-                                    className="ml-4 text-forest-green-600 hover:text-forest-green-700 text-sm font-medium"
-                                  >
-                                    {isExpanded ? 'Less' : 'More'} →
-                                  </button>
-                                </div>
-                                {isExpanded && (
-                                  <div className="mt-4 pt-4 border-t border-gray-200">
-                                    <div className="space-y-2">
-                                      <div><span className="font-semibold text-gray-700">Authors: </span><span className="text-gray-600 text-sm">{project.authors}</span></div>
-                                      <div><span className="font-semibold text-gray-700">Status: </span><span className="text-gray-600 text-sm">{project.status}</span></div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Style 5: Category-Based Grouped View (Center 5 - Alwarmalai) */}
-                  {selectedCenter.id === 5 && selectedCenter.projects && (() => {
-                    const categories = [...new Set(selectedCenter.projects.map(p => p.category || 'Uncategorized'))];
-                    const toggleCategory = (cat) => {
-                      setExpandedCategories(prev => 
-                        prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
-                      );
-                    };
-                    return (
-                      <div className="space-y-4">
-                        {categories.map((category) => {
-                          const categoryProjects = selectedCenter.projects.filter(p => (p.category || 'Uncategorized') === category);
-                          const isCategoryExpanded = expandedCategories.includes(category);
-                          return (
-                            <div key={category} className="border border-gray-200 rounded-lg overflow-hidden">
-                              <button
-                                onClick={() => toggleCategory(category)}
-                                className="w-full bg-forest-green-50 hover:bg-forest-green-100 p-4 flex items-center justify-between transition-colors"
-                              >
-                                <h4 className="text-lg font-semibold text-forest-green-800">
-                                  {category} ({categoryProjects.length})
-                                </h4>
-                                <ChevronDown className={`h-5 w-5 text-forest-green-600 transition-transform ${isCategoryExpanded ? 'rotate-180' : ''}`} />
-                              </button>
-                              {isCategoryExpanded && (
-                                <div className="p-4 space-y-3">
-                                  {categoryProjects.map((project) => {
-                                    const isExpanded = expandedProject === project.id;
-                                    return (
-                                      <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
-                                        <div className="flex items-start justify-between">
-                                          <div className="flex-1">
-                                            <h5 className="font-semibold text-forest-green-800 mb-1">{project.title}</h5>
-                                            <p className="text-gray-600 text-sm">{project.description}</p>
-                                          </div>
-                                          <button
-                                            onClick={() => toggleProjectDetails(project.id)}
-                                            className="ml-4 text-forest-green-600 hover:text-forest-green-700 text-sm"
-                                          >
-                                            {isExpanded ? 'Hide' : 'Details'}
-                                          </button>
-                                        </div>
-                                        {isExpanded && (
-                                          <div className="mt-3 pt-3 border-t border-gray-200">
-                                            <div className="space-y-1 text-sm">
-                                              <div><span className="font-semibold">Authors: </span><span className="text-gray-600">{project.authors}</span></div>
-                                              <div><span className="font-semibold">Status: </span><span className="text-gray-600">{project.status}</span></div>
-                                              <div><span className="font-semibold">Start Date: </span><span className="text-gray-600">{project.startDate}</span></div>
-                                            </div>
-                                          </div>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })()}
-
-                  {/* Style 6: Carousel/Slider View (Center 6 - Edaikkal) */}
-                  {selectedCenter.id === 6 && selectedCenter.projects && (
-                    <div className="relative">
-                      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                        <div className="relative h-96">
-                          {selectedCenter.projects.map((project, index) => (
-                            <div
-                              key={project.id}
-                              className={`absolute inset-0 transition-opacity duration-500 ${
-                                index === carouselIndex ? 'opacity-100' : 'opacity-0 pointer-events-none'
-                              }`}
-                            >
-                              <div className="flex h-full">
-                                <div className="w-1/2 bg-gray-200 flex items-center justify-center">
-                                  <TreePine className="h-24 w-24 text-gray-400" />
-                                </div>
-                                <div className="w-1/2 p-8 flex flex-col justify-center">
-                                  <h4 className="text-2xl font-bold text-forest-green-800 mb-4">{project.title}</h4>
-                                  <p className="text-gray-600 mb-4">{project.description}</p>
-                                  <div className="space-y-2">
-                                    <div><span className="font-semibold">Authors: </span><span className="text-gray-600">{project.authors}</span></div>
-                                    <div><span className="font-semibold">Status: </span><span className="text-gray-600">{project.status}</span></div>
-                                    <div><span className="font-semibold">Start Date: </span><span className="text-gray-600">{project.startDate}</span></div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                          {selectedCenter.projects.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setCarouselIndex(index)}
-                              className={`w-2 h-2 rounded-full transition-all ${
-                                index === carouselIndex ? 'bg-forest-green-600 w-6' : 'bg-gray-300'
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <button
-                          onClick={prevCarousel}
-                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg"
+                  {selectedCenter.id === 2 && selectedCenter.experiments && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {selectedCenter.experiments.map((experiment) => (
+                        <div 
+                          key={experiment.id}
+                          className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
                         >
-                          <ChevronLeft className="h-5 w-5 text-forest-green-600" />
-                        </button>
-                        <button
-                          onClick={nextCarousel}
-                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg"
-                        >
-                          <ChevronRight className="h-5 w-5 text-forest-green-600" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Style 7: Masonry/Pinterest-style Grid (Center 7 - Kathiripuram) */}
-                  {selectedCenter.id === 7 && selectedCenter.projects && (
-                    <div className="columns-1 md:columns-2 lg:columns-3 gap-6">
-                      {selectedCenter.projects.map((project, index) => {
-                        const isExpanded = expandedProject === project.id;
-                        const heights = ['h-64', 'h-80', 'h-72', 'h-96', 'h-68'];
-                        return (
-                          <div
-                            key={project.id}
-                            className={`break-inside-avoid mb-6 border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 ${heights[index % heights.length]}`}
-                          >
-                            <div className="h-32 bg-gray-200 flex items-center justify-center">
-                              <TreePine className="h-12 w-12 text-gray-400" />
-                            </div>
-                            <div className="p-4">
-                              <h4 className="font-semibold text-forest-green-800 mb-2">{project.title}</h4>
-                              <p className="text-gray-600 text-sm mb-3 line-clamp-2">{project.description}</p>
-                              <button
-                                onClick={() => toggleProjectDetails(project.id)}
-                                className="text-forest-green-600 hover:text-forest-green-700 text-sm font-medium"
-                              >
-                                {isExpanded ? 'Hide' : 'View'} Details →
-                              </button>
-                              {isExpanded && (
-                                <div className="mt-3 pt-3 border-t border-gray-200 space-y-1 text-xs">
-                                  <div><span className="font-semibold">Authors: </span><span className="text-gray-600">{project.authors}</span></div>
-                                  <div><span className="font-semibold">Status: </span><span className="text-gray-600">{project.status}</span></div>
-                                  <div><span className="font-semibold">Date: </span><span className="text-gray-600">{project.startDate}</span></div>
-                                </div>
-                              )}
-                            </div>
+                          {/* Image Placeholder */}
+                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <TreePine className="h-16 w-16 text-gray-400" />
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Style 8: Tabbed Interface (Center 8 - Melchengam) */}
-                  {selectedCenter.id === 8 && selectedCenter.projects && (() => {
-                    const years = [...new Set(selectedCenter.projects.map(p => p.year || '2024'))];
-                    const filteredProjects = activeTab === 'all' 
-                      ? selectedCenter.projects 
-                      : selectedCenter.projects.filter(p => (p.year || '2024') === activeTab);
-                    return (
-                      <div>
-                        <div className="flex gap-2 mb-6 border-b border-gray-200">
-                          <button
-                            onClick={() => setActiveTab('all')}
-                            className={`px-4 py-2 font-medium transition-colors ${
-                              activeTab === 'all' 
-                                ? 'border-b-2 border-forest-green-600 text-forest-green-600' 
-                                : 'text-gray-600 hover:text-forest-green-600'
-                            }`}
-                          >
-                            All
-                          </button>
-                          {years.map((year) => (
+                          {/* Experiment Info */}
+                          <div className="p-4">
+                            <h4 className="text-base font-semibold text-forest-green-800 mb-2 text-center">
+                              {experiment.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
+                              {experiment.description}
+                            </p>
                             <button
-                              key={year}
-                              onClick={() => setActiveTab(year)}
-                              className={`px-4 py-2 font-medium transition-colors ${
-                                activeTab === year 
-                                  ? 'border-b-2 border-forest-green-600 text-forest-green-600' 
-                                  : 'text-gray-600 hover:text-forest-green-600'
-                              }`}
+                              onClick={() => handleViewPDF(experiment.pdfPath)}
+                              className="w-full bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
                             >
-                              {year}
+                              View PDF
                             </button>
-                          ))}
-                        </div>
-                        <div className="space-y-4">
-                          {filteredProjects.map((project) => {
-                            const isExpanded = expandedProject === project.id;
-                            return (
-                              <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <span className="text-xs bg-forest-green-100 text-forest-green-800 px-2 py-1 rounded">{project.year || '2024'}</span>
-                                      <span className="text-xs text-gray-500">{project.startDate}</span>
-                                    </div>
-                                    <h4 className="text-lg font-semibold text-forest-green-800 mb-2">{project.title}</h4>
-                                    <p className="text-gray-600 text-sm">{project.description}</p>
-                                  </div>
-                                  <button
-                                    onClick={() => toggleProjectDetails(project.id)}
-                                    className="ml-4 text-forest-green-600 hover:text-forest-green-700 text-sm"
-                                  >
-                                    {isExpanded ? 'Hide' : 'Details'}
-                                  </button>
-                                </div>
-                                {isExpanded && (
-                                  <div className="mt-4 pt-4 border-t border-gray-200">
-                                    <div className="space-y-2 text-sm">
-                                      <div><span className="font-semibold">Authors: </span><span className="text-gray-600">{project.authors}</span></div>
-                                      <div><span className="font-semibold">Status: </span><span className="text-gray-600">{project.status}</span></div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Style 9: Dashboard-style with Metrics (Center 9 - Jamunamarathur) */}
-                  {selectedCenter.id === 9 && selectedCenter.projects && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {selectedCenter.projects.map((project) => {
-                        const isExpanded = expandedProject === project.id;
-                        return (
-                          <div
-                            key={project.id}
-                            className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200 cursor-pointer"
-                            onClick={() => toggleProjectDetails(project.id)}
-                          >
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex-1">
-                                <h4 className="text-lg font-semibold text-forest-green-800 mb-2">{project.title}</h4>
-                                <p className="text-gray-600 text-sm mb-3">{project.description}</p>
-                              </div>
-                              <TrendingUp className="h-8 w-8 text-forest-green-600 flex-shrink-0" />
-                            </div>
-                            {project.progress !== undefined && (
-                              <div className="mb-4">
-                                <div className="flex justify-between text-sm mb-1">
-                                  <span className="text-gray-600">Progress</span>
-                                  <span className="font-semibold text-forest-green-600">{project.progress}%</span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                  <div 
-                                    className="bg-forest-green-600 h-2 rounded-full transition-all duration-300"
-                                    style={{ width: `${project.progress}%` }}
-                                  ></div>
-                                </div>
-                              </div>
-                            )}
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                <span>{project.startDate}</span>
-                              </div>
-                              <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">{project.status}</span>
-                            </div>
-                            {isExpanded && (
-                              <div className="mt-4 pt-4 border-t border-gray-200">
-                                <div className="space-y-2 text-sm">
-                                  <div><span className="font-semibold">Authors: </span><span className="text-gray-600">{project.authors}</span></div>
-                                </div>
-                              </div>
-                            )}
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   )}
 
-                  {/* Style 10: Alternating Stacked Cards (Center 10 - Maragatta) */}
-                  {selectedCenter.id === 10 && selectedCenter.projects && (
+                  {/* Centers 3-9: Use designs from centers 1, 2, or 10 */}
+                  {/* Center 3 - Kalamavoor: Use Design 1 (Table View) */}
+                  {selectedCenter.id === 3 && selectedCenter.experiments && (
+                    <div className="space-y-3">
+                      {selectedCenter.experiments.map((experiment) => (
+                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
+                            {/* Image Placeholder */}
+                            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                              <TreePine className="h-8 w-8 text-gray-400" />
+                            </div>
+                            {/* Experiment Info */}
+                            <div className="flex-1">
+                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
+                                {experiment.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {experiment.description}
+                              </p>
+                            </div>
+                            {/* View PDF Button */}
+                            <button
+                              onClick={() => handleViewPDF(experiment.pdfPath)}
+                              className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
+                            >
+                              View PDF
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Center 4 - Valkaradu: Use Design 2 (Grid View) */}
+                  {selectedCenter.id === 4 && selectedCenter.experiments && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {selectedCenter.experiments.map((experiment) => (
+                        <div 
+                          key={experiment.id}
+                          className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
+                        >
+                          {/* Image Placeholder */}
+                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <TreePine className="h-16 w-16 text-gray-400" />
+                          </div>
+                          {/* Experiment Info */}
+                          <div className="p-4">
+                            <h4 className="text-base font-semibold text-forest-green-800 mb-2 text-center">
+                              {experiment.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
+                              {experiment.description}
+                            </p>
+                            <button
+                              onClick={() => handleViewPDF(experiment.pdfPath)}
+                              className="w-full bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                            >
+                              View PDF
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Center 5 - Alwarmalai: Use Design 10 (Alternating Stacked Cards) */}
+                  {selectedCenter.id === 5 && selectedCenter.experiments && (
                     <div className="space-y-6">
-                      {selectedCenter.projects.map((project, index) => {
-                        const isExpanded = expandedProject === project.id;
+                      {selectedCenter.experiments.map((experiment, index) => {
                         const isEven = index % 2 === 0;
                         return (
                           <div
-                            key={project.id}
-                            className={`border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200 ${
-                              isExpanded ? 'ring-2 ring-forest-green-500' : ''
-                            }`}
+                            key={experiment.id}
+                            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
                           >
                             <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
                               {/* Image Placeholder */}
@@ -638,46 +249,19 @@ const ModernNurseryDivision = () => {
                                 <div className="flex items-start justify-between mb-3">
                                   <div className="flex-1">
                                     <h4 className="text-xl font-bold text-forest-green-800 mb-2">
-                                      {project.title}
+                                      {experiment.title}
                                     </h4>
-                                    <p className="text-gray-600 text-sm mb-4">
-                                      {project.description}
+                                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                      {experiment.description}
                                     </p>
-                                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
-                                      <div className="flex items-center gap-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>{project.startDate}</span>
-                                      </div>
-                                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-medium">
-                                        {project.status}
-                                      </span>
-                                    </div>
                                   </div>
                                 </div>
                                 <button
-                                  onClick={() => toggleProjectDetails(project.id)}
+                                  onClick={() => handleViewPDF(experiment.pdfPath)}
                                   className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
                                 >
-                                  {isExpanded ? 'Hide Details' : 'View Details'}
+                                  View PDF
                                 </button>
-                                {isExpanded && (
-                                  <div className="mt-4 pt-4 border-t border-gray-200">
-                                    <div className="space-y-2">
-                                      <div>
-                                        <span className="font-semibold text-gray-700">Authors: </span>
-                                        <span className="text-gray-600">{project.authors}</span>
-                                      </div>
-                                      <div>
-                                        <span className="font-semibold text-gray-700">Status: </span>
-                                        <span className="text-gray-600">{project.status}</span>
-                                      </div>
-                                      <div>
-                                        <span className="font-semibold text-gray-700">Start Date: </span>
-                                        <span className="text-gray-600">{project.startDate}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
                               </div>
                             </div>
                           </div>
@@ -685,38 +269,184 @@ const ModernNurseryDivision = () => {
                       })}
                     </div>
                   )}
-                </div>
 
-                {/* Completed Projects Section */}
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-forest-green-800 mb-6 flex items-center">
-                    <Award className="h-6 w-6 mr-3" />
-                    Completed Projects
-                  </h3>
-                  <div className="space-y-4">
-                    {selectedCenter.completedProjects?.map((project) => (
-                      <div key={project.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-forest-green-800 mb-2">
-                              {project.title}
-                            </h4>
-                            <p className="text-gray-600 text-sm mb-3">
-                              Project Type: Completed
-                            </p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <button className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
+                  {/* Center 6 - Edaikkal: Use Design 1 (Table View) */}
+                  {selectedCenter.id === 6 && selectedCenter.experiments && (
+                    <div className="space-y-3">
+                      {selectedCenter.experiments.map((experiment) => (
+                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
+                            {/* Image Placeholder */}
+                            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                              <TreePine className="h-8 w-8 text-gray-400" />
+                            </div>
+                            {/* Experiment Info */}
+                            <div className="flex-1">
+                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
+                                {experiment.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {experiment.description}
+                              </p>
+                            </div>
+                            {/* View PDF Button */}
+                            <button
+                              onClick={() => handleViewPDF(experiment.pdfPath)}
+                              className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
+                            >
                               View PDF
-                            </button>
-                            <button className="border border-forest-green-600 text-forest-green-600 hover:bg-forest-green-50 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200">
-                              Download
                             </button>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Center 7 - Kathiripuram: Use Design 2 (Grid View) */}
+                  {selectedCenter.id === 7 && selectedCenter.experiments && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {selectedCenter.experiments.map((experiment) => (
+                        <div 
+                          key={experiment.id}
+                          className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
+                        >
+                          {/* Image Placeholder */}
+                          <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <TreePine className="h-16 w-16 text-gray-400" />
+                          </div>
+                          {/* Experiment Info */}
+                          <div className="p-4">
+                            <h4 className="text-base font-semibold text-forest-green-800 mb-2 text-center">
+                              {experiment.title}
+                            </h4>
+                            <p className="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
+                              {experiment.description}
+                            </p>
+                            <button
+                              onClick={() => handleViewPDF(experiment.pdfPath)}
+                              className="w-full bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                            >
+                              View PDF
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Center 8 - Melchengam: Use Design 10 (Alternating Stacked Cards) */}
+                  {selectedCenter.id === 8 && selectedCenter.experiments && (
+                    <div className="space-y-6">
+                      {selectedCenter.experiments.map((experiment, index) => {
+                        const isEven = index % 2 === 0;
+                        return (
+                          <div
+                            key={experiment.id}
+                            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
+                          >
+                            <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                              {/* Image Placeholder */}
+                              <div className="w-full md:w-1/3 bg-gray-200 flex items-center justify-center min-h-[200px]">
+                                <TreePine className="h-20 w-20 text-gray-400" />
+                              </div>
+                              {/* Content */}
+                              <div className="w-full md:w-2/3 p-6">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex-1">
+                                    <h4 className="text-xl font-bold text-forest-green-800 mb-2">
+                                      {experiment.title}
+                                    </h4>
+                                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                      {experiment.description}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleViewPDF(experiment.pdfPath)}
+                                  className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                                >
+                                  View PDF
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Center 9 - Jamunamarathur: Use Design 1 (Table View) */}
+                  {selectedCenter.id === 9 && selectedCenter.experiments && (
+                    <div className="space-y-3">
+                      {selectedCenter.experiments.map((experiment) => (
+                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                          <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
+                            {/* Image Placeholder */}
+                            <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                              <TreePine className="h-8 w-8 text-gray-400" />
+                            </div>
+                            {/* Experiment Info */}
+                            <div className="flex-1">
+                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
+                                {experiment.title}
+                              </h4>
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {experiment.description}
+                              </p>
+                            </div>
+                            {/* View PDF Button */}
+                            <button
+                              onClick={() => handleViewPDF(experiment.pdfPath)}
+                              className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
+                            >
+                              View PDF
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Style 10: Alternating Stacked Cards (Center 10 - Maragatta) */}
+                  {selectedCenter.id === 10 && selectedCenter.experiments && (
+                    <div className="space-y-6">
+                      {selectedCenter.experiments.map((experiment, index) => {
+                        const isEven = index % 2 === 0;
+                        return (
+                          <div
+                            key={experiment.id}
+                            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
+                          >
+                            <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
+                              {/* Image Placeholder */}
+                              <div className="w-full md:w-1/3 bg-gray-200 flex items-center justify-center min-h-[200px]">
+                                <TreePine className="h-20 w-20 text-gray-400" />
+                              </div>
+                              {/* Content */}
+                              <div className="w-full md:w-2/3 p-6">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex-1">
+                                    <h4 className="text-xl font-bold text-forest-green-800 mb-2">
+                                      {experiment.title}
+                                    </h4>
+                                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                                      {experiment.description}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleViewPDF(experiment.pdfPath)}
+                                  className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                                >
+                                  View PDF
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Center Contact Info */}
