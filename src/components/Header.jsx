@@ -25,7 +25,7 @@ const Header = () => {
         
         {/* Title - Responsive text sizing with better readability */}
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white text-shadow mb-2 sm:mb-3 md:mb-4 px-1 leading-tight">
-          Welcome to Tamil Nadu Forest Department Research Wing
+          Tamil Nadu Forest Department Research Wing
         </h1>
         
         {/* Subtitle - Responsive text sizing with better readability */}

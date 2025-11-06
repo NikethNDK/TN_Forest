@@ -1,26 +1,105 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, ExternalLink, Play, Pause } from 'lucide-react';
 
-const VideoHeroSection = () => {
+// Import all images from assets (excluding react.svg)
+import AlwarmalaiImage from '../assets/Alwarmalai.jpeg';
+import EdaikkalImage from '../assets/Edaikkal.jpeg';
+import HarurMNCImage from '../assets/Harur MNC.jpeg';
+import JamunamarathurImage from '../assets/Jamunamarathur.jpeg';
+import KalamavoorImage from '../assets/Kalamavoor.jpeg';
+import KathiripuramImage from '../assets/Kathiripuram.jpeg';
+import MaragattaImage from '../assets/Maragatta.jpeg';
+import MelchengamImage from '../assets/Melchengam.jpeg';
+import ThoppurImage from '../assets/Thoppur.jpeg';
+import ValkaraduImage from '../assets/Valkaradu.jpeg';
+
+const RotatingImageStrip = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const images = [
+    AlwarmalaiImage,
+    EdaikkalImage,
+    HarurMNCImage,
+    JamunamarathurImage,
+    KalamavoorImage,
+    KathiripuramImage,
+    MaragattaImage,
+    MelchengamImage,
+    ThoppurImage,
+    ValkaraduImage
+  ];
+
+  const nextImage = useCallback(() => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+  }, [images.length]);
+
+  const prevImage = () => {
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  };
+
+  // Auto-rotate every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(nextImage, 5000);
+    return () => clearInterval(interval);
+  }, [nextImage]);
+
   return (
     <section className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden">
-      {/* Video placeholder - replace src with actual video */}
-      <div className="absolute inset-0 bg-black opacity-40"></div>
-      <video 
-        className="absolute inset-0 w-full h-full object-cover"
-        autoPlay 
-        muted 
-        loop
-        playsInline
-        poster="https://images.unsplash.com/photo-1511497584788-876760111969?w=1200"
-      >
-        <source src="https://www.aiwc.res.in/uploads/videos/AIWC.mp4" type="video/mp4" />
-        {/* Fallback for browsers that don't support video */}
-        <div className="absolute inset-0 bg-cover bg-center" style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1511497584788-876760111969?w=1200)'
-        }}></div>
-      </video>
-    
+      <div className="relative w-full h-full">
+        <div 
+          className="flex transition-transform duration-500 ease-in-out h-64 sm:h-80 md:h-96 lg:h-[500px]"
+          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+        >
+          {images.map((image, index) => (
+            <div
+              key={index}
+              className="flex-shrink-0 w-full h-64 sm:h-80 md:h-96 lg:h-[500px]"
+            >
+              <img
+                src={image}
+                alt={`Nursery Image ${index + 1}`}
+                className="w-full h-64 sm:h-80 md:h-96 lg:h-[500px]"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation Buttons */}
+        <button
+          onClick={prevImage}
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-10"
+          aria-label="Previous image"
+        >
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
+        </button>
+
+        <button
+          onClick={nextImage}
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-10"
+          aria-label="Next image"
+        >
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
+        </button>
+
+        {/* Indicator Dots */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`h-2 rounded-full transition-all ${
+                index === currentIndex 
+                  ? 'w-8 bg-white' 
+                  : 'w-2 bg-white/50 hover:bg-white/75'
+              }`}
+              aria-label={`Go to image ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-green-900/30 via-transparent to-green-900/30 pointer-events-none"></div>
+      </div>
     </section>
   );
 };
@@ -104,13 +183,13 @@ const NewsAndInfoSection = () => {
 
             {/* Mission and Vision */}
             <div className="max-w-3xl mx-auto mb-8 space-y-6">
-              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-r-4 border-green-600">
                 <h3 className="text-xl font-bold text-green-900 mb-3">Our Mission</h3>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   To embrace innovation in soil health through biofertilizer solutions, produce high-quality climate-resilient seedlings for reforestation, supply superior forest tree seeds to stakeholders, and focus on conservation of rare, endangered, and threatened species for long-term environmental sustainability.
                 </p>
               </div>
-              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-lime-500">
+              <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-r-4 border-lime-500">
                 <h3 className="text-xl font-bold text-green-900 mb-3">Our Vision</h3>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   To be a leader in sustainable agroforestry and soil health through innovative biofertilizer production, advanced microbial inoculants, production of climate-resilient seedlings, supply of quality forest tree seeds, and fostering sustainable management practices in RET species for long-term ecological benefits.
@@ -254,13 +333,13 @@ const NewsAndInfoSection = () => {
 
                 {/* Mission and Vision */}
                 <div className="max-w-4xl mx-auto mb-8 space-y-6">
-                  <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-600">
+                  <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-r-4 border-green-600">
                     <h3 className="text-xl font-bold text-green-900 mb-3">Our Mission</h3>
                     <p className="text-gray-700 leading-relaxed text-sm xl:text-base">
                       To embrace innovation in soil health through biofertilizer solutions, produce high-quality climate-resilient seedlings for reforestation, supply superior forest tree seeds to stakeholders, and focus on conservation of rare, endangered, and threatened species for long-term environmental sustainability.
                     </p>
                   </div>
-                  <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-lime-500">
+                  <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-r-4 border-lime-500">
                     <h3 className="text-xl font-bold text-green-900 mb-3">Our Vision</h3>
                     <p className="text-gray-700 leading-relaxed text-sm xl:text-base">
                       To be a leader in sustainable agroforestry and soil health through innovative biofertilizer production, advanced microbial inoculants, production of climate-resilient seedlings, supply of quality forest tree seeds, and fostering sustainable management practices in RET species for long-term ecological benefits.
@@ -339,40 +418,31 @@ const ImageCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   
   const images = [
-    {
-      url: "https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=800",
-      caption: "Research Facility - Coimbatore Campus"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1473448912268-2022ce9509d8?w=800",
-      caption: "Endemic Species Conservation Program"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=800",
-      caption: "Modern Nursery Operations"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1510784722466-f2aa9c52fff6?w=800",
-      caption: "Field Research in Western Ghats"
-    },
-    {
-      url: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800",
-      caption: "Biodiversity Monitoring"
-    }
+    AlwarmalaiImage,
+    EdaikkalImage,
+    HarurMNCImage,
+    JamunamarathurImage,
+    KalamavoorImage,
+    KathiripuramImage,
+    MaragattaImage,
+    MelchengamImage,
+    ThoppurImage,
+    ValkaraduImage
   ];
 
-  const nextSlide = () => {
+  const nextImage = useCallback(() => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  };
+  }, [images.length]);
 
-  const prevSlide = () => {
+  const prevImage = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
   };
 
+  // Auto-rotate every 5 seconds
   useEffect(() => {
-    const interval = setInterval(nextSlide, 5000);
+    const interval = setInterval(nextImage, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [nextImage]);
 
   return (
     <section className="py-8 sm:py-12 bg-white">
@@ -382,45 +452,57 @@ const ImageCarousel = () => {
         </h2>
         
         <div className="relative">
-          <div className="overflow-hidden rounded-xl shadow-2xl">
-            <div className="relative h-64 sm:h-80 md:h-96">
-              <img
-                src={images[currentIndex].url}
-                alt={images[currentIndex].caption}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 sm:p-6">
-                <p className="text-white text-sm sm:text-lg font-medium">
-                  {images[currentIndex].caption}
-                </p>
-              </div>
+          <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl shadow-2xl overflow-hidden">
+            <div 
+              className="flex transition-transform duration-500 ease-in-out h-64 sm:h-80 md:h-96"
+              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+            >
+              {images.map((image, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-full h-64 sm:h-80 md:h-96"
+                >
+                  <img
+                    src={image}
+                    alt={`Nursery Image ${index + 1}`}
+                    className="w-full h-64 sm:h-80 md:h-96"
+                  />
+                </div>
+              ))}
             </div>
-          </div>
 
-          <button
-            onClick={prevSlide}
-            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all"
-          >
-            <ChevronLeft className="h-4 w-4 sm:h-6 sm:w-6 text-green-800" />
-          </button>
+            {/* Navigation Buttons */}
+            <button
+              onClick={prevImage}
+              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-10"
+              aria-label="Previous image"
+            >
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
+            </button>
 
-          <button
-            onClick={nextSlide}
-            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all"
-          >
-            <ChevronRight className="h-4 w-4 sm:h-6 sm:w-6 text-green-800" />
-          </button>
+            <button
+              onClick={nextImage}
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-10"
+              aria-label="Next image"
+            >
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
+            </button>
 
-          <div className="flex justify-center mt-4 sm:mt-6 space-x-2">
-            {images.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentIndex(index)}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'w-6 sm:w-8 bg-green-700' : 'w-2 bg-gray-300'
-                }`}
-              />
-            ))}
+            {/* Indicator Dots */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentIndex(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    index === currentIndex 
+                      ? 'w-8 bg-white' 
+                      : 'w-2 bg-white/50 hover:bg-white/75'
+                  }`}
+                  aria-label={`Go to image ${index + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -606,7 +688,7 @@ const LinksCarousel = () => {
 const Home = () => {
   return (
     <div className="min-h-screen bg-white">
-      <VideoHeroSection />
+      <RotatingImageStrip />
       <NewsAndInfoSection />
       <ImageCarousel />
       <LinksCarousel />

@@ -73,7 +73,7 @@ const About = () => {
       </section>
 
       {/* 3. History Section (Split Layout) */}
-      <section className="py-20 bg-green-800 text-white">
+      {/* <section className="py-20 bg-green-800 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center">
             <div className="lg:w-1/3 mb-8 lg:mb-0 lg:pr-12 text-center lg:text-left">
                 <History className="h-16 w-16 text-lime-400 mx-auto lg:mx-0 mb-4" />
@@ -98,7 +98,7 @@ const About = () => {
                 </p>
             </div>
         </div>
-      </section>
+      </section> */}
 
       {/* 4. Key Achievements (Enhanced Stats Block) */}
       {/* <section className="py-20"> */}
@@ -175,6 +175,70 @@ const About = () => {
           </div> */}
         {/* </div>
       </section> */}
+
+      {/* 5. Leadership & Governance Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold text-green-900 mb-4">
+              Leadership & Governance
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              The distinguished leadership team guiding the Tamil Nadu Forest Department Research Wing
+            </p>
+          </div>
+
+          {/* Faculty Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Thiru R.S.Rajakannappan",
+                position: "Hon'ble Minister for Forests"
+              },
+              {
+                name: "Tmt. Supriya Sahu, IAS",
+                position: "Additional Chief Secretary to Government, Environment, Climate Change and Forests Department"
+              },
+              {
+                name: "Thiru.Srinivas R. Reddy, IFS",
+                position: "Principal Chief Conservator of Forests (HoFF) & CEO, CAMPA (FAC)"
+              },
+              {
+                name: "Thiru Rakesh Kumar Dogra, IFS",
+                position: "Principal Chief Conservator of Forests and Chief Wildlife Warden & Principal Chief Conservator of Forests (Project Tiger) (FAC)"
+              },
+              {
+                name: "Thiru I Anwardeen, IFS",
+                position: "Principal Chief Conservator of Forests (Research and Education) Chennai"
+              },
+              {
+                name: "K.Geethanjali, IFS",
+                // position: "Additional Principal Chief Conservator of Forests"
+              }
+            ].map((member, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl shadow-xl p-8 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl"
+              >
+                <div className="flex flex-col h-full">
+                  {/* Name */}
+                  <h3 className="text-xl font-bold text-green-900 mb-3 leading-tight">
+                    {member.name}
+                  </h3>
+
+                  {/* Position */}
+                  {member.position && (
+                    <p className="text-gray-700 leading-relaxed">
+                      {member.position}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
     </div>
   );

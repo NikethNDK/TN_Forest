@@ -3,27 +3,23 @@ import { ShoppingCart, Search, Plus, Minus, Trash2, Sprout, Leaf, Zap, Star, Fla
 
 // --- MOCK DATA (Self-contained for canvas runnability) ---
 const mockShopProducts = [
-  // Seeds & Saplings (12 items)
-  { id: 1, name: 'Clonal Teak Sapling (High-Density)', description: 'High-quality clonal teak known for fast growth and superior wood density. Ideal for long-term timber investment in tropical climates.', price: 150, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌳' },
-  { id: 2, name: 'Red Sanders Sapling', description: 'Rare and protected red sanders sapling. Requires specific soil conditions and permits for commercial growth.', price: 500, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌲' },
-  { id: 3, name: 'Neem Sapling (Azadirachta indica)', description: 'Medicinal and shade-providing neem sapling. Tolerant of drought conditions and poor soil quality.', price: 40, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌿' },
-  { id: 4, name: 'African Mahogany Sapling', description: 'Tropical hardwood mahogany sapling. Excellent for furniture and construction, known for its rapid growth rate.', price: 120, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌳' },
-  { id: 5, name: 'Grafted Mango Tree Sapling (Alphonso)', description: 'Grafted mango sapling (Alphonso variety) for quick fruit bearing and high commercial value.', price: 250, category: 'Seeds & Saplings', inStock: true, imageIcon: '🥭' },
-  { id: 6, name: 'Bamboo Clump Starter (Giant Dendrocalamus)', description: 'Fast-growing giant bamboo species for erosion control and heavy construction.', price: 90, category: 'Seeds & Saplings', inStock: false, imageIcon: '🎍' },
-  { id: 7, name: 'Premium Sandalwood Seeds', description: 'Premium grade sandalwood seeds for propagation and perfumery. Requires host plants for successful germination.', price: 300, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌰' },
-  { id: 8, name: 'Eucalyptus Grandis Seeds (Industrial Grade)', description: 'Fast-growing industrial eucalyptus seeds for pulp, paper, and biofuel production.', price: 50, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌱' },
-  { id: 9, name: 'Acacia Nilotica Seeds (Babul)', description: 'Vachellia nilotica seeds used for traditional medicine, tannin extraction, and animal fodder.', price: 40, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌾' },
-  { id: 10, name: 'High-Yield Tamarind Seeds', description: 'Certified high-yield tamarind seeds for commercial cultivation and excellent fruit production.', price: 60, category: 'Seeds & Saplings', inStock: true, imageIcon: '🍋' },
-  { id: 11, name: 'Rare Medicinal Herb Seed Mix', description: 'A curated mix of rare medicinal herb seeds for home gardens and research purposes.', price: 180, category: 'Seeds & Saplings', inStock: true, imageIcon: '🌼' },
-  { id: 12, name: 'Banyan Tree Seeds (Ficus benghalensis)', description: 'Seeds of the majestic and culturally significant banyan tree, ideal for large landscapes.', price: 100, category: 'Seeds & Saplings', inStock: false, imageIcon: '🌳' },
+  // Seeds (8 items)
+  { id: 1, name: 'Acacia Nilotica Seeds', description: 'Vachellia nilotica seeds, commonly known as Babul or Indian Gum Arabic tree. Medium-sized thorny tree valued for traditional medicine, tannin extraction, and animal fodder. Drought-tolerant and suitable for arid regions.', price: 40, category: 'Seeds', inStock: true, imageIcon: '🌾',stock: 18 },
+  { id: 2, name: 'Anthocephalus cadamba Seeds', description: 'Kadamba or Burflower tree seeds. Fast-growing tropical evergreen tree reaching 30-45 meters. Produces fragrant bright yellow-orange flowers in spherical clusters during monsoon. Excellent for reforestation and ornamental planting.', price: 60, category: 'Seeds', inStock: true, imageIcon: '🌳',stock: 15 },
+  { id: 3, name: 'Buchanania Lanzan Seeds', description: 'Chironji seeds from the Buchanania lanzan tree, native to India. Medium-sized deciduous tree producing edible seeds used in Indian cuisine. Valued for its medicinal properties and quality timber.', price: 80, category: 'Seeds', inStock: true, imageIcon: '🌰',stock: 12 },
+  { id: 4, name: 'Butea monosperma Seeds', description: 'Flame of the Forest seeds, also known as Palash. Medium-sized deciduous tree renowned for vibrant orange-red flowers that bloom in clusters, creating a flame-like appearance. Drought-resistant and ideal for dry regions.', price: 50, category: 'Seeds', inStock: true, imageIcon: '🌺',stock: 20 },
+  { id: 5, name: 'Cassia fistula Seeds', description: 'Golden Shower tree seeds, also known as Amaltas. Medium-sized deciduous tree famous for cascading clusters of bright yellow flowers. Has significant medicinal value and is widely used as an ornamental tree.', price: 55, category: 'Seeds', inStock: true, imageIcon: '🌼',stock: 16 },
+  { id: 6, name: 'Casuarina equisetifolia Seeds', description: 'Coastal She-Oak seeds, native to Southeast Asia and Australia. Fast-growing evergreen tree with needle-like foliage. Excellent for coastal afforestation, windbreaks, and erosion control due to salt tolerance.', price: 45, category: 'Seeds', inStock: true, imageIcon: '🌲',stock: 14 },
+  { id: 7, name: 'Dalbergia Latifolia Seeds', description: 'Indian Rosewood seeds, also known as Sissoo. Large deciduous tree native to the Indian subcontinent. Premium hardwood valued for furniture, musical instruments, and construction. Produces durable and attractive timber.', price: 120, category: 'Seeds', inStock: true, imageIcon: '🌳',stock: 10 },
+  { id: 8, name: 'Delonix regia Seeds', description: 'Gulmohar or Royal Poinciana seeds. Fast-growing deciduous tree native to Madagascar but widely cultivated in tropical regions. Famous for flamboyant display of bright red-orange flowers and fern-like leaves. Perfect ornamental tree for landscaping.', price: 65, category: 'Seeds', inStock: true, imageIcon: '🌺',stock: 18 },
 
   // Bio Fertilizers (6 items)
-  { id: 13, name: 'Vermicompost (Organic)', description: 'High-quality organic vermicompost produced using earthworms. Enhances soil structure, fertility, and microbial activity for optimal plant growth.', price: 80, category: 'Bio Fertilizers', inStock: true, imageIcon: '🐛' },
-  { id: 14, name: 'VAM (Vesicular Arbuscular Mycorrhizae)', description: 'Beneficial mycorrhizal fungi that form symbiotic relationships with plant roots, improving nutrient and water absorption.', price: 120, category: 'Bio Fertilizers', inStock: true, imageIcon: '🍄' },
-  { id: 15, name: 'Azospirillum (Nitrogen-Fixing Bacteria)', description: 'Premium nitrogen-fixing bacteria that enhance soil nitrogen levels naturally, reducing the need for chemical fertilizers.', price: 95, category: 'Bio Fertilizers', inStock: true, imageIcon: '🦠' },
-  { id: 16, name: 'Phosphobacteria (Phosphate Solubilizing)', description: 'Phosphate-solubilizing bacteria that convert insoluble phosphates into plant-available forms, promoting root development.', price: 100, category: 'Bio Fertilizers', inStock: true, imageIcon: '🔬' },
-  { id: 17, name: 'Pseudomonas sp. (Root-Rot Suppressing)', description: 'Beneficial bacteria that suppress soil-borne pathogens and root rot diseases, protecting plant health naturally.', price: 110, category: 'Bio Fertilizers', inStock: true, imageIcon: '🛡️' },
-  { id: 18, name: 'Trichoderma viride (Fungal Biocontrol)', description: 'Beneficial fungus that acts as a biocontrol agent against harmful pathogens while promoting plant growth and root health.', price: 105, category: 'Bio Fertilizers', inStock: false, imageIcon: '🌱' },
+  { id: 13, name: 'Vermicompost (Organic)', description: 'High-quality organic vermicompost produced using earthworms. Enhances soil structure, fertility, and microbial activity for optimal plant growth.', price: 15, category: 'Bio Fertilizers', inStock: true, imageIcon: '🐛',stock: 10 },
+  { id: 14, name: 'VAM (Vesicular Arbuscular Mycorrhizae)', description: 'Beneficial mycorrhizal fungi that form symbiotic relationships with plant roots, improving nutrient and water absorption.', price: 22, category: 'Bio Fertilizers', inStock: true, imageIcon: '🍄',stock: 15 },
+  { id: 15, name: 'Azospirillum (Nitrogen-Fixing Bacteria)', description: 'Premium nitrogen-fixing bacteria that enhance soil nitrogen levels naturally, reducing the need for chemical fertilizers.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🦠',stock: 10 },
+  { id: 16, name: 'Phosphobacteria (Phosphate Solubilizing)', description: 'Phosphate-solubilizing bacteria that convert insoluble phosphates into plant-available forms, promoting root development.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🔬',stock: 10 },
+  { id: 17, name: 'Pseudomonas sp. (Root-Rot Suppressing)', description: 'Beneficial bacteria that suppress soil-borne pathogens and root rot diseases, protecting plant health naturally.', price: 120, category: 'Bio', inStock: true, imageIcon: '🛡️',stock: 12 },
+  { id: 18, name: 'Trichoderma viride (Fungal Biocontrol)', description: 'Beneficial fungus that acts as a biocontrol agent against harmful pathogens while promoting plant growth and root health.', price: 120, category: 'Bio', inStock: false, imageIcon: '🌱',stock: 13 },
 ];
 // --- END MOCK DATA ---
 
@@ -54,7 +50,7 @@ const ProductCard = ({ product, addToCart }) => (
               ? 'bg-lime-100 text-lime-800' 
               : 'bg-red-100 text-red-800'
         }`}>
-          {product.inStock ? 'In Stock' : 'Out of Stock'}
+          {product.inStock ? `In Stock: ${product.stock}` : 'Out of Stock'}
         </span>
       </div>
       <button
@@ -67,7 +63,7 @@ const ProductCard = ({ product, addToCart }) => (
         }`}
       >
         <Plus className="h-4 w-4 mr-2" />
-        {product.inStock ? 'Add to Order' : 'Notify Me'}
+        {product.inStock ? 'Add to Order' : 'Add to Order'}
       </button>
     </div>
   </div>
@@ -178,11 +174,11 @@ const Shop = () => {
     return matchesSearch;
   });
 
-  const seedsSaplings = filteredProducts.filter(p => p.category === 'Seeds & Saplings');
+  const seedsSaplings = filteredProducts.filter(p => p.category === 'Seeds');
   const bioFertilizers = filteredProducts.filter(p => p.category === 'Bio Fertilizers');
   
   // Get available bio-fertilizers for the dropdown
-  const availableFertilizers = bioFertilizers;
+  const availableFertilizers = filteredProducts.filter(p => p.category === 'Bio');
 
   const addToCart = (product) => {
     const existingItem = cart.find(item => item.id === product.id);
@@ -363,7 +359,7 @@ const Shop = () => {
               <div className="space-y-16">
                 {seedsSaplings.length > 0 && (
                   <ProductSection 
-                      title="Seeds & Saplings"
+                      title="Seeds"
                       icon={Sprout}
                       products={seedsSaplings}
                       limit={seedsSaplingsLimit}
@@ -390,7 +386,7 @@ const Shop = () => {
                       No Products Match Your Search
                   </h3>
                   <p className="text-gray-600">
-                      Try a broader search term (e.g., 'tree', 'fertilizer') or check the Seeds & Saplings and Bio Fertilizers sections.
+                      Try a broader search term (e.g., 'tree', 'fertilizer') or check the Seeds and Bio Fertilizers sections.
                   </p>
               </div>
           )}

@@ -11,7 +11,6 @@ const Navbar = () => {
   const navItems = [
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
-    { name: 'Faculty', path: '/faculty' },
     // { name: 'Information', path: '/information' },
     { name: 'Publication', path: '/publication' },
     { name: 'Contact Us', path: '/contact' }
@@ -99,15 +98,6 @@ const Navbar = () => {
                  About
                </Link>
                
-
-               
-               <Link
-                 to="/faculty"
-                 className="text-green-950 hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200"
-               >
-                 Faculty
-               </Link>
-               
                {/* <Link
                  to="/information"
                  className="text-green-950 hover:text-green-200 px-4 py-3 text-base font-medium transition-colors duration-200"
@@ -188,14 +178,6 @@ const Navbar = () => {
                    </Link>
                  ))}
                </div>
-               
-               <Link
-                 to="/faculty"
-                 className="text-white hover:text-green-200 block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200"
-                 onClick={() => setIsMenuOpen(false)}
-               >
-                 Faculty
-               </Link>
                
                {/* <Link
                  to="/information"

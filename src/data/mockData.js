@@ -22,7 +22,8 @@ export const divisions = [
         district: "Dharmapuri",
         range: "Dharmapuri Modern Nursery Range",
         description: "Modern nursery facility for forest tree species propagation and seedling production.",
-        experiments: experimentsData["1"] || []
+        experiments: experimentsData["1"] || [],
+        coordinates: { lat: 11.96828, lng: 78.05200 }
       },
       {
         id: 2,
@@ -32,7 +33,8 @@ export const divisions = [
         district: "Dharmapuri",
         range: "Dharmapuri Modern Nursery Range",
         description: "Modern nursery center specializing in quality seedling production and distribution.",
-        experiments: experimentsData["2"] || []
+        experiments: experimentsData["2"] || [],
+        coordinates: { lat: 12.06574, lng: 78.47608 }
       },
       {
         id: 3,
@@ -42,7 +44,8 @@ export const divisions = [
         district: "Pudukottai",
         range: "Dindigul Modern Nursery Range",
         description: "Modern nursery facility in the Dindigul range, focusing on plant propagation and cultivation.",
-        experiments: experimentsData["3"] || []
+        experiments: experimentsData["3"] || [],
+        coordinates: { lat: 10.62207, lng: 78.75205 }
       },
       {
         id: 4,
@@ -52,7 +55,8 @@ export const divisions = [
         district: "Theni",
         range: "Dindigul Modern Nursery Range",
         description: "Modern nursery center in Theni district, dedicated to sustainable forestry practices.",
-        experiments: experimentsData["4"] || []
+        experiments: experimentsData["4"] || [],
+        coordinates: { lat: 10.01465, lng: 77.49482 }
       },
       {
         id: 5,
@@ -62,7 +66,8 @@ export const divisions = [
         district: "Villupuram",
         range: "Kallakurichi Modern Nursery Range",
         description: "Modern nursery facility in Villupuram district, part of the Kallakurichi range.",
-        experiments: experimentsData["5"] || []
+        experiments: experimentsData["5"] || [],
+        coordinates: { lat: 11.72816, lng: 79.10987 }
       },
       {
         id: 6,
@@ -72,7 +77,8 @@ export const divisions = [
         district: "Villupuram",
         range: "Kallakurichi Modern Nursery Range",
         description: "Major research center spanning 85 hectares, conducting advanced research in forest tree species and nursery management.",
-        experiments: experimentsData["6"] || []
+        experiments: experimentsData["6"] || [],
+        coordinates: { lat: 11.70149, lng: 79.24360 }
       },
       {
         id: 7,
@@ -82,7 +88,8 @@ export const divisions = [
         district: "Dharmapuri",
         range: "Harur Research Range",
         description: "Research center in Dharmapuri district, part of the Harur Research Range, focusing on forest research and development.",
-        experiments: experimentsData["9"] || []
+        experiments: experimentsData["9"] || [],
+        coordinates: { lat: 11.96498, lng: 78.31737 }
       },
       {
         id: 8,
@@ -92,7 +99,8 @@ export const divisions = [
         district: "Thiruvanamalai",
         range: "Chengam Research Range",
         description: "Research center in Thiruvanamalai district, part of the Chengam Research Range, dedicated to forest research activities.",
-        experiments: experimentsData["7"] || []
+        experiments: experimentsData["7"] || [],
+        coordinates: { lat: 12.27189, lng: 78.71328 }
       },
       {
         id: 9,
@@ -102,7 +110,8 @@ export const divisions = [
         district: "Thiruvanamalai",
         range: "Chengam Research Range",
         description: "Large research center spanning 75 hectares in Thiruvanamalai district, conducting extensive forest research programs.",
-        experiments: experimentsData["8"] || []
+        experiments: experimentsData["8"] || [],
+        coordinates: { lat: 12.59550, lng: 78.87456 }
       },
       {
         id: 10,
@@ -112,7 +121,8 @@ export const divisions = [
         district: "Krishnagiri",
         range: "Denkanikottai Research Range",
         description: "Research center in Krishnagiri district, part of the Denkanikottai Research Range, focusing on forest research and conservation.",
-        experiments: experimentsData["10"] || []
+        experiments: experimentsData["10"] || [],
+        coordinates: { lat: 12.48128, lng: 77.77862 }
       }
     ]
   },

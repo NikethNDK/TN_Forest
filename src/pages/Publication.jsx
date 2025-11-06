@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Download, Calendar, Search, Filter } from 'lucide-react';
+import { FileText, Calendar, Search, Filter, ExternalLink } from 'lucide-react';
 
 const Publication = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -8,23 +8,12 @@ const Publication = () => {
   const publications = [
     {
       id: 1,
-      title: "Forest Biodiversity Conservation in Tamil Nadu: A Comprehensive Study",
-      // authors: "Dr. Rajesh Kumar, Dr. Priya Sharma, Dr. Suresh Menon",
+      title: "நகர்ப்புறங்களில் மரம் வளர்ப்பு",
       year: 2024,
       category: "Research Paper",
-      journal: "Journal of Forest Conservation",
-      description: "A detailed study on biodiversity conservation strategies and their implementation in Tamil Nadu forests.",
-      pdfUrl: "/pdfs/biodiversity-study-2024.pdf"
-    },
-    {
-      id: 2,
-      title: "Modern Nursery Techniques for Forest Tree Species",
-      // authors: "Dr. Suresh Menon, Dr. Lakshmi Nair",
-      year: 2024,
-      category: "Technical Report",
-      journal: "Forest Research Bulletin",
-      description: "Comprehensive guide on modern nursery management and propagation techniques for forest trees.",
-      pdfUrl: "/pdfs/nursery-techniques-2024.pdf"
+      journal: "ஓர் எளிய வழிகாட்டி",
+      description: "A comprehensive guide on tree planting in urban areas.",
+      pdfUrl: "/Publications/நகர்ப்புறங்களில் மரம் வளர்ப்பு.pdf"
     },
     // {
     //   id: 3,
@@ -156,13 +145,15 @@ const Publication = () => {
                 </div>
                 
                 <div className="flex flex-col gap-2">
-                  <button className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center">
-                    <Download className="h-4 w-4 mr-2" />
-                    Download PDF
-                  </button>
-                  <button className="border border-forest-green-600 text-forest-green-600 hover:bg-forest-green-50 px-4 py-2 rounded-lg font-medium transition-colors duration-300">
+                  <a
+                    href={publication.pdfUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="border border-forest-green-600 text-forest-green-600 hover:bg-forest-green-50 px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center justify-center"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
                     View Details
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>

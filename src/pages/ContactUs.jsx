@@ -57,12 +57,11 @@ const ContactUs = () => {
   ];
 
   const researchCenters = [
-    { name: "Thoppur Modern Nursery", location: "Thoppur, TN", phone: "+91 XXXXX 5681", email: "thoppur@tnfrd.gov.in" },
-    { name: "Kathipuram Research Center", location: "Kathipuram, TN", phone: "+91 XXXXX 5682", email: "kathipuram@tnfrd.gov.in" },
-    { name: "Melsangam Research Center", location: "Melsangam, TN", phone: "+91 XXXXX 5683", email: "melsangam@tnfrd.gov.in" },
-    { name: "Edaikal Research Center", location: "Edaikal, TN", phone: "+91 XXXXX 5684", email: "edaikal@tnfrd.gov.in" },
-    { name: "Aalvarmalai Research Center", location: "Aalvarmalai, TN", phone: "+91 XXXXX 5685", email: "aalvarmalai@tnfrd.gov.in" },
-    { name: "Madurai Seed Center", location: "Madurai, TN", phone: "+91 XXXXX 5686", email: "madurai@tnfrd.gov.in" },
+    { name: "State Forest Research Division"},
+    { name: "Modern Nursery Division"},
+    { name: "Forest Genetics Division", phone: "+91 XXXXX 5683", email: "melsangam@tnfrd.gov.in" },
+    { name: "Industrial Wood Research Division", phone: "+91 XXXXX 5684", email: "edaikal@tnfrd.gov.in" },
+    { name: "Agro Forestry Research Division", phone: "+91 XXXXX 5685", email: "aalvarmalai@tnfrd.gov.in" },
   ];
 
   return (
@@ -171,7 +170,7 @@ const ContactUs = () => {
             <div className="bg-white rounded-xl shadow-lg p-6">
                 <h2 className="text-2xl font-bold text-green-900 mb-4 flex items-center">
                     <MapPin className="h-6 w-6 text-green-700 mr-3" />
-                    Our Main Location
+                     Location
                 </h2>
                 <div className="bg-green-100 rounded-lg h-72 flex items-center justify-center border-2 border-green-300 overflow-hidden">
                     {/* Placeholder for a Google Map embed */}
@@ -189,24 +188,24 @@ const ContactUs = () => {
         <div className={`bg-green-50 rounded-xl shadow-inner p-10 mb-16`}>
           <h2 className={`text-3xl font-bold text-green-900 mb-8 text-center flex items-center justify-center`}>
             <GitBranch className="h-7 w-7 text-lime-600 mr-3" />
-            Our Extended Research Centers
+            Our Research Divisions
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {researchCenters.map((center, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md p-6 border-b-2 border-green-300 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold text-green-800 mb-3">{center.name}</h3>
-                <div className="space-y-2 text-sm">
+                <h3 className="text-xl font-semibold text-green-800 mb-3 text-center">{center.name}</h3>
+                {/* <div className="space-y-2 text-sm">
                   <ContactDetailItem icon={MapPin} detail={center.location} />
                   <ContactDetailItem icon={Phone} detail={center.phone} />
                   <ContactDetailItem icon={Mail} detail={center.email} />
-                </div>
+                </div> */}
               </div>
             ))}
           </div>
         </div>
 
         {/* Emergency Contact Strip */}
-        <div className="bg-red-500/10 border-4 border-red-500 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between shadow-xl">
+        {/* <div className="bg-red-500/10 border-4 border-red-500 rounded-xl p-6 flex flex-col md:flex-row items-center justify-between shadow-xl">
           <div className="flex items-center mb-4 md:mb-0">
             <AlertTriangle className="h-8 w-8 text-red-700 mr-4 flex-shrink-0" />
             <div>
@@ -217,7 +216,7 @@ const ContactUs = () => {
           <div className="text-4xl font-extrabold text-red-800 bg-white px-6 py-2 rounded-lg shadow-inner">
             +91 44 XXXXX 5680
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
