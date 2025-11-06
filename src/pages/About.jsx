@@ -214,7 +214,7 @@ const About = () => {
               },
               {
                 name: "K.Geethanjali, IFS",
-                // position: "Additional Principal Chief Conservator of Forests"
+                position: "Chief Conservator of Forests (Research), Chennai"
               }
             ].map((member, index) => (
               <div
