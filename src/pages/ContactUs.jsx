@@ -38,9 +38,7 @@ const ContactUs = () => {
       icon: <Phone className="h-6 w-6 text-lime-500" />,
       title: "Phone",
       details: [
-        "General Office: +044-227514565",
-        "Research Wing: +91 44 XXXXX 5679",
-        "Emergency Line: +91 44 XXXXX 5680"
+        "Office: +044-227514565",
       ],
       type: 'phone'
     },
@@ -50,7 +48,6 @@ const ContactUs = () => {
       details: [
         "General: info@tnfrd.gov.in",
         "Research: research@tnfrd.gov.in",
-        "Emergency: emergency@tnfrd.gov.in"
       ],
       type: 'email'
     },
