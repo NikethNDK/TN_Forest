@@ -36,9 +36,9 @@ const ContactUs = () => {
     },
     {
       icon: <Phone className="h-6 w-6 text-lime-500" />,
-      title: "Phone & Emergency",
+      title: "Phone",
       details: [
-        "General Office: +91 44 XXXXX 5678",
+        "General Office: +044-227514565",
         "Research Wing: +91 44 XXXXX 5679",
         "Emergency Line: +91 44 XXXXX 5680"
       ],
@@ -57,11 +57,36 @@ const ContactUs = () => {
   ];
 
   const researchCenters = [
-    { name: "State Forest Research Division"},
-    { name: "Modern Nursery Division"},
-    { name: "Forest Genetics Division", phone: "+91 XXXXX 5683", email: "melsangam@tnfrd.gov.in" },
-    { name: "Industrial Wood Research Division", phone: "+91 XXXXX 5684", email: "edaikal@tnfrd.gov.in" },
-    { name: "Agro Forestry Research Division", phone: "+91 XXXXX 5685", email: "aalvarmalai@tnfrd.gov.in" },
+    {
+      name: "State Forest Research Institute Center",
+      address: "State Forest Research Institute Campus, Anna Nagar, Vandalur (via), Kolapakkam, Chennai 600127",
+      phone: "044-2275-297",
+      email: "dcfsfri@gmail.com"
+    },
+    {
+      name: "Modern Nursery Division",
+      address: "Modern Nursery Division, Behind Collectorate, Dharmapuri - 636 705",
+      phone: "04342 231100",
+      email: "dfomndpi@gmail.com"
+    },
+    {
+      name: "Forest Genetics Division",
+      address: "Forest Genetics Division, Bharathi Park Road, Marutham (via), Coimbatore - 600 043",
+      phone: "0422-2434791",
+      email: "cfgeneticscbe@yahoo.in"
+    },
+    {
+      name: "Industrial Wood Research Division",
+      address: "Industrial Wood Research Division, Kodiyalam Post Mukkombu, Trichy 639115",
+      phone: "0431-2614723",
+      email: "dvfiwrdmukkombu@gmail.com"
+    },
+    {
+      name: "Agro Forestry Research Division",
+      address: "Agro Forestry Research Division, No.2 Race Course Road, Madurai - 625002",
+      phone: "0452 2531148",
+      email: "afrmdu@gmail.com"
+    }
   ];
 
   return (
@@ -115,7 +140,7 @@ const ContactUs = () => {
                 <div className="space-y-2 text-sm">
                     <div className="flex justify-between border-b border-green-700 pb-1">
                         <span className="text-green-200">Monday - Friday</span>
-                        <span className="font-semibold">9:00 AM - 5:00 PM</span>
+                        <span className="font-semibold">10:00 AM - 5:00 PM</span>
                     </div>
                     <div className="flex justify-between">
                         <span className="text-green-200">Saturday / Sunday</span>
@@ -165,22 +190,6 @@ const ContactUs = () => {
                     </button>
                 </form>
             </div>
-
-            {/* Map Placeholder */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-green-900 mb-4 flex items-center">
-                    <MapPin className="h-6 w-6 text-green-700 mr-3" />
-                     Location
-                </h2>
-                <div className="bg-green-100 rounded-lg h-72 flex items-center justify-center border-2 border-green-300 overflow-hidden">
-                    {/* Placeholder for a Google Map embed */}
-                    <div className="text-center p-4">
-                        <MapPin className="h-10 w-10 text-green-700 mx-auto mb-2" />
-                        <p className="text-green-800 font-medium">Interactive Map Placeholder</p>
-                        <p className="text-gray-600 text-sm">Main Office: Chennai, Tamil Nadu</p>
-                    </div>
-                </div>
-            </div>
           </div>
         </div>
 
@@ -193,12 +202,12 @@ const ContactUs = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {researchCenters.map((center, index) => (
               <div key={index} className="bg-white rounded-lg shadow-md p-6 border-b-2 border-green-300 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold text-green-800 mb-3 text-center">{center.name}</h3>
-                {/* <div className="space-y-2 text-sm">
-                  <ContactDetailItem icon={MapPin} detail={center.location} />
-                  <ContactDetailItem icon={Phone} detail={center.phone} />
-                  <ContactDetailItem icon={Mail} detail={center.email} />
-                </div> */}
+                <h3 className="text-xl font-semibold text-green-800 mb-4 text-center">{center.name}</h3>
+                <div className="space-y-3 text-sm">
+                  {center.address && <ContactDetailItem icon={MapPin} detail={center.address} />}
+                  {center.phone && <ContactDetailItem icon={Phone} detail={center.phone} />}
+                  {center.email && <ContactDetailItem icon={Mail} detail={center.email} />}
+                </div>
               </div>
             ))}
           </div>
@@ -241,11 +250,14 @@ const FormInput = ({ name, label, type, value, onChange, required }) => (
     </div>
 );
 
-const ContactDetailItem = ({ icon: Icon, detail }) => (
-    <div className="flex items-center">
-        <Icon className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
-        <span className="text-gray-600">{detail}</span>
-    </div>
-);
+const ContactDetailItem = ({ icon, detail }) => {
+    const IconComponent = icon;
+    return (
+        <div className="flex items-center">
+            <IconComponent className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
+            <span className="text-gray-600">{detail}</span>
+        </div>
+    );
+};
 
 export default ContactUs;

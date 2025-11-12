@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Leaf, MapPin, Phone, Mail, ArrowRight, TreePine, Users, Award, ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, TrendingUp } from 'lucide-react';
 import { divisions } from '../data/mockData';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -20,6 +20,18 @@ function MapUpdater({ center, zoom }) {
   React.useEffect(() => {
     map.setView(center, zoom, { animate: true, duration: 0.5 });
   }, [map, center, zoom]);
+  return null;
+}
+
+// Component to handle map clicks and redirect to Google Maps
+function MapClickHandler({ destinationLat, destinationLng }) {
+  useMapEvents({
+    click: () => {
+      // Open Google Maps with directions to the destination
+      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${destinationLat},${destinationLng}`;
+      window.open(googleMapsUrl, '_blank');
+    },
+  });
   return null;
 }
 
@@ -62,6 +74,13 @@ const ModernNurseryDivision = () => {
 
   const handleViewPDF = (pdfPath) => {
     window.open(`/${pdfPath}`, '_blank');
+  };
+
+  const handleLocationClick = (coordinates) => {
+    if (coordinates && coordinates.lat && coordinates.lng) {
+      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}`;
+      window.open(googleMapsUrl, '_blank');
+    }
   };
 
   return (
@@ -142,9 +161,18 @@ const ModernNurseryDivision = () => {
                         {selectedCenter.name}
                       </h2>
                       <div className="space-y-3">
-                        <div className="flex items-center text-gray-600">
+                        <div 
+                          onClick={() => handleLocationClick(selectedCenter.coordinates)}
+                          className={`flex items-center text-gray-600 ${
+                            selectedCenter.coordinates ? 'cursor-pointer hover:text-forest-green-700 transition-colors' : ''
+                          }`}
+                          title={selectedCenter.coordinates ? 'Click to get directions on Google Maps' : ''}
+                        >
                           <MapPin className="h-5 w-5 mr-2 text-forest-green-600" />
                           <span className="font-medium">{selectedCenter.location}</span>
+                          {selectedCenter.coordinates && (
+                            <span className="ml-2 text-xs text-forest-green-600 opacity-70">(Click for directions)</span>
+                          )}
                         </div>
                         {selectedCenter.area && (
                           <div className="flex items-center text-gray-600">
@@ -180,8 +208,8 @@ const ModernNurseryDivision = () => {
                     Experiments
                   </h3>
                   
-                  {/* Table View for First Center (Thoppur) */}
-                  {selectedCenter.id === 1 && selectedCenter.experiments && (
+                  {/* Table View for All Research Centers */}
+                  {selectedCenter.experiments && (
                     <div className="space-y-3">
                       {selectedCenter.experiments.map((experiment) => (
                         <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
@@ -215,376 +243,6 @@ const ModernNurseryDivision = () => {
                           </div>
                         </div>
                       ))}
-                    </div>
-                  )}
-
-                  {/* Grid View for Second Center (Harur) */}
-                  {selectedCenter.id === 2 && selectedCenter.experiments && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {selectedCenter.experiments.map((experiment) => (
-                        <div 
-                          key={experiment.id}
-                          className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
-                        >
-                          {/* Center Image */}
-                          {getCenterImage(selectedCenter.name) && (
-                            <div className="w-full h-48 overflow-hidden">
-                              <img
-                                src={getCenterImage(selectedCenter.name)}
-                                alt={selectedCenter.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                          {/* Experiment Info */}
-                          <div className="p-4">
-                            <h4 className="text-base font-semibold text-forest-green-800 mb-2 text-center">
-                              {experiment.title}
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
-                              {experiment.description}
-                            </p>
-                            <button
-                              onClick={() => handleViewPDF(experiment.pdfPath)}
-                              className="w-full bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                            >
-                              View PDF
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Centers 3-9: Use designs from centers 1, 2, or 10 */}
-                  {/* Center 3 - Kalamavoor: Use Design 1 (Table View) */}
-                  {selectedCenter.id === 3 && selectedCenter.experiments && (
-                    <div className="space-y-3">
-                      {selectedCenter.experiments.map((experiment) => (
-                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
-                            {/* Center Image */}
-                            {getCenterImage(selectedCenter.name) && (
-                              <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
-                                <img
-                                  src={getCenterImage(selectedCenter.name)}
-                                  alt={selectedCenter.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            {/* Experiment Info */}
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
-                                {experiment.title}
-                              </h4>
-                              <p className="text-sm text-gray-600 line-clamp-2">
-                                {experiment.description}
-                              </p>
-                            </div>
-                            {/* View PDF Button */}
-                            <button
-                              onClick={() => handleViewPDF(experiment.pdfPath)}
-                              className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
-                            >
-                              View PDF
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Center 4 - Valkaradu: Use Design 2 (Grid View) */}
-                  {selectedCenter.id === 4 && selectedCenter.experiments && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {selectedCenter.experiments.map((experiment) => (
-                        <div 
-                          key={experiment.id}
-                          className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
-                        >
-                          {/* Center Image */}
-                          {getCenterImage(selectedCenter.name) && (
-                            <div className="w-full h-48 overflow-hidden">
-                              <img
-                                src={getCenterImage(selectedCenter.name)}
-                                alt={selectedCenter.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                          {/* Experiment Info */}
-                          <div className="p-4">
-                            <h4 className="text-base font-semibold text-forest-green-800 mb-2 text-center">
-                              {experiment.title}
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
-                              {experiment.description}
-                            </p>
-                            <button
-                              onClick={() => handleViewPDF(experiment.pdfPath)}
-                              className="w-full bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                            >
-                              View PDF
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Center 5 - Alwarmalai: Use Design 10 (Alternating Stacked Cards) */}
-                  {selectedCenter.id === 5 && selectedCenter.experiments && (
-                    <div className="space-y-6">
-                      {selectedCenter.experiments.map((experiment, index) => {
-                        const isEven = index % 2 === 0;
-                        return (
-                          <div
-                            key={experiment.id}
-                            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
-                          >
-                            <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                              {/* Center Image */}
-                              {getCenterImage(selectedCenter.name) && (
-                                <div className="w-full md:w-1/3 overflow-hidden min-h-[200px]">
-                                  <img
-                                    src={getCenterImage(selectedCenter.name)}
-                                    alt={selectedCenter.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              {/* Content */}
-                              <div className="w-full md:w-2/3 p-6">
-                                <div className="flex items-start justify-between mb-3">
-                                  <div className="flex-1">
-                                    <h4 className="text-xl font-bold text-forest-green-800 mb-2">
-                                      {experiment.title}
-                                    </h4>
-                                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                      {experiment.description}
-                                    </p>
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => handleViewPDF(experiment.pdfPath)}
-                                  className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                                >
-                                  View PDF
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Center 6 - Edaikkal: Use Design 1 (Table View) */}
-                  {selectedCenter.id === 6 && selectedCenter.experiments && (
-                    <div className="space-y-3">
-                      {selectedCenter.experiments.map((experiment) => (
-                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
-                            {/* Center Image */}
-                            {getCenterImage(selectedCenter.name) && (
-                              <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
-                                <img
-                                  src={getCenterImage(selectedCenter.name)}
-                                  alt={selectedCenter.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            {/* Experiment Info */}
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
-                                {experiment.title}
-                              </h4>
-                              <p className="text-sm text-gray-600 line-clamp-2">
-                                {experiment.description}
-                              </p>
-                            </div>
-                            {/* View PDF Button */}
-                            <button
-                              onClick={() => handleViewPDF(experiment.pdfPath)}
-                              className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
-                            >
-                              View PDF
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Center 7 - Kathiripuram: Use Design 2 (Grid View) */}
-                  {selectedCenter.id === 7 && selectedCenter.experiments && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {selectedCenter.experiments.map((experiment) => (
-                        <div 
-                          key={experiment.id}
-                          className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
-                        >
-                          {/* Center Image */}
-                          {getCenterImage(selectedCenter.name) && (
-                            <div className="w-full h-48 overflow-hidden">
-                              <img
-                                src={getCenterImage(selectedCenter.name)}
-                                alt={selectedCenter.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
-                          {/* Experiment Info */}
-                          <div className="p-4">
-                            <h4 className="text-base font-semibold text-forest-green-800 mb-2 text-center">
-                              {experiment.title}
-                            </h4>
-                            <p className="text-sm text-gray-600 mb-4 line-clamp-2 text-center">
-                              {experiment.description}
-                            </p>
-                            <button
-                              onClick={() => handleViewPDF(experiment.pdfPath)}
-                              className="w-full bg-forest-green-600 hover:bg-forest-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                            >
-                              View PDF
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Center 8 - Melchengam: Use Design 10 (Alternating Stacked Cards) */}
-                  {selectedCenter.id === 8 && selectedCenter.experiments && (
-                    <div className="space-y-6">
-                      {selectedCenter.experiments.map((experiment, index) => {
-                        const isEven = index % 2 === 0;
-                        return (
-                          <div
-                            key={experiment.id}
-                            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
-                          >
-                            <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                              {/* Center Image */}
-                              {getCenterImage(selectedCenter.name) && (
-                                <div className="w-full md:w-1/3 overflow-hidden min-h-[200px]">
-                                  <img
-                                    src={getCenterImage(selectedCenter.name)}
-                                    alt={selectedCenter.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              {/* Content */}
-                              <div className="w-full md:w-2/3 p-6">
-                                <div className="flex items-start justify-between mb-3">
-                                  <div className="flex-1">
-                                    <h4 className="text-xl font-bold text-forest-green-800 mb-2">
-                                      {experiment.title}
-                                    </h4>
-                                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                      {experiment.description}
-                                    </p>
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => handleViewPDF(experiment.pdfPath)}
-                                  className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                                >
-                                  View PDF
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-
-                  {/* Center 9 - Jamunamarathur: Use Design 1 (Table View) */}
-                  {selectedCenter.id === 9 && selectedCenter.experiments && (
-                    <div className="space-y-3">
-                      {selectedCenter.experiments.map((experiment) => (
-                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
-                            {/* Center Image */}
-                            {getCenterImage(selectedCenter.name) && (
-                              <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
-                                <img
-                                  src={getCenterImage(selectedCenter.name)}
-                                  alt={selectedCenter.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            {/* Experiment Info */}
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
-                                {experiment.title}
-                              </h4>
-                              <p className="text-sm text-gray-600 line-clamp-2">
-                                {experiment.description}
-                              </p>
-                            </div>
-                            {/* View PDF Button */}
-                            <button
-                              onClick={() => handleViewPDF(experiment.pdfPath)}
-                              className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
-                            >
-                              View PDF
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Style 10: Alternating Stacked Cards (Center 10 - Maragatta) */}
-                  {selectedCenter.id === 10 && selectedCenter.experiments && (
-                    <div className="space-y-6">
-                      {selectedCenter.experiments.map((experiment, index) => {
-                        const isEven = index % 2 === 0;
-                        return (
-                          <div
-                            key={experiment.id}
-                            className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-200"
-                          >
-                            <div className={`flex flex-col ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-                              {/* Center Image */}
-                              {getCenterImage(selectedCenter.name) && (
-                                <div className="w-full md:w-1/3 overflow-hidden min-h-[200px]">
-                                  <img
-                                    src={getCenterImage(selectedCenter.name)}
-                                    alt={selectedCenter.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                              )}
-                              {/* Content */}
-                              <div className="w-full md:w-2/3 p-6">
-                                <div className="flex items-start justify-between mb-3">
-                                  <div className="flex-1">
-                                    <h4 className="text-xl font-bold text-forest-green-800 mb-2">
-                                      {experiment.title}
-                                    </h4>
-                                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                                      {experiment.description}
-                                    </p>
-                                  </div>
-                                </div>
-                                <button
-                                  onClick={() => handleViewPDF(experiment.pdfPath)}
-                                  className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
-                                >
-                                  View PDF
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
                     </div>
                   )}
                 </div>
@@ -615,15 +273,19 @@ const ModernNurseryDivision = () => {
                         <MapPin className="h-5 w-5 mr-2 text-forest-green-600" />
                         Location on Map
                       </h3>
-                      <div className="rounded-lg overflow-hidden shadow-md border border-gray-200 relative" style={{ height: '300px', zIndex: 1 }}>
+                      <div className="rounded-lg overflow-hidden shadow-md border border-gray-200 relative" style={{ height: '300px', zIndex: 1, cursor: 'pointer' }}>
                         <MapContainer
                           key={`${selectedCenter.coordinates.lat}-${selectedCenter.coordinates.lng}`}
                           center={[selectedCenter.coordinates.lat, selectedCenter.coordinates.lng]}
                           zoom={13}
-                          style={{ height: '100%', width: '100%', zIndex: 1 }}
+                          style={{ height: '100%', width: '100%', zIndex: 1, cursor: 'pointer' }}
                           scrollWheelZoom={true}
                         >
                           <MapUpdater center={[selectedCenter.coordinates.lat, selectedCenter.coordinates.lng]} zoom={13} />
+                          <MapClickHandler 
+                            destinationLat={selectedCenter.coordinates.lat} 
+                            destinationLng={selectedCenter.coordinates.lng} 
+                          />
                           <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -634,11 +296,16 @@ const ModernNurseryDivision = () => {
                                 <strong className="text-forest-green-800">{selectedCenter.name}</strong>
                                 <br />
                                 <span className="text-sm text-gray-600">{selectedCenter.location}</span>
+                                <br />
+                                <span className="text-xs text-gray-500 mt-1 block">Click anywhere on the map to get directions</span>
                               </div>
                             </Popup>
                           </Marker>
                         </MapContainer>
                       </div>
+                      <p className="text-sm text-gray-600 mt-3 text-center italic">
+                        💡 Click anywhere on the map to open Google Maps with directions to this location
+                      </p>
                     </div>
                   )}
                 </div>

@@ -178,7 +178,7 @@ const NewsAndInfoSection = () => {
             </p>
             
             <p className="text-base sm:text-lg text-gray-600 leading-relaxed mb-8 max-w-3xl mx-auto">
-              Our multidisciplinary team of scientists, researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
+              Our multidisciplinary team of researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
             </p>
 
             {/* Mission and Vision */}
@@ -328,7 +328,7 @@ const NewsAndInfoSection = () => {
                 </p>
                 
                 <p className="text-sm xl:text-base text-gray-600 leading-relaxed mb-8 max-w-4xl mx-auto">
-                  Our multidisciplinary team of scientists, researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
+                  Our multidisciplinary team of researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
                 </p>
 
                 {/* Mission and Vision */}

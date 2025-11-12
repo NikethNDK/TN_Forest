@@ -21,7 +21,7 @@ export const divisions = [
         area: "24.80",
         district: "Dharmapuri",
         range: "Dharmapuri Modern Nursery Range",
-        description: "Modern nursery facility for forest tree species propagation and seedling production.",
+        description: "Modern nursery facility for forest tree species propagation, quality seedling and biofertilizer production.",
         experiments: experimentsData["1"] || [],
         coordinates: { lat: 11.96828, lng: 78.05200 }
       },
