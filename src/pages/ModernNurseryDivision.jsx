@@ -439,8 +439,24 @@ const ModernNurseryDivision = () => {
           </div>
         </div>
 
+        {/* Toll Free Number Box */}
+        <div className="mt-16 bg-gray-100 rounded-lg shadow-lg p-8 border-2 border-gray-300">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+            <Phone className="h-8 w-8 text-forest-green-700" />
+            <div className="text-center md:text-left">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">Toll Free Number</h3>
+              <a 
+                href="tel:18004252313" 
+                className="text-3xl md:text-4xl font-bold text-forest-green-700 hover:text-forest-green-800 transition-colors"
+              >
+                1800-425-2313
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Division Statistics */}
-        <div className="mt-16 bg-forest-green-800 rounded-lg p-8">
+        <div className="mt-8 bg-forest-green-800 rounded-lg p-8">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
             Modern Nursery Division Statistics
           </h2>
