@@ -485,7 +485,7 @@ const ModernNurseryDivision = () => {
                   {/* Focus Areas Image Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
                     <div className="flex justify-center">
-                      <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl">
+                      <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
                         <img
                           src="/MND_Focus_Areas.png"
                           alt="Modern Nursery Division Focus Areas"
