@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, MapPin, Phone, Mail, ArrowRight, TreePine, Users, Award, ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, TrendingUp } from 'lucide-react';
+import { Leaf, MapPin, Phone, Mail, ArrowRight, TreePine, Users, Award, ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, TrendingUp, X } from 'lucide-react';
 import { divisions } from '../data/mockData';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -49,7 +49,15 @@ import MaragattaImage from '../assets/Maragatta.jpeg';
 
 const ModernNurseryDivision = () => {
   const [selectedCenter, setSelectedCenter] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const modernNurseryDivision = divisions.find(div => div.slug === 'modern-nursery');
+  
+  const EXPERIMENTS_PER_PAGE = 8;
+
+  // Reset to page 1 when selected center changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCenter]);
 
   // Map center names to their images
   const getCenterImage = (centerName) => {
@@ -116,6 +124,15 @@ const ModernNurseryDivision = () => {
                 <Leaf className="h-6 w-6 mr-3" />
                 Research Centers
               </h2>
+              {selectedCenter && (
+                <button
+                  onClick={() => setSelectedCenter(null)}
+                  className="w-full mb-4 px-3 py-2 bg-gray-100 hover:bg-forest-green-600 text-gray-700 hover:text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm font-medium"
+                >
+                  <X className="h-4 w-4" />
+                  Clear Selection
+                </button>
+              )}
               <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
                 {modernNurseryDivision?.researchCenters?.map((center) => (
                   <button
@@ -209,40 +226,138 @@ const ModernNurseryDivision = () => {
                   </h3>
                   
                   {/* Table View for All Research Centers */}
-                  {selectedCenter.experiments && (
-                    <div className="space-y-3">
-                      {selectedCenter.experiments.map((experiment) => (
-                        <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                          <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
-                            {/* Center Image */}
-                            {getCenterImage(selectedCenter.name) && (
-                              <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
-                                <img
-                                  src={getCenterImage(selectedCenter.name)}
-                                  alt={selectedCenter.name}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                            )}
-                            {/* Experiment Info */}
-                            <div className="flex-1">
-                              <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
-                                {experiment.title}
-                              </h4>
-                              <p className="text-sm text-gray-600 line-clamp-2">
-                                {experiment.description}
-                              </p>
+                  {selectedCenter.experiments && selectedCenter.experiments.length > 0 ? (
+                    <>
+                      {/* Pagination Logic */}
+                      {(() => {
+                        const totalPages = Math.ceil(selectedCenter.experiments.length / EXPERIMENTS_PER_PAGE);
+                        const startIndex = (currentPage - 1) * EXPERIMENTS_PER_PAGE;
+                        const endIndex = startIndex + EXPERIMENTS_PER_PAGE;
+                        const paginatedExperiments = selectedCenter.experiments.slice(startIndex, endIndex);
+                        const startItem = startIndex + 1;
+                        const endItem = Math.min(endIndex, selectedCenter.experiments.length);
+
+                        return (
+                          <>
+                            {/* Pagination Info */}
+                            <div className="mb-4 text-sm text-gray-600">
+                              Showing {startItem}-{endItem} of {selectedCenter.experiments.length} experiments
                             </div>
-                            {/* View PDF Button */}
-                            <button
-                              onClick={() => handleViewPDF(experiment.pdfPath)}
-                              className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
-                            >
-                              View PDF
-                            </button>
-                          </div>
-                        </div>
-                      ))}
+
+                            {/* Experiments List */}
+                            <div className="space-y-3">
+                              {paginatedExperiments.map((experiment) => (
+                                <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                  <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
+                                    {/* Center Image */}
+                                    {getCenterImage(selectedCenter.name) && (
+                                      <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
+                                        <img
+                                          src={getCenterImage(selectedCenter.name)}
+                                          alt={selectedCenter.name}
+                                          className="w-full h-full object-cover"
+                                        />
+                                      </div>
+                                    )}
+                                    {/* Experiment Info */}
+                                    <div className="flex-1">
+                                      <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
+                                        {experiment.title}
+                                      </h4>
+                                      <p className="text-sm text-gray-600 line-clamp-2">
+                                        {experiment.description}
+                                      </p>
+                                    </div>
+                                    {/* View PDF Button */}
+                                    <button
+                                      onClick={() => handleViewPDF(experiment.pdfPath)}
+                                      className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
+                                    >
+                                      View PDF
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+
+                            {/* Pagination Controls */}
+                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                              {/* Page Info */}
+                              <div className="text-sm text-gray-600">
+                                Page {currentPage} of {totalPages}
+                              </div>
+
+                              {/* Pagination Buttons */}
+                              <div className="flex items-center gap-2">
+                                {/* Previous Button */}
+                                <button
+                                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                  disabled={currentPage === 1}
+                                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
+                                    currentPage === 1
+                                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                      : 'bg-forest-green-600 hover:bg-forest-green-700 text-white'
+                                  }`}
+                                >
+                                  <ChevronLeft className="h-4 w-4" />
+                                  Previous
+                                </button>
+
+                                {/* Page Number Buttons */}
+                                <div className="flex items-center gap-1">
+                                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                                    // Show first page, last page, current page, and pages around current
+                                    const showPage = 
+                                      pageNum === 1 ||
+                                      pageNum === totalPages ||
+                                      (pageNum >= currentPage - 1 && pageNum <= currentPage + 1);
+                                    
+                                    if (!showPage) {
+                                      // Show ellipsis
+                                      if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
+                                        return <span key={pageNum} className="px-2 text-gray-400">...</span>;
+                                      }
+                                      return null;
+                                    }
+
+                                    return (
+                                      <button
+                                        key={pageNum}
+                                        onClick={() => setCurrentPage(pageNum)}
+                                        className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                                          currentPage === pageNum
+                                            ? 'bg-forest-green-600 text-white'
+                                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                        }`}
+                                      >
+                                        {pageNum}
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+
+                                {/* Next Button */}
+                                <button
+                                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                  disabled={currentPage === totalPages}
+                                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
+                                    currentPage === totalPages
+                                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                      : 'bg-forest-green-600 hover:bg-forest-green-700 text-white'
+                                  }`}
+                                >
+                                  Next
+                                  <ChevronRight className="h-4 w-4" />
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No experiments available for this research center.
                     </div>
                   )}
                 </div>
@@ -364,6 +479,19 @@ const ModernNurseryDivision = () => {
                       <p className="text-justify">
                         Initially the division was established in 1999 under the supervision of the <strong>Research Circle, Chennai</strong>. In line with <strong>G.O.(Ms) No.149</strong> of the Environment and Forest (FR. Spl.B) Department, dated <strong>November 14, 2011</strong>, the division was brought under the administrative control the <strong>Genetics Circle in Coimbatore</strong>, and later on again brought and continue to function under the control of <strong>Research circle, Chennai</strong>.
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Focus Areas Image Section */}
+                  <div className="mb-8 border-t border-gray-200 pt-8">
+                    <div className="flex justify-center">
+                      <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl">
+                        <img
+                          src="/MND_Focus_Areas.png"
+                          alt="Modern Nursery Division Focus Areas"
+                          className="w-full h-auto rounded-lg"
+                        />
+                      </div>
                     </div>
                   </div>
 
