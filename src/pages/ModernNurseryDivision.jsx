@@ -76,6 +76,23 @@ const ModernNurseryDivision = () => {
     return imageMap[centerName] || null;
   };
 
+  // Get experiment image with fallback to center image
+  const getExperimentImage = (experiment, centerName) => {
+    // If experiment has its own image, use it (from src folder)
+    if (experiment.imagePath) {
+      try {
+        // Use dynamic import for images in src folder
+        return new URL(experiment.imagePath, import.meta.url).href;
+      } catch (error) {
+        console.warn(`Failed to load experiment image: ${experiment.imagePath}`, error);
+        // Fall back to center image if import fails
+        return getCenterImage(centerName);
+      }
+    }
+    // Otherwise, fall back to center image
+    return getCenterImage(centerName);
+  };
+
   const handleCenterSelect = (center) => {
     setSelectedCenter(center);
   };
@@ -249,12 +266,12 @@ const ModernNurseryDivision = () => {
                               {paginatedExperiments.map((experiment) => (
                                 <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
                                   <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
-                                    {/* Center Image */}
-                                    {getCenterImage(selectedCenter.name) && (
+                                    {/* Experiment Image or Center Image */}
+                                    {getExperimentImage(experiment, selectedCenter.name) && (
                                       <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
                                         <img
-                                          src={getCenterImage(selectedCenter.name)}
-                                          alt={selectedCenter.name}
+                                          src={getExperimentImage(experiment, selectedCenter.name)}
+                                          alt={experiment.imagePath ? experiment.title : selectedCenter.name}
                                           className="w-full h-full object-cover"
                                         />
                                       </div>

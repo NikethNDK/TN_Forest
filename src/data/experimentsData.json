@@ -5,7 +5,8 @@
       "title": "Pole stage seedling",
       "year": 2023,
       "pdfPath": "experiments/1. Website - Thoppur Modern Nursery centre/2. Experiments/2023-24/2023-24-Pole stage seedling (Trichy seed centre).pdf",
-      "description": "Research study on pole stage seedling."
+      "description": "Research study on pole stage seedling.",
+      "imagePath": "../experiments/1. Website - Thoppur Modern Nursery centre/2. Experiments/2023-24/2023-24-Pole stage seedling (Trichy seed centre).jpg"
     },
     {
       "id": 4,
@@ -246,35 +247,40 @@
       "title": "Phytoremediation",
       "year": 2023,
       "pdfPath": "experiments/6. Website - Edaikkal Research centre/2. Experiments/2023-24/2023-24-Phytoremediation (Edaikkal).pdf",
-      "description": "Research study on phytoremediation."
+      "description": "Research study on phytoremediation.",
+      "imagePath": "../experiments/6. Website - Edaikkal Research centre/2. Experiments/2023-24/phytoremediation.jpg"
     },
     {
       "id": 4,
       "title": "Pole stage seedling",
       "year": 2023,
       "pdfPath": "experiments/6. Website - Edaikkal Research centre/2. Experiments/2023-24/2023-24-Pole stage seedling (Edaikkal).pdf",
-      "description": "Research study on pole stage seedling."
+      "description": "Research study on pole stage seedling.",
+      "imagePath": "../experiments/6. Website - Edaikkal Research centre/2. Experiments/2023-24/taller_seedling.jpg"
     },
     {
       "id": 5,
       "title": "Urban forestry",
       "year": 2023,
       "pdfPath": "experiments/6. Website - Edaikkal Research centre/2. Experiments/2023-24/2023-24-Urban forestry (Edaikkal).pdf",
-      "description": "Research study on urban forestry."
+      "description": "Research study on urban forestry.",
+      "imagePath": "../experiments/6. Website - Edaikkal Research centre/2. Experiments/2023-24/Urban_forestry.jpg"
     },
     {
       "id": 2,
       "title": "Hildegardia populifolia",
       "year": 2022,
       "pdfPath": "experiments/6. Website - Edaikkal Research centre/2. Experiments/2022-23/2022-23-Hildegardia populifolia (Edaikkal).pdf",
-      "description": "Research study on hildegardia populifolia."
+      "description": "Research study on hildegardia populifolia.",
+      "imagePath": "../experiments/6. Website - Edaikkal Research centre/2. Experiments/2022-23/Hildegardia populifolia.jpg"
     },
     {
       "id": 1,
       "title": "Terminalia chebula (SSO)",
       "year": null,
       "pdfPath": "experiments/6. Website - Edaikkal Research centre/2. Experiments/2006-07/94 2006-07 - Terminalia chebula (SSO) - Edaikkal.pdf",
-      "description": "Research study on terminalia chebula (sso)."
+      "description": "Research study on terminalia chebula (sso).",
+      "imagePath": "../experiments/6. Website - Edaikkal Research centre/2. Experiments/2006-07/Terminalia chebula.jpg"
     }
   ],
   "7": [
@@ -283,49 +289,56 @@
       "title": "Agro forestry model",
       "year": 2023,
       "pdfPath": "experiments/7. Website - Melchengam Research centre/2. Experiments/2023-24/2023-24-Agro forestry model (Melchengam).pdf",
-      "description": "Research study on agro forestry model."
+      "description": "Research study on agro forestry model.",
+      "imagePath": "../experiments/7. Website - Melchengam Research centre/2. Experiments/2023-24/2023-24 - Agro forestry model.jpg"
     },
     {
       "id": 7,
       "title": "Pole stage seedling",
       "year": 2023,
       "pdfPath": "experiments/7. Website - Melchengam Research centre/2. Experiments/2023-24/2023-24-Pole stage seedling (Melchengam).pdf",
-      "description": "Research study on pole stage seedling."
+      "description": "Research study on pole stage seedling.",
+      "imagePath": "../experiments/7. Website - Melchengam Research centre/2. Experiments/2023-24/2023-24 - Pole stage seedling.jpg"
     },
     {
       "id": 4,
       "title": "Agarwood",
       "year": 2022,
       "pdfPath": "experiments/7. Website - Melchengam Research centre/2. Experiments/2022-23/2022-23-Agarwood (Melchengam).pdf",
-      "description": "Research study on agarwood."
+      "description": "Research study on agarwood.",
+      "imagePath": "../experiments/7. Website - Melchengam Research centre/2. Experiments/2022-23/2022-23 - Agarwood.jpg"
     },
     {
       "id": 5,
       "title": "Boswellia serrata",
       "year": 2022,
       "pdfPath": "experiments/7. Website - Melchengam Research centre/2. Experiments/2022-23/2022-23-Boswellia serrata (Melchengam).pdf",
-      "description": "Research study on boswellia serrata."
+      "description": "Research study on boswellia serrata.",
+      "imagePath": "../experiments/7. Website - Melchengam Research centre/2. Experiments/2022-23/2022-23 - Boswellia serrata.jpg"
     },
     {
       "id": 3,
       "title": "Multifunctional agro forestry",
       "year": 2021,
       "pdfPath": "experiments/7. Website - Melchengam Research centre/2. Experiments/2021-22/2021-22-Multifunctional agro forestry (Melchengam).pdf",
-      "description": "Research study on multifunctional agro forestry."
+      "description": "Research study on multifunctional agro forestry.",
+      "imagePath": "../experiments/7. Website - Melchengam Research centre/2. Experiments/2021-22/2021-22 - Multifunctional agro forestry.jpg"
     },
     {
       "id": 1,
       "title": "Terminalia chebula (SSO)",
       "year": null,
       "pdfPath": "experiments/7. Website - Melchengam Research centre/2. Experiments/2005-06/21 2005-06 - Terminalia chebula (SSO) - Melchengam.pdf",
-      "description": "Research study on terminalia chebula (sso)."
+      "description": "Research study on terminalia chebula (sso).",
+      "imagePath": "../experiments/7. Website - Melchengam Research centre/2. Experiments/2005-06/21 2005-06 - Terminalia chebula.jpg"
     },
     {
       "id": 2,
       "title": "62-2008-09 - Tectona grandis (CSO)",
       "year": null,
       "pdfPath": "experiments/7. Website - Melchengam Research centre/2. Experiments/2008-09/62-2008-09 - Tectona grandis (CSO) - Melchengam.pdf",
-      "description": "Research study on 62-2008-09 - tectona grandis (cso)."
+      "description": "Research study on 62-2008-09 - tectona grandis (cso).",
+      "imagePath": "../experiments/7. Website - Melchengam Research centre/2. Experiments/2008-09/62 2008-09 - Tectona grandis.jpg"
     }
   ],
   "8": [
@@ -334,14 +347,16 @@
       "title": "Melia dubia (SSO)",
       "year": null,
       "pdfPath": "experiments/8. Website - Jamunamarathur Research Centre/2. Experiments/2009-10/85 2009-10 - Melia dubia (SSO) - Jamunamarathur.pdf",
-      "description": "Research study on melia dubia (sso)."
+      "description": "Research study on melia dubia (sso).",
+      "imagePath": "../experiments/8. Website - Jamunamarathur Research Centre/2. Experiments/2009-10/85 2009-10 - Melia dubia.jpg"
     },
     {
       "id": 2,
       "title": "Tectona grandis (CSO)",
       "year": null,
       "pdfPath": "experiments/8. Website - Jamunamarathur Research Centre/2. Experiments/2010-11/256 2010-11 - Tectona grandis (CSO) - Jamunamarathur.pdf",
-      "description": "Research study on tectona grandis (cso)."
+      "description": "Research study on tectona grandis (cso).",
+      "imagePath": "../experiments/8. Website - Jamunamarathur Research Centre/2. Experiments/2010-11/256 2010-11 - Tectona grandis.jpg"
     }
   ],
   "9": [
@@ -350,35 +365,40 @@
       "title": "Pole stage seedling",
       "year": 2023,
       "pdfPath": "experiments/9. Website - Kathiripuram Research centre/2. Experiments/2023-24/2023-24-Pole stage seedling (Kathiripuram).pdf",
-      "description": "Research study on pole stage seedling."
+      "description": "Research study on pole stage seedling.",
+      "imagePath": "../experiments/9. Website - Kathiripuram Research centre/2. Experiments/2023-24/2023-24 - Pole stage seedling.jpg"
     },
     {
       "id": 1,
       "title": "Chloroxylon swietenia (SSO)",
       "year": null,
       "pdfPath": "experiments/9. Website - Kathiripuram Research centre/2. Experiments/2005-06/44 2005-06 - Chloroxylon swietenia (SSO) - Kathiripuram.pdf",
-      "description": "Research study on chloroxylon swietenia (sso)."
+      "description": "Research study on chloroxylon swietenia (sso).",
+      "imagePath": "../experiments/9. Website - Kathiripuram Research centre/2. Experiments/2005-06/44 2005-06 - Chloroxylon swietenia.jpg"
     },
     {
       "id": 2,
       "title": "Terminalia chebula (SSO)",
       "year": null,
       "pdfPath": "experiments/9. Website - Kathiripuram Research centre/2. Experiments/2006-07/57 2006-07 - Terminalia chebula (SSO) - Kathiripuram.pdf",
-      "description": "Research study on terminalia chebula (sso)."
+      "description": "Research study on terminalia chebula (sso).",
+      "imagePath": "../experiments/9. Website - Kathiripuram Research centre/2. Experiments/2006-07/57 2006-07 - Terminalia chebula.jpg"
     },
     {
       "id": 3,
       "title": "Pterocarpus santalinus (SSO)",
       "year": null,
       "pdfPath": "experiments/9. Website - Kathiripuram Research centre/2. Experiments/2012-13/115 2012-13 - Pterocarpus santalinus (SSO) - Kat.pdf",
-      "description": "Research study on pterocarpus santalinus (sso)."
+      "description": "Research study on pterocarpus santalinus (sso).",
+      "imagePath": "../experiments/9. Website - Kathiripuram Research centre/2. Experiments/2012-13/115 2012-13 - Pterocarpus santalinus.jpg"
     },
     {
       "id": 4,
       "title": "Melia dubia (SSO)",
       "year": null,
       "pdfPath": "experiments/9. Website - Kathiripuram Research centre/2. Experiments/2012-13/116 2012-13 - Melia dubia (SSO) - Kathiripuram.pdf",
-      "description": "Research study on melia dubia (sso)."
+      "description": "Research study on melia dubia (sso).",
+      "imagePath": "../experiments/9. Website - Kathiripuram Research centre/2. Experiments/2012-13/116 2012-13 - Melia dubia.jpg"
     }
   ],
   "10": [
@@ -387,21 +407,24 @@
       "title": "Extension centre",
       "year": 2023,
       "pdfPath": "experiments/10. Website - Maragatta Research centre/2. Experiments/2023-24/2023-24-Extension centre (Maragatta).pdf",
-      "description": "Research study on extension centre."
+      "description": "Research study on extension centre.",
+      "imagePath": "../experiments/10. Website - Maragatta Research centre/2. Experiments/2023-24/2023-24 - Extension centre (maragatta).jpg"
     },
     {
       "id": 3,
       "title": "Pole stage seedling",
       "year": 2023,
       "pdfPath": "experiments/10. Website - Maragatta Research centre/2. Experiments/2023-24/2023-24-Pole stage seedling (Maragatta).pdf",
-      "description": "Research study on pole stage seedling."
+      "description": "Research study on pole stage seedling.",
+      "imagePath": "../experiments/10. Website - Maragatta Research centre/2. Experiments/2023-24/2023-24 - Pole stage seedling.jpg"
     },
     {
       "id": 1,
       "title": "Melia dubia (CSO)",
       "year": null,
       "pdfPath": "experiments/10. Website - Maragatta Research centre/2. Experiments/2011-12/328 2011-12 - Melia dubia (CSO) - Maragatta.pdf",
-      "description": "Research study on melia dubia (cso)."
+      "description": "Research study on melia dubia (cso).",
+      "imagePath": "../experiments/10. Website - Maragatta Research centre/2. Experiments/2011-12/328 2011-12 - Melia dubia.jpg"
     }
   ]
 }

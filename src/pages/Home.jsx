@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, ExternalLink, Play, Pause } from 'lucide-react';
 
 // Import all images from assets (excluding react.svg)
@@ -412,8 +412,6 @@ const NewsAndInfoSection = () => {
 };
 
 const ImageCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  
   const images = [
     AlwarmalaiImage,
     EdaikkalImage,
@@ -427,78 +425,87 @@ const ImageCarousel = () => {
     ValkaraduImage
   ];
 
-  const nextImage = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-  }, [images.length]);
+  // State: featured image index and grid image indices
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [gridIndices, setGridIndices] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const featuredIndexRef = useRef(0);
 
-  const prevImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+  // Update ref when featured index changes
+  useEffect(() => {
+    featuredIndexRef.current = featuredIndex;
+  }, [featuredIndex]);
+
+  // Function to randomly swap featured image with one from grid
+  const rotateFeatured = useCallback(() => {
+    setGridIndices((prevGrid) => {
+      // Randomly pick one from grid
+      const randomIndex = Math.floor(Math.random() * prevGrid.length);
+      const selectedGridIndex = prevGrid[randomIndex];
+      
+      // Swap: featured goes to grid, selected grid becomes featured
+      const newGrid = [...prevGrid];
+      newGrid[randomIndex] = featuredIndexRef.current;
+      
+      setFeaturedIndex(selectedGridIndex);
+      return newGrid;
+    });
+  }, []);
+
+  // Function to handle grid image click
+  const handleGridImageClick = (gridImageIndex, gridPosition) => {
+    // Swap clicked grid image with featured
+    setGridIndices((prevGrid) => {
+      const newGrid = [...prevGrid];
+      newGrid[gridPosition] = featuredIndex;
+      setFeaturedIndex(gridImageIndex);
+      return newGrid;
+    });
   };
 
   // Auto-rotate every 5 seconds
   useEffect(() => {
-    const interval = setInterval(nextImage, 5000);
+    const interval = setInterval(rotateFeatured, 5000);
     return () => clearInterval(interval);
-  }, [nextImage]);
+  }, [rotateFeatured]);
 
   return (
-    <section className="py-8 sm:py-12 bg-white">
+    <section className="sm:py-12 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-center text-green-900 mb-6 sm:mb-8">
           Gallery Highlights
         </h2>
         
         <div className="relative">
-          <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-xl shadow-2xl overflow-hidden">
-            <div 
-              className="flex transition-transform duration-500 ease-in-out h-64 sm:h-80 md:h-96"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {images.map((image, index) => (
-                <div
-                  key={index}
-                  className="flex-shrink-0 w-full h-64 sm:h-80 md:h-96"
-                >
-                  <img
-                    src={image}
-                    alt={`Nursery Image ${index + 1}`}
-                    className="w-full h-64 sm:h-80 md:h-96"
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Navigation Buttons */}
-            <button
-              onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-10"
-              aria-label="Previous image"
-            >
-              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
-            </button>
-
-            <button
-              onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-10"
-              aria-label="Next image"
-            >
-              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
-            </button>
-
-            {/* Indicator Dots */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
-              {images.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    index === currentIndex 
-                      ? 'w-8 bg-white' 
-                      : 'w-2 bg-white/50 hover:bg-white/75'
-                  }`}
-                  aria-label={`Go to image ${index + 1}`}
+          <div className="relative w-full h-64 sm:h-80 md:h-96 shadow-2xl overflow-hidden bg-gray-100">
+            <div className="flex h-64 sm:h-80 md:h-96">
+              {/* Left: Featured Image (40%) */}
+              <div className="w-[40%] flex items-center justify-center bg-white">
+                <img
+                  src={images[featuredIndex]}
+                  alt={`Featured Nursery Image ${featuredIndex + 1}`}
+                  className="max-w-full max-h-full w-auto h-auto object-contain"
                 />
-              ))}
+              </div>
+
+              {/* Right: Grid (60%) */}
+              <div className="w-[60%] p-2 sm:p-4 bg-gray-50">
+                <div className="grid grid-cols-3 gap-1 sm:gap-2 h-full">
+                  {gridIndices.map((imageIndex, gridPosition) => (
+                    <button
+                      key={`${imageIndex}-${gridPosition}`}
+                      onClick={() => handleGridImageClick(imageIndex, gridPosition)}
+                      className="relative aspect-square overflow-hidden rounded-lg hover:opacity-80 transition-opacity duration-200 cursor-pointer bg-white shadow-sm hover:shadow-md"
+                      aria-label={`Select image ${imageIndex + 1}`}
+                    >
+                      <img
+                        src={images[imageIndex]}
+                        alt={`Nursery Image ${imageIndex + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
