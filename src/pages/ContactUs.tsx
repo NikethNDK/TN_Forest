@@ -1,6 +1,6 @@
 import React from 'react';
 import { MapPin, Phone, Mail, Clock, MessageCircle, GitBranch } from 'lucide-react';
-import type { ContactInfo, ResearchCenterContact } from '../types';
+import type { ResearchCenterContact } from '../types';
 import ContactForm from '../components/contact/ContactForm';
 
 const ContactUs: React.FC = () => {
