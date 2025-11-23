@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Leaf, MapPin, Phone, Mail, ArrowRight, TreePine, Users, Award, ChevronLeft, ChevronRight, ChevronDown, Calendar, Clock, TrendingUp, X } from 'lucide-react';
+import { Leaf, MapPin, Phone, Mail, ChevronLeft, ChevronRight, X, TreePine } from 'lucide-react';
 import { divisions } from '../data/mockData';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import type { ResearchCenter, Experiment, Coordinates } from '../types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 // Fix for default marker icon in React
-delete L.Icon.Default.prototype._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -15,7 +15,12 @@ L.Icon.Default.mergeOptions({
 });
 
 // Component to update map view when center changes
-function MapUpdater({ center, zoom }) {
+interface MapUpdaterProps {
+  center: [number, number];
+  zoom: number;
+}
+
+function MapUpdater({ center, zoom }: MapUpdaterProps) {
   const map = useMap();
   React.useEffect(() => {
     map.setView(center, zoom, { animate: true, duration: 0.5 });
@@ -24,7 +29,12 @@ function MapUpdater({ center, zoom }) {
 }
 
 // Component to handle map clicks and redirect to Google Maps
-function MapClickHandler({ destinationLat, destinationLng }) {
+interface MapClickHandlerProps {
+  destinationLat: number;
+  destinationLng: number;
+}
+
+function MapClickHandler({ destinationLat, destinationLng }: MapClickHandlerProps) {
   useMapEvents({
     click: () => {
       // Open Google Maps with directions to the destination
@@ -47,9 +57,9 @@ import MelchengamImage from '../assets/Melchengam.jpeg';
 import JamunamarathurImage from '../assets/Jamunamarathur.jpeg';
 import MaragattaImage from '../assets/Maragatta.jpeg';
 
-const ModernNurseryDivision = () => {
-  const [selectedCenter, setSelectedCenter] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+const ModernNurseryDivision: React.FC = () => {
+  const [selectedCenter, setSelectedCenter] = useState<ResearchCenter | null>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const modernNurseryDivision = divisions.find(div => div.slug === 'modern-nursery');
   
   const EXPERIMENTS_PER_PAGE = 8;
@@ -60,8 +70,8 @@ const ModernNurseryDivision = () => {
   }, [selectedCenter]);
 
   // Map center names to their images
-  const getCenterImage = (centerName) => {
-    const imageMap = {
+  const getCenterImage = (centerName: string): string | null => {
+    const imageMap: Record<string, string> = {
       'Thoppur Modern Nursery Centre': ThoppurImage,
       'Harur Modern Nursery Centre': HarurMNCImage,
       'Kalamavoor Modern Nursery Centre': KalamavoorImage,
@@ -77,7 +87,7 @@ const ModernNurseryDivision = () => {
   };
 
   // Get experiment image with fallback to center image
-  const getExperimentImage = (experiment, centerName) => {
+  const getExperimentImage = (experiment: Experiment, centerName: string): string | null => {
     // If experiment has its own image, use it (from src folder)
     if (experiment.imagePath) {
       try {
@@ -93,15 +103,17 @@ const ModernNurseryDivision = () => {
     return getCenterImage(centerName);
   };
 
-  const handleCenterSelect = (center) => {
+  const handleCenterSelect = (center: ResearchCenter): void => {
     setSelectedCenter(center);
   };
 
-  const handleViewPDF = (pdfPath) => {
-    window.open(`/${pdfPath}`, '_blank');
+  const handleViewPDF = (pdfPath?: string): void => {
+    if (pdfPath) {
+      window.open(`/${pdfPath}`, '_blank');
+    }
   };
 
-  const handleLocationClick = (coordinates) => {
+  const handleLocationClick = (coordinates?: Coordinates): void => {
     if (coordinates && coordinates.lat && coordinates.lng) {
       const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${coordinates.lat},${coordinates.lng}`;
       window.open(googleMapsUrl, '_blank');
@@ -109,23 +121,11 @@ const ModernNurseryDivision = () => {
   };
 
   return (
-    <>
-      <style>{`
-        .leaflet-container {
-          z-index: 1 !important;
-        }
-        .leaflet-control-container {
-          z-index: 2 !important;
-        }
-        .leaflet-popup {
-          z-index: 3 !important;
-        }
-      `}</style>
-      <div className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-forest-green-800 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-green-800 mb-6">
             Modern Nursery Division
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -137,14 +137,14 @@ const ModernNurseryDivision = () => {
           {/* Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
-              <h2 className="text-2xl font-bold text-forest-green-800 mb-6 flex items-center">
+              <h2 className="text-2xl font-bold text-green-800 mb-6 flex items-center">
                 <Leaf className="h-6 w-6 mr-3" />
                 Research Centers
               </h2>
               {selectedCenter && (
                 <button
                   onClick={() => setSelectedCenter(null)}
-                  className="w-full mb-4 px-3 py-2 bg-gray-100 hover:bg-forest-green-600 text-gray-700 hover:text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm font-medium"
+                  className="w-full mb-4 px-3 py-2 bg-gray-100 hover:bg-green-600 text-gray-700 hover:text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm font-medium"
                 >
                   <X className="h-4 w-4" />
                   Clear Selection
@@ -157,8 +157,8 @@ const ModernNurseryDivision = () => {
                     onClick={() => handleCenterSelect(center)}
                     className={`w-full text-left p-3 rounded-lg transition-colors duration-200 ${
                       selectedCenter?.id === center.id
-                        ? 'bg-forest-green-100 text-forest-green-800 border-2 border-forest-green-300'
-                        : 'bg-gray-50 hover:bg-forest-green-50 text-gray-700 hover:text-forest-green-700'
+                        ? 'bg-green-100 text-green-800 border-2 border-green-300'
+                        : 'bg-gray-50 hover:bg-green-50 text-gray-700 hover:text-green-700'
                     }`}
                   >
                     <div className="font-semibold text-sm mb-1">{center.name}</div>
@@ -181,7 +181,7 @@ const ModernNurseryDivision = () => {
                       <div className="flex-shrink-0">
                         <div className="w-full md:w-64 h-48 md:h-64 rounded-lg overflow-hidden shadow-md border border-gray-200">
                           <img
-                            src={getCenterImage(selectedCenter.name)}
+                            src={getCenterImage(selectedCenter.name) || ''}
                             alt={selectedCenter.name}
                             className="w-full h-full object-cover"
                           />
@@ -191,21 +191,21 @@ const ModernNurseryDivision = () => {
                     
                     {/* Center Details */}
                     <div className="flex-1">
-                      <h2 className="text-3xl font-bold text-forest-green-800 mb-4">
+                      <h2 className="text-3xl font-bold text-green-800 mb-4">
                         {selectedCenter.name}
                       </h2>
                       <div className="space-y-3">
                         <div 
                           onClick={() => handleLocationClick(selectedCenter.coordinates)}
                           className={`flex items-center text-gray-600 ${
-                            selectedCenter.coordinates ? 'cursor-pointer hover:text-forest-green-700 transition-colors' : ''
+                            selectedCenter.coordinates ? 'cursor-pointer hover:text-green-700 transition-colors' : ''
                           }`}
                           title={selectedCenter.coordinates ? 'Click to get directions on Google Maps' : ''}
                         >
-                          <MapPin className="h-5 w-5 mr-2 text-forest-green-600" />
+                          <MapPin className="h-5 w-5 mr-2 text-green-600" />
                           <span className="font-medium">{selectedCenter.location}</span>
                           {selectedCenter.coordinates && (
-                            <span className="ml-2 text-xs text-forest-green-600 opacity-70">(Click for directions)</span>
+                            <span className="ml-2 text-xs text-green-600 opacity-70">(Click for directions)</span>
                           )}
                         </div>
                         {selectedCenter.area && (
@@ -237,7 +237,7 @@ const ModernNurseryDivision = () => {
 
                 {/* Experiments Section */}
                 <div className="bg-white rounded-lg shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-forest-green-800 mb-6 flex items-center">
+                  <h3 className="text-2xl font-bold text-green-800 mb-6 flex items-center">
                     <TreePine className="h-6 w-6 mr-3" />
                     Experiments
                   </h3>
@@ -270,7 +270,7 @@ const ModernNurseryDivision = () => {
                                     {getExperimentImage(experiment, selectedCenter.name) && (
                                       <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
                                         <img
-                                          src={getExperimentImage(experiment, selectedCenter.name)}
+                                          src={getExperimentImage(experiment, selectedCenter.name) || ''}
                                           alt={experiment.imagePath ? experiment.title : selectedCenter.name}
                                           className="w-full h-full object-cover"
                                         />
@@ -278,7 +278,7 @@ const ModernNurseryDivision = () => {
                                     )}
                                     {/* Experiment Info */}
                                     <div className="flex-1">
-                                      <h4 className="text-lg font-semibold text-forest-green-800 mb-1">
+                                      <h4 className="text-lg font-semibold text-green-800 mb-1">
                                         {experiment.title}
                                       </h4>
                                       <p className="text-sm text-gray-600 line-clamp-2">
@@ -288,7 +288,7 @@ const ModernNurseryDivision = () => {
                                     {/* View PDF Button */}
                                     <button
                                       onClick={() => handleViewPDF(experiment.pdfPath)}
-                                      className="bg-forest-green-600 hover:bg-forest-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
+                                      className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
                                     >
                                       View PDF
                                     </button>
@@ -313,7 +313,7 @@ const ModernNurseryDivision = () => {
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
                                     currentPage === 1
                                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                      : 'bg-forest-green-600 hover:bg-forest-green-700 text-white'
+                                      : 'bg-green-600 hover:bg-green-700 text-white'
                                   }`}
                                 >
                                   <ChevronLeft className="h-4 w-4" />
@@ -343,7 +343,7 @@ const ModernNurseryDivision = () => {
                                         onClick={() => setCurrentPage(pageNum)}
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                                           currentPage === pageNum
-                                            ? 'bg-forest-green-600 text-white'
+                                            ? 'bg-green-600 text-white'
                                             : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                                         }`}
                                       >
@@ -360,7 +360,7 @@ const ModernNurseryDivision = () => {
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
                                     currentPage === totalPages
                                       ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                      : 'bg-forest-green-600 hover:bg-forest-green-700 text-white'
+                                      : 'bg-green-600 hover:bg-green-700 text-white'
                                   }`}
                                 >
                                   Next
@@ -382,17 +382,17 @@ const ModernNurseryDivision = () => {
                 {/* Center Contact Info and Map */}
                 <div className="space-y-6">
                   {/* Contact Information */}
-                  <div className="bg-forest-green-50 rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-forest-green-800 mb-4">
+                  <div className="bg-green-50 rounded-lg p-6">
+                    <h3 className="text-xl font-semibold text-green-800 mb-4">
                       Contact Information
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="flex items-center">
-                        <Phone className="h-5 w-5 text-forest-green-600 mr-3" />
+                        <Phone className="h-5 w-5 text-green-600 mr-3" />
                         <span className="text-gray-700">+91 44 1234 5681</span>
                       </div>
                       <div className="flex items-center">
-                        <Mail className="h-5 w-5 text-forest-green-600 mr-3" />
+                        <Mail className="h-5 w-5 text-green-600 mr-3" />
                         <span className="text-gray-700">{selectedCenter.name.toLowerCase().replace(/\s+/g, '')}@tnfrd.gov.in</span>
                       </div>
                     </div>
@@ -400,17 +400,17 @@ const ModernNurseryDivision = () => {
 
                   {/* Map Section */}
                   {selectedCenter.coordinates && (
-                    <div className="bg-white rounded-lg shadow-lg p-6 relative" style={{ zIndex: 1 }}>
-                      <h3 className="text-xl font-semibold text-forest-green-800 mb-4 flex items-center">
-                        <MapPin className="h-5 w-5 mr-2 text-forest-green-600" />
+                    <div className="bg-white rounded-lg shadow-lg p-6 relative z-[1]">
+                      <h3 className="text-xl font-semibold text-green-800 mb-4 flex items-center">
+                        <MapPin className="h-5 w-5 mr-2 text-green-600" />
                         Location on Map
                       </h3>
-                      <div className="rounded-lg overflow-hidden shadow-md border border-gray-200 relative" style={{ height: '300px', zIndex: 1, cursor: 'pointer' }}>
+                      <div className="rounded-lg overflow-hidden shadow-md border border-gray-200 relative h-[300px] z-[1] cursor-pointer">
                         <MapContainer
                           key={`${selectedCenter.coordinates.lat}-${selectedCenter.coordinates.lng}`}
                           center={[selectedCenter.coordinates.lat, selectedCenter.coordinates.lng]}
                           zoom={13}
-                          style={{ height: '100%', width: '100%', zIndex: 1, cursor: 'pointer' }}
+                          className="h-full w-full z-[1] cursor-pointer"
                           scrollWheelZoom={true}
                         >
                           <MapUpdater center={[selectedCenter.coordinates.lat, selectedCenter.coordinates.lng]} zoom={13} />
@@ -425,7 +425,7 @@ const ModernNurseryDivision = () => {
                           <Marker position={[selectedCenter.coordinates.lat, selectedCenter.coordinates.lng]}>
                             <Popup>
                               <div className="text-center">
-                                <strong className="text-forest-green-800">{selectedCenter.name}</strong>
+                                <strong className="text-green-800">{selectedCenter.name}</strong>
                                 <br />
                                 <span className="text-sm text-gray-600">{selectedCenter.location}</span>
                                 <br />
@@ -446,14 +446,9 @@ const ModernNurseryDivision = () => {
               <div className="space-y-8">
                 {/* MODERN NURSERY DIVISION AT A GLANCE */}
                 <div className="bg-white rounded-lg shadow-lg p-8">
-                  {/* <h2 className="text-3xl font-bold text-forest-green-800 mb-6 flex items-center">
-                    <Leaf className="h-8 w-8 mr-3" />
-                    MODERN NURSERY DIVISION AT A GLANCE
-                  </h2> */}
-
                   {/* Introduction Section */}
                   <div className="mb-8">
-                    <h3 className="text-2xl font-semibold text-forest-green-700 mb-4 text-center">
+                    <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
                       Historical Background
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -471,7 +466,7 @@ const ModernNurseryDivision = () => {
 
                   {/* Formation Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
-                    <h3 className="text-2xl font-semibold text-forest-green-700 mb-4 text-center">
+                    <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
                       Formation of Modern Nursery Division
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -489,7 +484,7 @@ const ModernNurseryDivision = () => {
 
                   {/* Administrative History Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
-                    <h3 className="text-2xl font-semibold text-forest-green-700 mb-4 text-center">
+                    <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
                       Administrative History
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -514,7 +509,7 @@ const ModernNurseryDivision = () => {
 
                   {/* Mission and Bio-fertilizers Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
-                    <h3 className="text-2xl font-semibold text-forest-green-700 mb-4 text-center">
+                    <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
                       Mission and Bio-fertilizers Production
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -526,7 +521,7 @@ const ModernNurseryDivision = () => {
 
                   {/* ISO Certification Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
-                    <h3 className="text-2xl font-semibold text-forest-green-700 mb-4 text-center">
+                    <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
                       ISO Certification
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -538,7 +533,7 @@ const ModernNurseryDivision = () => {
 
                   {/* Forest Tree Seed Centre Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
-                    <h3 className="text-2xl font-semibold text-forest-green-700 mb-4 text-center">
+                    <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
                       Forest Tree Seed Centre
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -550,34 +545,6 @@ const ModernNurseryDivision = () => {
                       </p>
                     </div>
                   </div>
-
-                  {/* Quick Access to Research Centers
-                  <div className="border-t border-gray-200 pt-8 mt-8">
-                    <h3 className="text-xl font-semibold text-forest-green-800 mb-4">
-                      Explore Our Research Centers
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                      Select a research center from the sidebar to view detailed information, current projects, and completed research.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {modernNurseryDivision?.researchCenters?.map((center) => (
-                        <div key={center.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer" onClick={() => handleCenterSelect(center)}>
-                          <h4 className="font-semibold text-forest-green-800 mb-2 text-sm">{center.name}</h4>
-                          <p className="text-xs text-gray-600 mb-3">{center.location}</p>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCenterSelect(center);
-                            }}
-                            className="text-forest-green-600 hover:text-forest-green-700 font-medium text-xs flex items-center"
-                          >
-                            View Details
-                            <ArrowRight className="h-3 w-3 ml-1" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div> */}
                 </div>
               </div>
             )}
@@ -587,12 +554,12 @@ const ModernNurseryDivision = () => {
         {/* Toll Free Number Box */}
         <div className="mt-16 bg-gray-100 rounded-lg shadow-lg p-8 border-2 border-gray-300">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            <Phone className="h-8 w-8 text-forest-green-700" />
+            <Phone className="h-8 w-8 text-green-700" />
             <div className="text-center md:text-left">
               <h3 className="text-xl font-semibold text-gray-800 mb-2">Toll Free Number</h3>
               <a 
                 href="tel:18004252313" 
-                className="text-3xl md:text-4xl font-bold text-forest-green-700 hover:text-forest-green-800 transition-colors"
+                className="text-3xl md:text-4xl font-bold text-green-700 hover:text-green-800 transition-colors"
               >
                 1800-425-2313
               </a>
@@ -601,7 +568,7 @@ const ModernNurseryDivision = () => {
         </div>
 
         {/* Division Statistics */}
-        <div className="mt-8 bg-forest-green-800 rounded-lg p-8">
+        <div className="mt-8 bg-green-800 rounded-lg p-8">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
             Modern Nursery Division Statistics
           </h2>
@@ -626,8 +593,8 @@ const ModernNurseryDivision = () => {
         </div>
       </div>
     </div>
-    </>
   );
 };
 
 export default ModernNurseryDivision;
+

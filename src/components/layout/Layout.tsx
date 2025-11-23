@@ -3,7 +3,11 @@ import Header from './Header';
 import Navbar from './Navbar';
 import Footer from './Footer';
 
-const Layout = ({ children }) => {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -17,3 +21,4 @@ const Layout = ({ children }) => {
 };
 
 export default Layout;
+

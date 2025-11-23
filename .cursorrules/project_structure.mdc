@@ -1,0 +1,70 @@
+---
+alwaysApply: true
+---
+
+# Frontend Project Structure
+
+```
+tnfrd/src/
+├── assets/              # Static assets (images, etc.)
+├── components/          # React components
+│   ├── layout/         # Layout components (Header, Footer, Navbar, Layout)
+│   ├── home/           # Home page specific components
+│   ├── contact/        # Contact page specific components (ContactForm.tsx)
+│   ├── shop/           # Shop page specific components
+│   └── [page-name]/    # Other page-specific component folders
+├── constants/          # Application constants
+│   ├── apiEndpoints.ts # API endpoint constants (placeholders for now)
+│   └── businessConstants.ts # Business logic constants
+├── data/               # Data files
+│   ├── mockData.ts     # Mock data with TypeScript types
+│   └── experimentsData.json # Experiments data
+├── hooks/              # Custom React hooks (TanStack Query hooks)
+├── pages/              # Page components (route components)
+│   ├── Home.tsx
+│   ├── About.tsx
+│   ├── ContactUs.tsx
+│   ├── Faculty.tsx
+│   ├── Information.tsx
+│   ├── Publication.tsx
+│   ├── Divisions.tsx
+│   ├── ModernNurseryDivision.tsx
+│   └── Shop.tsx
+├── providers/          # React context providers
+│   └── QueryProvider.tsx # TanStack Query provider
+├── services/           # API service functions
+│   └── api.ts          # Axios instance with interceptors for API calls
+├── types/              # TypeScript type definitions
+│   └── index.ts        # Shared interfaces and types
+└── utils/              # Utility functions
+```
+
+## Component Organization
+
+- **Layout components** go in `components/layout/`
+- **Page-specific components** go in `components/[page-name]/` folders
+- **Shared/reusable components** can stay in `components/` root or be organized by feature
+- Each page component should be in `pages/` folder
+- Components should be grouped by page/feature for better maintainability
+
+## File Naming Conventions
+
+- Components: PascalCase (e.g., `ContactForm.tsx`)
+- Utilities: camelCase (e.g., `formatDate.ts`)
+- Types: PascalCase interfaces/types (e.g., `ContactFormData`)
+- Constants: UPPER_SNAKE_CASE for exported constants (e.g., `API_BASE_URL`)
+
+## API Integration
+
+- **Axios Instance**: Use the configured axios instance from `services/api.ts` for all API calls
+  - Base URL: `http://localhost:8000/api` (configurable via `VITE_API_BASE_URL` env variable)
+  - Credentials included automatically (for HTTP-only cookie authentication)
+  - Error handling interceptors configured
+- **API Endpoints**: Defined in `constants/apiEndpoints.ts`
+- **Example Usage**:
+  ```typescript
+  import api from '@/services/api';
+  import { API_ENDPOINTS } from '@/constants/apiEndpoints';
+  
+  const response = await api.post(API_ENDPOINTS.AUTH.LOGIN, { username, password });
+  ```

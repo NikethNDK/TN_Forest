@@ -1,129 +1,58 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ShoppingCart, Search, Plus, Minus, Trash2, Sprout, Leaf, Zap, Star, FlaskConical, Mail, MapPin, Truck, X, CheckCircle, User, Phone, Package } from 'lucide-react';
-
-// --- MOCK DATA (Self-contained for canvas runnability) ---
-const mockShopProducts = [
-  // Seeds (8 items)
-  { id: 1, name: 'Acacia Nilotica ', description: 'Vachellia nilotica seeds, commonly known as Babul or Indian Gum Arabic tree. Medium-sized thorny tree valued for traditional medicine, tannin extraction, and animal fodder. Drought-tolerant and suitable for arid regions.', price: 40, category: 'Seeds', inStock: true, imageIcon: '🌾',stock: '55.60 kg' },
-  { id: 2, name: 'Anthocephalus cadamba   ', description: 'Kadamba or Burflower tree seeds. Fast-growing tropical evergreen tree reaching 30-45 meters. Produces fragrant bright yellow-orange flowers in spherical clusters during monsoon. Excellent for reforestation and ornamental planting.', price: 60, category: 'Seeds', inStock: true, imageIcon: '🌳',stock: '0.70 kg' },
-  { id: 3, name: 'Buchanania Lanzan   ', description: 'Chironji seeds from the Buchanania lanzan tree, native to India. Medium-sized deciduous tree producing edible seeds used in Indian cuisine. Valued for its medicinal properties and quality timber.', price: 80, category: 'Seeds', inStock: true, imageIcon: '🌰',stock: '10.00 kg' },
-  { id: 4, name: 'Butea monosperma  ', description: 'Flame of the Forest seeds, also known as Palash. Medium-sized deciduous tree renowned for vibrant orange-red flowers that bloom in clusters, creating a flame-like appearance. Drought-resistant and ideal for dry regions.', price: 50, category: 'Seeds', inStock: true, imageIcon: '🌺',stock: '6.42 kg' },
-  { id: 5, name: 'Cassia fistula  ', description: 'Golden Shower tree seeds, also known as Amaltas. Medium-sized deciduous tree famous for cascading clusters of bright yellow flowers. Has significant medicinal value and is widely used as an ornamental tree.', price: 55, category: 'Seeds', inStock: true, imageIcon: '🌼',stock: '16.45 kg' },
-  { id: 6, name: 'Casuarina equisetifolia   ', description: 'Coastal She-Oak seeds, native to Southeast Asia and Australia. Fast-growing evergreen tree with needle-like foliage. Excellent for coastal afforestation, windbreaks, and erosion control due to salt tolerance.', price: 45, category: 'Seeds', inStock: true, imageIcon: '🌲',stock: '2.08 kg' },
-  { id: 7, name: 'Dalbergia Latifolia   ', description: 'Indian Rosewood seeds, also known as Sissoo. Large deciduous tree native to the Indian subcontinent. Premium hardwood valued for furniture, musical instruments, and construction. Produces durable and attractive timber.', price: 120, category: 'Seeds', inStock: true, imageIcon: '🌳',stock: '2.00 kg' },
-  { id: 8, name: 'Delonix regia   ', description: 'Gulmohar or Royal Poinciana seeds. Fast-growing deciduous tree native to Madagascar but widely cultivated in tropical regions. Famous for flamboyant display of bright red-orange flowers and fern-like leaves. Perfect ornamental tree for landscaping.', price: 65, category: 'Seeds', inStock: false, imageIcon: '🌺',stock: '0.00 kg' },
-
-  // Bio Fertilizers (6 items)
-  { id: 13, name: 'Vermicompost ', description: 'High-quality organic vermicompost produced using earthworms. Enhances soil structure, fertility, and microbial activity for optimal plant growth.', price: 15, category: 'Bio Fertilizers', inStock: true, imageIcon: '🐛',stock: 10 },
-  { id: 14, name: 'Vesicular Arbuscular Mycorrhizae', description: 'Beneficial mycorrhizal fungi that form symbiotic relationships with plant roots, improving nutrient and water absorption.', price: 22, category: 'Bio Fertilizers', inStock: true, imageIcon: '🍄',stock: 15 },
-  { id: 15, name: 'Azospirillum ', description: 'Premium nitrogen-fixing bacteria that enhance soil nitrogen levels naturally, reducing the need for chemical fertilizers.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🦠',stock: 10 },
-  { id: 16, name: 'Phosphobacteria ', description: 'Phosphate-solubilizing bacteria that convert insoluble phosphates into plant-available forms, promoting root development.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🔬',stock: 10 },
-  { id: 17, name: 'Pseudomonas sp. ', description: 'Beneficial bacteria that suppress soil-borne pathogens and root rot diseases, protecting plant health naturally.', price: 120, category: 'Bio', inStock: true, imageIcon: '🛡️',stock: 12 },
-  { id: 18, name: 'Trichoderma viride ', description: 'Beneficial fungus that acts as a biocontrol agent against harmful pathogens while promoting plant growth and root health.', price: 120, category: 'Bio', inStock: false, imageIcon: '🌱',stock: 13 },
-];
-// --- END MOCK DATA ---
+import { ShoppingCart, Search, Plus, Minus, Trash2, Sprout, Leaf, Star, FlaskConical, Mail, MapPin, Truck, X, CheckCircle, User, Phone, Package } from 'lucide-react';
+import type { ShopProduct, CartItem } from '../types';
+import ProductSection from '../components/shop/ProductSection';
 
 const INITIAL_LIMIT = 4;
 
-const ProductCard = ({ product, addToCart }) => (
-  <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-lime-400 hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-    <div className="h-36 bg-green-50 flex flex-col items-center justify-center p-4">
-      <div className="text-5xl mb-2">{product.imageIcon}</div>
-      <div className="text-green-700 font-semibold text-center text-sm">{product.category}</div>
-    </div>
-    <div className="p-6">
-      <div className="h-20 mb-4"> 
-        <h3 className="text-lg font-bold text-green-900 mb-1 line-clamp-2">
-          <span className="italic">{product.name}</span>
-        </h3>
-        <p className="text-gray-600 text-xs line-clamp-2">
-          {product.description}
-        </p>
-      </div>
-      
-      <div className="flex items-center justify-between mb-4 border-t border-gray-100 pt-3">
-        <span className="text-2xl font-extrabold text-green-700">
-          ₹{product.price}
-        </span>
-        <span className={`px-3 py-1 rounded-full text-xs font-medium uppercase ${
-          product.inStock 
-              ? 'bg-lime-100 text-lime-800' 
-              : 'bg-red-100 text-red-800'
-        }`}>
-          {product.inStock ? `In Stock: ${product.stock}` : 'Out of Stock'}
-        </span>
-      </div>
-      <button
-        onClick={() => addToCart(product)}
-        disabled={!product.inStock}
-        className={`w-full py-3 px-4 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center shadow-lg ${
-          product.inStock
-              ? 'bg-lime-500 hover:bg-lime-600 text-green-900 disabled:bg-gray-300'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-        }`}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        {product.inStock ? 'Add to Order' : 'Add to Order'}
-      </button>
-    </div>
-  </div>
-);
+// --- MOCK DATA (Self-contained for canvas runnability) ---
+const mockShopProducts: ShopProduct[] = [
+  // Seeds (8 items)
+  { id: 1, name: 'Acacia Nilotica ', description: 'Vachellia nilotica seeds, commonly known as Babul or Indian Gum Arabic tree. Medium-sized thorny tree valued for traditional medicine, tannin extraction, and animal fodder. Drought-tolerant and suitable for arid regions.', price: 40, category: 'Seeds', inStock: true, imageIcon: '🌾', stock: '55.60 kg' },
+  { id: 2, name: 'Anthocephalus cadamba   ', description: 'Kadamba or Burflower tree seeds. Fast-growing tropical evergreen tree reaching 30-45 meters. Produces fragrant bright yellow-orange flowers in spherical clusters during monsoon. Excellent for reforestation and ornamental planting.', price: 60, category: 'Seeds', inStock: true, imageIcon: '🌳', stock: '0.70 kg' },
+  { id: 3, name: 'Buchanania Lanzan   ', description: 'Chironji seeds from the Buchanania lanzan tree, native to India. Medium-sized deciduous tree producing edible seeds used in Indian cuisine. Valued for its medicinal properties and quality timber.', price: 80, category: 'Seeds', inStock: true, imageIcon: '🌰', stock: '10.00 kg' },
+  { id: 4, name: 'Butea monosperma  ', description: 'Flame of the Forest seeds, also known as Palash. Medium-sized deciduous tree renowned for vibrant orange-red flowers that bloom in clusters, creating a flame-like appearance. Drought-resistant and ideal for dry regions.', price: 50, category: 'Seeds', inStock: true, imageIcon: '🌺', stock: '6.42 kg' },
+  { id: 5, name: 'Cassia fistula  ', description: 'Golden Shower tree seeds, also known as Amaltas. Medium-sized deciduous tree famous for cascading clusters of bright yellow flowers. Has significant medicinal value and is widely used as an ornamental tree.', price: 55, category: 'Seeds', inStock: true, imageIcon: '🌼', stock: '16.45 kg' },
+  { id: 6, name: 'Casuarina equisetifolia   ', description: 'Coastal She-Oak seeds, native to Southeast Asia and Australia. Fast-growing evergreen tree with needle-like foliage. Excellent for coastal afforestation, windbreaks, and erosion control due to salt tolerance.', price: 45, category: 'Seeds', inStock: true, imageIcon: '🌲', stock: '2.08 kg' },
+  { id: 7, name: 'Dalbergia Latifolia   ', description: 'Indian Rosewood seeds, also known as Sissoo. Large deciduous tree native to the Indian subcontinent. Premium hardwood valued for furniture, musical instruments, and construction. Produces durable and attractive timber.', price: 120, category: 'Seeds', inStock: true, imageIcon: '🌳', stock: '2.00 kg' },
+  { id: 8, name: 'Delonix regia   ', description: 'Gulmohar or Royal Poinciana seeds. Fast-growing deciduous tree native to Madagascar but widely cultivated in tropical regions. Famous for flamboyant display of bright red-orange flowers and fern-like leaves. Perfect ornamental tree for landscaping.', price: 65, category: 'Seeds', inStock: false, imageIcon: '🌺', stock: '0.00 kg' },
 
-const ProductSection = ({ title, icon: Icon, products, limit, setLimit, addToCart }) => {
-  const isExpanded = limit === products.length;
-  const itemsToDisplay = products.slice(0, limit);
+  // Bio Fertilizers (6 items)
+  { id: 13, name: 'Vermicompost ', description: 'High-quality organic vermicompost produced using earthworms. Enhances soil structure, fertility, and microbial activity for optimal plant growth.', price: 15, category: 'Bio Fertilizers', inStock: true, imageIcon: '🐛', stock: 10 },
+  { id: 14, name: 'Vesicular Arbuscular Mycorrhizae', description: 'Beneficial mycorrhizal fungi that form symbiotic relationships with plant roots, improving nutrient and water absorption.', price: 22, category: 'Bio Fertilizers', inStock: true, imageIcon: '🍄', stock: 15 },
+  { id: 15, name: 'Azospirillum ', description: 'Premium nitrogen-fixing bacteria that enhance soil nitrogen levels naturally, reducing the need for chemical fertilizers.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🦠', stock: 10 },
+  { id: 16, name: 'Phosphobacteria ', description: 'Phosphate-solubilizing bacteria that convert insoluble phosphates into plant-available forms, promoting root development.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🔬', stock: 10 },
+  { id: 17, name: 'Pseudomonas sp. ', description: 'Beneficial bacteria that suppress soil-borne pathogens and root rot diseases, protecting plant health naturally.', price: 120, category: 'Bio', inStock: true, imageIcon: '🛡️', stock: 12 },
+  { id: 18, name: 'Trichoderma viride ', description: 'Beneficial fungus that acts as a biocontrol agent against harmful pathogens while promoting plant growth and root health.', price: 120, category: 'Bio', inStock: false, imageIcon: '🌱', stock: 13 },
+];
+// --- END MOCK DATA ---
 
-  return (
-    <div className="mb-12">
-      <h2 className="text-3xl font-bold text-green-900 mb-8 flex items-center">
-        <Icon className="h-7 w-7 mr-3 text-lime-600" />
-        {title}
-      </h2>
-      
-      {products.length === 0 ? (
-        <div className="text-center py-8 bg-white rounded-xl shadow-lg border border-gray-100">
-          <Leaf className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-500">No {title.toLowerCase()} currently match your search.</p>
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {itemsToDisplay.map((product) => (
-              <ProductCard key={product.id} product={product} addToCart={addToCart} />
-            ))}
-          </div>
+interface Location {
+  name: string;
+  address: string;
+  distance: string;
+}
 
-          {products.length > INITIAL_LIMIT && (
-            <div className="text-center mt-8">
-              <button
-                onClick={() => setLimit(isExpanded ? INITIAL_LIMIT : products.length)}
-                className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300 shadow-md flex items-center justify-center mx-auto"
-              >
-                {isExpanded ? (
-                  <>Show Less</>
-                ) : (
-                  <>View {products.length - INITIAL_LIMIT} More Products <Zap className="h-4 w-4 ml-2" /></>
-                )}
-              </button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  selectedFertilizer: string;
+  quantity: string;
+  transportation: string;
+  address: string;
+}
 
-
-const Shop = () => {
-  const [cart, setCart] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showCart, setShowCart] = useState(false);
+const Shop: React.FC = () => {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [showCart, setShowCart] = useState<boolean>(false);
   
-  const [seedsSaplingsLimit, setSeedsSaplingsLimit] = useState(INITIAL_LIMIT);
-  const [bioFertilizersLimit, setBioFertilizersLimit] = useState(INITIAL_LIMIT);
+  const [seedsSaplingsLimit, setSeedsSaplingsLimit] = useState<number>(INITIAL_LIMIT);
+  const [bioFertilizersLimit, setBioFertilizersLimit] = useState<number>(INITIAL_LIMIT);
 
   // Form state for on-demand fertilizers
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
     phone: '',
@@ -132,11 +61,11 @@ const Shop = () => {
     transportation: '',
     address: ''
   });
-  const [showToast, setShowToast] = useState(false);
-  const [nearestLocation, setNearestLocation] = useState(null);
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [nearestLocation, setNearestLocation] = useState<Location | null>(null);
 
   // Mock locations (research centers)
-  const locations = [
+  const locations: Location[] = [
     { name: 'Thoppur Modern Nursery Centre', address: 'Thoppur RF, Dharmapuri', distance: '5 km' },
     { name: 'Harur Modern Nursery Centre', address: 'Harur RF, Dharmapuri', distance: '8 km' },
     { name: 'Kalamavoor Modern Nursery Centre', address: 'Kalamavoor Patthai RF, Pudukottai', distance: '12 km' },
@@ -145,17 +74,17 @@ const Shop = () => {
   ];
 
   // Refs for cart and cart button to detect outside clicks
-  const cartRef = useRef(null);
-  const cartButtonRef = useRef(null);
+  const cartRef = useRef<HTMLDivElement>(null);
+  const cartButtonRef = useRef<HTMLButtonElement>(null);
 
   // --- NEW: Outside Click Handler ---
   useEffect(() => {
-    function handleClickOutside(event) {
+    function handleClickOutside(event: MouseEvent) {
       if (showCart && 
           cartRef.current && 
-          !cartRef.current.contains(event.target) &&
+          !cartRef.current.contains(event.target as Node) &&
           cartButtonRef.current &&
-          !cartButtonRef.current.contains(event.target)
+          !cartButtonRef.current.contains(event.target as Node)
       ) {
         setShowCart(false);
       }
@@ -180,7 +109,7 @@ const Shop = () => {
   // Get available bio-fertilizers for the dropdown
   const availableFertilizers = filteredProducts.filter(p => p.category === 'Bio');
 
-  const addToCart = (product) => {
+  const addToCart = (product: ShopProduct): void => {
     const existingItem = cart.find(item => item.id === product.id);
     if (existingItem) {
       setCart(cart.map(item =>
@@ -191,14 +120,13 @@ const Shop = () => {
     } else {
       setCart([...cart, { ...product, quantity: 1 }]);
     }
-    // FIX: Removed setShowCart(true) here
   };
 
-  const removeFromCart = (productId) => {
+  const removeFromCart = (productId: number): void => {
     setCart(cart.filter(item => item.id !== productId));
   };
 
-  const updateQuantity = (productId, newQuantity) => {
+  const updateQuantity = (productId: number, newQuantity: number): void => {
     if (newQuantity <= 0) {
       removeFromCart(productId);
     } else {
@@ -210,16 +138,16 @@ const Shop = () => {
     }
   };
 
-  const getTotalPrice = () => {
+  const getTotalPrice = (): number => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   };
 
-  const getCartItemCount = () => {
+  const getCartItemCount = (): number => {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
   // Handle transportation option change
-  const handleTransportationChange = (value) => {
+  const handleTransportationChange = (value: string): void => {
     setFormData({ ...formData, transportation: value, address: '' });
     setNearestLocation(null);
     
@@ -230,7 +158,7 @@ const Shop = () => {
   };
 
   // Handle form submission
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
     e.preventDefault();
     
     // Validate form
@@ -264,54 +192,6 @@ const Shop = () => {
 
   return (
     <div className="py-16 bg-gray-50 min-h-screen font-sans">
-      <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-        .font-sans { font-family: 'Inter', sans-serif; }
-        .overflow-y-auto::-webkit-scrollbar { width: 6px; }
-        .overflow-y-auto::-webkit-scrollbar-thumb { background-color: #a7f3d0; border-radius: 3px; }
-        .overflow-y-auto::-webkit-scrollbar-track { background-color: #f0fdf4; }
-        
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        .animate-slideIn {
-          animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-slideUp {
-          animation: slideUp 0.3s ease-out;
-        }
-        
-        @keyframes fadeOut {
-          from {
-            opacity: 1;
-          }
-          to {
-            opacity: 0;
-          }
-        }
-        .animate-fadeOut {
-          animation: fadeOut 0.5s ease-out;
-        }
-      `}} />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-12">
@@ -339,7 +219,7 @@ const Shop = () => {
             </div>
             
             <button
-                ref={cartButtonRef} /* Attach ref to the button */
+                ref={cartButtonRef}
                 onClick={() => setShowCart(!showCart)}
                 className="relative bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow-lg w-full md:w-auto flex-shrink-0"
             >
@@ -394,7 +274,7 @@ const Shop = () => {
 
         {showCart && (
           <div 
-            ref={cartRef} /* Attach ref to the cart panel */
+            ref={cartRef}
             className="fixed top-20 right-4 w-96 max-w-[calc(100vw-2rem)] z-50 animate-slideIn"
           >
             <div className="bg-white rounded-xl shadow-2xl p-6 border-t-4 border-lime-500 max-h-[calc(100vh-6rem)] overflow-hidden flex flex-col">
@@ -635,7 +515,7 @@ const Shop = () => {
                     value={formData.address}
                     onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700 resize-none"
-                    rows="3"
+                    rows={3}
                     placeholder={formData.transportation === 'yes' ? 'Enter your complete delivery address' : 'Enter your address to find the nearest pickup location'}
                   />
                 </div>
@@ -775,3 +655,4 @@ const Shop = () => {
 };
 
 export default Shop;
+
