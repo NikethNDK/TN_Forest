@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ShoppingCart, Search, Plus, Minus, Trash2, Sprout, Leaf, Star, FlaskConical, Mail, MapPin, Truck, X, CheckCircle, User, Phone, Package } from 'lucide-react';
+import { ShoppingCart, Search, Plus, Minus, Trash2, Sprout, Leaf, Star, FlaskConical, Mail, MapPin, Truck, X, CheckCircle, User, Phone, Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { ShopProduct, CartItem } from '../types';
-import ProductSection from '../components/shop/ProductSection';
+import ProductCard from '../components/shop/ProductCard';
 
-const INITIAL_LIMIT = 4;
+const ITEMS_PER_PAGE = 12;
 
 // --- MOCK DATA (Self-contained for canvas runnability) ---
 const mockShopProducts: ShopProduct[] = [
@@ -48,8 +48,11 @@ const Shop: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showCart, setShowCart] = useState<boolean>(false);
   
-  const [seedsSaplingsLimit, setSeedsSaplingsLimit] = useState<number>(INITIAL_LIMIT);
-  const [bioFertilizersLimit, setBioFertilizersLimit] = useState<number>(INITIAL_LIMIT);
+  // Tab and pagination state
+  const [activeTab, setActiveTab] = useState<'Seeds' | 'Bio Fertilizers'>('Seeds');
+  const [seedsPage, setSeedsPage] = useState<number>(1);
+  const [bioFertilizersPage, setBioFertilizersPage] = useState<number>(1);
+  const [searchPage, setSearchPage] = useState<number>(1);
 
   // Form state for on-demand fertilizers
   const [formData, setFormData] = useState<FormData>({
@@ -106,8 +109,28 @@ const Shop: React.FC = () => {
   const seedsSaplings = filteredProducts.filter(p => p.category === 'Seeds');
   const bioFertilizers = filteredProducts.filter(p => p.category === 'Bio Fertilizers');
   
+  // Combined search results
+  const combinedSearchResults = searchTerm ? [...seedsSaplings, ...bioFertilizers] : [];
+  
   // Get available bio-fertilizers for the dropdown
   const availableFertilizers = filteredProducts.filter(p => p.category === 'Bio');
+
+  // Pagination calculations
+  const getPaginatedProducts = (products: ShopProduct[], page: number): ShopProduct[] => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    return products.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  };
+
+  const getTotalPages = (products: ShopProduct[]): number => {
+    return Math.ceil(products.length / ITEMS_PER_PAGE);
+  };
+
+  // Reset pagination when tab or search changes
+  useEffect(() => {
+    setSeedsPage(1);
+    setBioFertilizersPage(1);
+    setSearchPage(1);
+  }, [activeTab, searchTerm]);
 
   const addToCart = (product: ShopProduct): void => {
     const existingItem = cart.find(item => item.id === product.id);
@@ -235,40 +258,198 @@ const Shop: React.FC = () => {
         </div>
 
         <div>
-          {filteredProducts.length > 0 ? (
-              <div className="space-y-16">
-                {seedsSaplings.length > 0 && (
-                  <ProductSection 
-                      title="Seeds"
-                      icon={Sprout}
-                      products={seedsSaplings}
-                      limit={seedsSaplingsLimit}
-                      setLimit={setSeedsSaplingsLimit}
-                      addToCart={addToCart}
-                  />
-                )}
-
-                {bioFertilizers.length > 0 && (
-                  <ProductSection 
-                      title="Bio Fertilizers"
-                      icon={FlaskConical}
-                      products={bioFertilizers}
-                      limit={bioFertilizersLimit}
-                      setLimit={setBioFertilizersLimit}
-                      addToCart={addToCart}
-                  />
-                )}
-              </div>
-          ) : (
-              <div className="text-center py-16 bg-white rounded-xl shadow-xl">
-                  <div className="text-6xl mb-4">🔍</div>
-                  <h3 className="text-2xl font-bold text-green-900 mb-2">
-                      No Products Match Your Search
-                  </h3>
+          {searchTerm ? (
+            // Search Results View
+            combinedSearchResults.length > 0 ? (
+              <div>
+                <div className="mb-6">
+                  <h2 className="text-3xl font-bold text-green-900 mb-2 flex items-center">
+                    <Search className="h-7 w-7 mr-3 text-lime-600" />
+                    Search Results
+                  </h2>
                   <p className="text-gray-600">
-                      Try a broader search term (e.g., 'tree', 'fertilizer') or check the Seeds and Bio Fertilizers sections.
+                    Found {combinedSearchResults.length} product{combinedSearchResults.length !== 1 ? 's' : ''} matching "{searchTerm}"
                   </p>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                  {getPaginatedProducts(combinedSearchResults, searchPage).map((product) => (
+                    <ProductCard key={product.id} product={product} addToCart={addToCart} />
+                  ))}
+                </div>
+
+                {/* Search Results Pagination */}
+                {getTotalPages(combinedSearchResults) > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-8">
+                    <button
+                      onClick={() => setSearchPage(prev => Math.max(1, prev - 1))}
+                      disabled={searchPage === 1}
+                      className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+                    >
+                      <ChevronLeft className="h-5 w-5 mr-1" />
+                      Previous
+                    </button>
+                    <span className="text-gray-700 font-medium">
+                      Page {searchPage} of {getTotalPages(combinedSearchResults)}
+                    </span>
+                    <button
+                      onClick={() => setSearchPage(prev => Math.min(getTotalPages(combinedSearchResults), prev + 1))}
+                      disabled={searchPage === getTotalPages(combinedSearchResults)}
+                      className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+                    >
+                      Next
+                      <ChevronRight className="h-5 w-5 ml-1" />
+                    </button>
+                  </div>
+                )}
               </div>
+            ) : (
+              <div className="text-center py-16 bg-white rounded-xl shadow-xl">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-bold text-green-900 mb-2">
+                  No Products Match Your Search
+                </h3>
+                <p className="text-gray-600">
+                  Try a broader search term (e.g., 'tree', 'fertilizer') or check the Seeds and Bio Fertilizers sections.
+                </p>
+              </div>
+            )
+          ) : (
+            // Tabbed View
+            <div>
+              {/* Chrome-style Tabs */}
+              <div className="bg-white rounded-t-xl border-b border-gray-200 mb-0 flex">
+                <button
+                  onClick={() => setActiveTab('Seeds')}
+                  className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
+                    activeTab === 'Seeds'
+                      ? 'text-green-700 bg-white'
+                      : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-center">
+                    <Sprout className={`h-5 w-5 mr-2 ${activeTab === 'Seeds' ? 'text-lime-600' : 'text-gray-400'}`} />
+                    Seeds
+                    {seedsSaplings.length > 0 && (
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
+                        activeTab === 'Seeds' ? 'bg-lime-100 text-lime-800' : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {seedsSaplings.length}
+                      </span>
+                    )}
+                  </div>
+                  {activeTab === 'Seeds' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveTab('Bio Fertilizers')}
+                  className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
+                    activeTab === 'Bio Fertilizers'
+                      ? 'text-green-700 bg-white'
+                      : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-center">
+                    <FlaskConical className={`h-5 w-5 mr-2 ${activeTab === 'Bio Fertilizers' ? 'text-lime-600' : 'text-gray-400'}`} />
+                    Bio Fertilizers
+                    {bioFertilizers.length > 0 && (
+                      <span className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
+                        activeTab === 'Bio Fertilizers' ? 'bg-lime-100 text-lime-800' : 'bg-gray-200 text-gray-600'
+                      }`}>
+                        {bioFertilizers.length}
+                      </span>
+                    )}
+                  </div>
+                  {activeTab === 'Bio Fertilizers' && (
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
+                  )}
+                </button>
+              </div>
+
+              {/* Tab Content */}
+              <div className="bg-white rounded-b-xl shadow-xl p-6 border-t-0">
+                {activeTab === 'Seeds' ? (
+                  seedsSaplings.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                        {getPaginatedProducts(seedsSaplings, seedsPage).map((product) => (
+                          <ProductCard key={product.id} product={product} addToCart={addToCart} />
+                        ))}
+                      </div>
+                      {/* Seeds Pagination */}
+                      {getTotalPages(seedsSaplings) > 1 && (
+                        <div className="flex items-center justify-center gap-4 mt-8">
+                          <button
+                            onClick={() => setSeedsPage(prev => Math.max(1, prev - 1))}
+                            disabled={seedsPage === 1}
+                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+                          >
+                            <ChevronLeft className="h-5 w-5 mr-1" />
+                            Previous
+                          </button>
+                          <span className="text-gray-700 font-medium">
+                            Page {seedsPage} of {getTotalPages(seedsSaplings)}
+                          </span>
+                          <button
+                            onClick={() => setSeedsPage(prev => Math.min(getTotalPages(seedsSaplings), prev + 1))}
+                            disabled={seedsPage === getTotalPages(seedsSaplings)}
+                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+                          >
+                            Next
+                            <ChevronRight className="h-5 w-5 ml-1" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-16">
+                      <Sprout className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No seeds available at the moment.</p>
+                    </div>
+                  )
+                ) : (
+                  bioFertilizers.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                        {getPaginatedProducts(bioFertilizers, bioFertilizersPage).map((product) => (
+                          <ProductCard key={product.id} product={product} addToCart={addToCart} />
+                        ))}
+                      </div>
+                      {/* Bio Fertilizers Pagination */}
+                      {getTotalPages(bioFertilizers) > 1 && (
+                        <div className="flex items-center justify-center gap-4 mt-8">
+                          <button
+                            onClick={() => setBioFertilizersPage(prev => Math.max(1, prev - 1))}
+                            disabled={bioFertilizersPage === 1}
+                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+                          >
+                            <ChevronLeft className="h-5 w-5 mr-1" />
+                            Previous
+                          </button>
+                          <span className="text-gray-700 font-medium">
+                            Page {bioFertilizersPage} of {getTotalPages(bioFertilizers)}
+                          </span>
+                          <button
+                            onClick={() => setBioFertilizersPage(prev => Math.min(getTotalPages(bioFertilizers), prev + 1))}
+                            disabled={bioFertilizersPage === getTotalPages(bioFertilizers)}
+                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+                          >
+                            Next
+                            <ChevronRight className="h-5 w-5 ml-1" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-16">
+                      <FlaskConical className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                      <p className="text-gray-600">No bio fertilizers available at the moment.</p>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
           )}
         </div>
 
