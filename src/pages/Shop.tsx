@@ -537,7 +537,7 @@ const Shop: React.FC = () => {
               Order Bio-Fertilizers
             </h2>
             <p className="text-gray-600">
-              Some of our specialized bio-fertilizers are produced on-demand. Place your order below and we'll prepare it for you.
+              Place your order below for biofertilizers.
             </p>
           </div>
 
