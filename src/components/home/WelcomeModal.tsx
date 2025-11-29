@@ -38,69 +38,73 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
 
   return (
     <>
-      {/* Modal */}
+      {/* Modal Overlay - Semi-transparent, allows background interaction */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center p-4 pointer-events-auto"
+          onClick={handleClose}
+        >
+          {/* Modal Container - Smaller size, stops event propagation */}
+          <div 
+            className="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[75vh] overflow-hidden flex flex-col pointer-events-auto transform transition-all"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
-            <div className="bg-gradient-to-r from-green-700 to-lime-500 p-6 flex items-center justify-between">
-              <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center">
-                <Info className="h-6 w-6 md:h-7 md:w-7 mr-3" />
-                Welcome to Tamil Nadu Forest Research Department
+            <div className="bg-gradient-to-r from-green-700 to-lime-500 p-4 md:p-5 flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-bold text-white flex items-center">
+                <Info className="h-5 w-5 md:h-6 md:w-6 mr-2" />
+                <span className="hidden sm:inline">Welcome to Tamil Nadu Forest Research Department</span>
+                <span className="sm:hidden">Welcome</span>
               </h2>
               <button
                 onClick={handleClose}
-                className="text-white hover:text-gray-200 transition-colors p-2 rounded-full hover:bg-white hover:bg-opacity-20"
+                className="text-white hover:text-gray-200 transition-colors p-1.5 rounded-full hover:bg-white hover:bg-opacity-20 flex-shrink-0"
                 aria-label="Close modal"
               >
-                <X className="h-6 w-6" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-6 md:p-8">
+            <div className="flex-1 overflow-y-auto p-4 md:p-6">
               {/* Shop Information Section */}
-              <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-xl p-6 mb-6 border-l-4 border-green-600">
-                <div className="flex items-center mb-4">
-                  <ShoppingBag className="h-6 w-6 text-green-700 mr-3" />
-                  <h3 className="text-xl font-bold text-green-900">Explore Our Forest Products Shop</h3>
+              <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-xl p-4 md:p-5 mb-4 border-l-4 border-green-600">
+                <div className="flex items-center mb-3">
+                  <ShoppingBag className="h-5 w-5 text-green-700 mr-2" />
+                  <h3 className="text-lg font-bold text-green-900">Explore Our Forest Products Shop</h3>
                 </div>
-                <p className="text-gray-700 mb-4 leading-relaxed">
+                <p className="text-sm text-gray-700 mb-3 leading-relaxed">
                   Discover high-quality seeds, saplings, and bio-fertilizers directly from our research centers. 
                   All products are genetically verified and backed by our scientific research, ensuring the best 
                   quality for your afforestation and cultivation projects.
                 </p>
-                <p className="text-gray-700 mb-6 leading-relaxed">
-                  Browse our extensive catalog of forest tree seeds and organic bio-fertilizers, all produced 
-                  with sustainable practices and scientific precision.
-                </p>
                 <button
                   onClick={handleShopNavigation}
-                  className="bg-lime-500 hover:bg-lime-600 text-green-900 font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center shadow-lg"
+                  className="bg-lime-500 hover:bg-lime-600 text-green-900 font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center shadow-lg text-sm"
                 >
                   Visit Shop
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </button>
               </div>
 
               {/* Latest News Section */}
               {displayNews.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-xl font-bold text-green-900 mb-4 flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-lime-600" />
+                <div className="mb-4">
+                  <h3 className="text-lg font-bold text-green-900 mb-3 flex items-center">
+                    <Calendar className="h-4 w-4 mr-2 text-lime-600" />
                     Latest News
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {displayNews.map((news, index) => (
-                      <div key={index} className="bg-white border-l-4 border-green-600 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow">
+                      <div key={index} className="bg-white border-l-4 border-green-600 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
                         <p className="text-xs text-gray-500 mb-1 flex items-center">
                           <Calendar className="h-3 w-3 mr-1" /> {news.date}
                         </p>
-                        <h4 className="font-bold text-green-800 mb-2">{news.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{news.excerpt}</p>
+                        <h4 className="font-bold text-green-800 mb-1 text-sm">{news.title}</h4>
+                        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{news.excerpt}</p>
                         <a 
                           href={news.link} 
-                          className="text-green-600 hover:text-lime-600 text-sm font-semibold inline-flex items-center"
+                          className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
                         >
                           Read more
                           <ExternalLink className="h-3 w-3 ml-1" />
@@ -114,21 +118,21 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
               {/* Recent Events Section */}
               {displayEvents.length > 0 && (
                 <div>
-                  <h3 className="text-xl font-bold text-green-900 mb-4 flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-lime-600" />
+                  <h3 className="text-lg font-bold text-green-900 mb-3 flex items-center">
+                    <Calendar className="h-4 w-4 mr-2 text-lime-600" />
                     Recent Events
                   </h3>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {displayEvents.map((event, index) => (
-                      <div key={index} className="bg-white border-l-4 border-lime-500 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow">
+                      <div key={index} className="bg-white border-l-4 border-lime-500 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
                         <p className="text-xs text-gray-500 mb-1 flex items-center">
                           <Calendar className="h-3 w-3 mr-1" /> {event.date}
                         </p>
-                        <h4 className="font-bold text-green-800 mb-2">{event.title}</h4>
-                        <p className="text-sm text-gray-600 mb-2 line-clamp-2">{event.excerpt}</p>
+                        <h4 className="font-bold text-green-800 mb-1 text-sm">{event.title}</h4>
+                        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{event.excerpt}</p>
                         <a 
                           href={event.link} 
-                          className="text-green-600 hover:text-lime-600 text-sm font-semibold inline-flex items-center"
+                          className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
                         >
                           View details
                           <ExternalLink className="h-3 w-3 ml-1" />
