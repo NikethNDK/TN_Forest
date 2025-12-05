@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, Shield, Leaf } from 'lucide-react';
+import { signIn } from '../../services/firebase/authService';
+import { getCurrentUser } from '../../services/firebase/authService';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -11,28 +13,25 @@ const AdminLogin: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Check if user is already logged in
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user) {
+      navigate('/admin');
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // TODO: Replace with actual Firebase authentication
-    // For now, this is a placeholder that allows access
-    // In production, you'll use Firebase Auth here
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Placeholder validation - replace with Firebase Auth
-      if (formData.email && formData.password) {
-        // Store auth state (in production, this will be handled by Firebase)
-        localStorage.setItem('adminAuthenticated', 'true');
-        navigate('/admin');
-      } else {
-        setError('Please enter both email and password');
-      }
-    } catch (err) {
-      setError('Login failed. Please try again.');
+      await signIn(formData.email, formData.password);
+      // Navigation will happen automatically via AdminLayout auth check
+      navigate('/admin');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

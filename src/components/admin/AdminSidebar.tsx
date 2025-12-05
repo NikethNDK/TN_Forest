@@ -15,6 +15,7 @@ import {
   // Info
 } from 'lucide-react';
 import { divisions } from '../../data/mockData';
+import { signOutUser } from '../../services/firebase/authService';
 
 const AdminSidebar: React.FC = () => {
   const location = useLocation();
@@ -47,10 +48,15 @@ const AdminSidebar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  const handleLogout = () => {
-    // TODO: Replace with Firebase Auth sign out
-    localStorage.removeItem('adminAuthenticated');
-    navigate('/login/admin');
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      navigate('/login/admin');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Still navigate to login even if logout fails
+      navigate('/login/admin');
+    }
   };
 
   return (
