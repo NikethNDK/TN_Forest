@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Home, 
@@ -10,12 +10,15 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
-  X
+  X,
+  LogOut
+  // Info
 } from 'lucide-react';
 import { divisions } from '../../data/mockData';
 
 const AdminSidebar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedDivisions, setExpandedDivisions] = useState<string[]>([]);
 
@@ -31,7 +34,9 @@ const AdminSidebar: React.FC = () => {
     { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/admin/home', label: 'Home Page', icon: Home },
     { path: '/admin/about', label: 'About Page', icon: Users },
+    { path: '/admin/faculty', label: 'Faculty Page', icon: Users },
     { path: '/admin/publications', label: 'Publications', icon: FileText },
+    // { path: '/admin/information', label: 'Information', icon: Info },
     { path: '/admin/contact', label: 'Contact Page', icon: Phone },
   ];
 
@@ -40,6 +45,12 @@ const AdminSidebar: React.FC = () => {
       return location.pathname === '/admin';
     }
     return location.pathname.startsWith(path);
+  };
+
+  const handleLogout = () => {
+    // TODO: Replace with Firebase Auth sign out
+    localStorage.removeItem('adminAuthenticated');
+    navigate('/login/admin');
   };
 
   return (
@@ -132,8 +143,8 @@ const AdminSidebar: React.FC = () => {
             )}
           </div>
 
-          {/* Back to Site Link */}
-          <div className="pt-4 border-t border-green-800 mt-4">
+          {/* Back to Site & Logout */}
+          <div className="pt-4 border-t border-green-800 mt-4 space-y-2">
             <Link
               to="/"
               onClick={() => setIsOpen(false)}
@@ -141,6 +152,16 @@ const AdminSidebar: React.FC = () => {
             >
               <span className="font-medium">← Back to Site</span>
             </Link>
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                handleLogout();
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-green-100 hover:bg-red-600 hover:text-white transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="font-medium">Logout</span>
+            </button>
           </div>
         </nav>
       </aside>

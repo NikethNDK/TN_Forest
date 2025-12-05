@@ -16,8 +16,13 @@ import type {
 } from '../../types';
 
 // In-memory data storage (will be replaced with API calls later)
-let adminData = {
+let adminData: {
+  divisions: Division[];
+  tollFreeNumber?: string;
+  [key: string]: any;
+} = {
   divisions: [...divisions],
+  tollFreeNumber: "1800-425-2313",
   homeContent: {
     sliderImages: [
       '/assets/Alwarmalai.jpeg',
@@ -145,6 +150,42 @@ let adminData = {
         name: "Thiru.Srinivas R. Reddy, IFS",
         position: "Principal Chief Conservator of Forests (HoFF) & CEO, CAMPA (FAC)"
       },
+      {
+        name: "Thiru Rakesh Kumar Dogra, IFS",
+        position: "Principal Chief Conservator of Forests and Chief Wildlife Warden & Principal Chief Conservator of Forests (Project Tiger) (FAC)"
+      },
+      {
+        name: "Thiru I Anwardeen, IFS",
+        position: "Principal Chief Conservator of Forests (Research and Education) Chennai"
+      },
+      {
+        name: "K.Geethanjali, IFS",
+        position: "Chief Conservator of Forests (Research), Chennai"
+      }
+    ]
+  },
+  facultyContent: {
+    members: [
+      {
+        name: "Thiru R.S.Rajakannappan",
+        position: "Hon'ble Minister for Forests"
+      },
+      {
+        name: "Tmt. Supriya Sahu, IAS",
+        position: "Additional Chief Secretary to Government, Environment, Climate Change and Forests Department"
+      },
+      {
+        name: "Thiru.Srinivas R. Reddy, IFS",
+        position: "Principal Chief Conservator of Forests (HoFF) & CEO, CAMPA (FAC)"
+      },
+      {
+        name: "Thiru Rakesh Kumar Dogra, IFS",
+        position: "Principal Chief Conservator of Forests and Chief Wildlife Warden & Principal Chief Conservator of Forests (Project Tiger) (FAC)"
+      },
+      {
+        name: "Thiru I Anwardeen, IFS",
+        position: "Principal Chief Conservator of Forests (Research and Education) Chennai"
+      }
     ]
   },
   publications: {
@@ -179,9 +220,6 @@ let adminData = {
         showInFooter: true
       }
     ]
-  },
-  divisions: {
-    tollFreeNumber: "1800-425-2313"
   }
 };
 
@@ -305,6 +343,24 @@ export const updateLeadershipMember = (index: number, member: { name: string; po
 export const deleteLeadershipMember = (index: number) => {
   adminData.aboutContent.leadership.splice(index, 1);
   return adminData.aboutContent.leadership;
+};
+
+// Faculty Page Operations
+export const getFacultyContent = () => adminData.facultyContent;
+
+export const addFacultyMember = (member: { name: string; position: string }) => {
+  adminData.facultyContent.members.push(member);
+  return adminData.facultyContent.members;
+};
+
+export const updateFacultyMember = (index: number, member: { name: string; position: string }) => {
+  adminData.facultyContent.members[index] = member;
+  return adminData.facultyContent.members;
+};
+
+export const deleteFacultyMember = (index: number) => {
+  adminData.facultyContent.members.splice(index, 1);
+  return adminData.facultyContent.members;
 };
 
 // Publications Operations
@@ -435,9 +491,109 @@ export const deleteExperiment = (divisionSlug: string, centerId: number, experim
 };
 
 export const updateTollFreeNumber = (number: string) => {
-  adminData.divisions.tollFreeNumber = number;
-  return adminData.divisions.tollFreeNumber;
+  adminData.tollFreeNumber = number;
+  return adminData.tollFreeNumber;
 };
 
-export const getTollFreeNumber = () => adminData.divisions.tollFreeNumber;
+export const getTollFreeNumber = () => adminData.tollFreeNumber || '';
+
+// Information Page Management
+interface InformationItem {
+  name: string;
+  action: string;
+  type: string;
+  fileUrl?: string;
+}
+
+interface InformationSection {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  items: InformationItem[];
+}
+
+let informationData = {
+  sections: [
+    {
+      id: 'publications',
+      title: 'Research Publications',
+      description: 'Access our latest research papers, reports, and scientific publications.',
+      icon: 'FileText',
+      items: [
+        { name: 'Annual Research Report 2024', action: 'Download', type: 'file' },
+        { name: 'Forest Conservation Guidelines', action: 'Download', type: 'file' },
+        { name: 'Biodiversity Assessment Report', action: 'Download', type: 'file' },
+        { name: 'Climate Change Impact Study', action: 'Download', type: 'file' },
+      ]
+    },
+    {
+      id: 'forms',
+      title: 'Forms & Applications',
+      description: 'Download forms for research permits, collaborations, and partnerships.',
+      icon: 'Download',
+      items: [
+        { name: 'Research Permit Application', action: 'Download', type: 'file' },
+        { name: 'Collaboration Agreement Form', action: 'Download', type: 'file' },
+        { name: 'Data Access Request Form', action: 'Download', type: 'file' },
+        { name: 'Publication Permission Form', action: 'Download', type: 'file' },
+      ]
+    }
+  ],
+  newsletter: {
+    title: 'Subscribe to Our Research Bulletin',
+    description: 'Receive the latest official announcements, research findings, and event invitations directly in your inbox.',
+    buttonText: 'Subscribe Now'
+  }
+};
+
+export const getInformationContent = () => informationData;
+
+export const updateInformationSection = (sectionId: string, updates: Partial<InformationSection>) => {
+  const section = informationData.sections.find(s => s.id === sectionId);
+  if (section) {
+    Object.assign(section, updates);
+  }
+  return informationData.sections;
+};
+
+export const addInformationItem = (sectionId: string, item: InformationItem) => {
+  const section = informationData.sections.find(s => s.id === sectionId);
+  if (section) {
+    section.items.push(item);
+  }
+  return informationData.sections;
+};
+
+export const updateInformationItem = (sectionId: string, itemIndex: number, updates: Partial<InformationItem>) => {
+  const section = informationData.sections.find(s => s.id === sectionId);
+  if (section && section.items[itemIndex]) {
+    Object.assign(section.items[itemIndex], updates);
+  }
+  return informationData.sections;
+};
+
+export const deleteInformationItem = (sectionId: string, itemIndex: number) => {
+  const section = informationData.sections.find(s => s.id === sectionId);
+  if (section) {
+    section.items.splice(itemIndex, 1);
+  }
+  return informationData.sections;
+};
+
+export const moveInformationItem = (sectionId: string, itemIndex: number, direction: 'up' | 'down') => {
+  const section = informationData.sections.find(s => s.id === sectionId);
+  if (section) {
+    const newIndex = direction === 'up' ? itemIndex - 1 : itemIndex + 1;
+    if (newIndex >= 0 && newIndex < section.items.length) {
+      [section.items[itemIndex], section.items[newIndex]] = [section.items[newIndex], section.items[itemIndex]];
+    }
+  }
+  return informationData.sections;
+};
+
+export const updateNewsletterContent = (updates: Partial<typeof informationData.newsletter>) => {
+  Object.assign(informationData.newsletter, updates);
+  return informationData.newsletter;
+};
 

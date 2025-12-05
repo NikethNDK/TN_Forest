@@ -5,7 +5,7 @@ import QueryProvider from './providers/QueryProvider';
 import Home from './pages/Home';
 import About from './pages/About';
 import Faculty from './pages/Faculty';
-import Information from './pages/Information';
+// import Information from './pages/Information';
 import Publication from './pages/Publication';
 import ContactUs from './pages/ContactUs';
 import Divisions from './pages/Divisions';
@@ -15,23 +15,33 @@ import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminHome from './pages/admin/AdminHome';
 import AdminAbout from './pages/admin/AdminAbout';
+import AdminFaculty from './pages/admin/AdminFaculty';
 import AdminPublications from './pages/admin/AdminPublications';
+// import AdminInformation from './pages/admin/AdminInformation';
 import AdminContact from './pages/admin/AdminContact';
 import AdminDivision from './pages/admin/AdminDivision';
+import AdminResearchCenter from './pages/admin/AdminResearchCenter';
+import AdminLogin from './pages/admin/AdminLogin';
 
 const App: React.FC = () => {
   return (
     <QueryProvider>
       <Router>
         <Routes>
+          {/* Admin Login */}
+          <Route path="/login/admin" element={<AdminLogin />} />
+          
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboard />} />
             <Route path="home" element={<AdminHome />} />
             <Route path="about" element={<AdminAbout />} />
+            <Route path="faculty" element={<AdminFaculty />} />
             <Route path="publications" element={<AdminPublications />} />
+            {/* <Route path="information" element={<AdminInformation />} /> */}
             <Route path="contact" element={<AdminContact />} />
             <Route path="divisions/:divisionSlug" element={<AdminDivision />} />
+            <Route path="divisions/:divisionSlug/centers/:centerId" element={<AdminResearchCenter />} />
           </Route>
           
           {/* Public Routes */}
@@ -41,7 +51,7 @@ const App: React.FC = () => {
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/faculty" element={<Faculty />} />
-                <Route path="/information" element={<Information />} />
+                {/* <Route path="/information" element={<Information />} /> */}
                 <Route path="/publication" element={<Publication />} />
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/divisions" element={<Divisions />} />

@@ -9,6 +9,7 @@ import {
   deletePublication
 } from '../../services/admin/adminDataService';
 import { uploadPDFFile } from '../../services/admin/fileUploadService';
+import Modal from '../../components/admin/Modal';
 
 const AdminPublications: React.FC = () => {
   const [publications, setPublications] = useState(getPublications());
@@ -19,13 +20,14 @@ const AdminPublications: React.FC = () => {
     title: '',
     year: new Date().getFullYear(),
     category: '',
+    journal: '',
     description: '',
     pdfUrl: ''
   });
   const [showForm, setShowForm] = useState(false);
   const [categoryForm, setCategoryForm] = useState({ name: '', showForm: false });
 
-  const filteredPublications = publications.items.filter(pub => {
+  const filteredPublications = publications.items.filter((pub: any) => {
     const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || pub.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -51,6 +53,7 @@ const AdminPublications: React.FC = () => {
       title: '',
       year: new Date().getFullYear(),
       category: publications.categories[0] || '',
+      journal: '',
       description: '',
       pdfUrl: ''
     });
@@ -59,12 +62,13 @@ const AdminPublications: React.FC = () => {
   };
 
   const handleEditPublication = (id: number) => {
-    const pub = publications.items.find(p => p.id === id);
+    const pub = publications.items.find((p: any) => p.id === id);
     if (pub) {
       setFormData({
         title: pub.title,
         year: pub.year,
         category: pub.category,
+        journal: (pub as any).journal || '',
         description: pub.description,
         pdfUrl: pub.pdfUrl || ''
       });
@@ -94,6 +98,7 @@ const AdminPublications: React.FC = () => {
       title: '',
       year: new Date().getFullYear(),
       category: '',
+      journal: '',
       description: '',
       pdfUrl: ''
     });
@@ -141,35 +146,45 @@ const AdminPublications: React.FC = () => {
             </button>
           </div>
 
-          {categoryForm.showForm && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-green-200">
-              <div className="flex gap-2">
+          <Modal
+            isOpen={categoryForm.showForm}
+            onClose={() => setCategoryForm({ name: '', showForm: false })}
+            title="Add Category"
+            size="sm"
+          >
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Category Name *
+                </label>
                 <input
                   type="text"
                   value={categoryForm.name}
                   onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                  placeholder="Category name"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="e.g., Research Paper"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
                 />
+              </div>
+              <div className="flex gap-2 pt-4">
                 <button
                   onClick={handleAddCategory}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
                 >
                   Save
                 </button>
                 <button
                   onClick={() => setCategoryForm({ name: '', showForm: false })}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
                 >
                   Cancel
                 </button>
               </div>
             </div>
-          )}
+          </Modal>
 
           <div className="flex flex-wrap gap-2">
-            {publications.categories.map((category) => (
+            {publications.categories.map((category: string) => (
               <div
                 key={category}
                 className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full"
@@ -219,20 +234,21 @@ const AdminPublications: React.FC = () => {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="all">All Categories</option>
-                {publications.categories.map(category => (
+                {publications.categories.map((category: string) => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </select>
             </div>
           </div>
 
-          {/* Publication Form */}
-          {showForm && (
-            <div className="mb-6 p-6 bg-gray-50 rounded-lg border-2 border-green-200">
-              <h3 className="font-semibold text-green-900 mb-4">
-                {editingId !== null ? 'Edit' : 'Add'} Publication
-              </h3>
-              <div className="space-y-4">
+          {/* Publication Form Modal */}
+          <Modal
+            isOpen={showForm}
+            onClose={handleCancelPublication}
+            title={editingId !== null ? 'Edit Publication' : 'Add Publication'}
+            size="lg"
+          >
+            <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Title *
@@ -266,11 +282,23 @@ const AdminPublications: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     >
                       <option value="">Select category</option>
-                      {publications.categories.map(cat => (
+                      {publications.categories.map((cat: string) => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
                   </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Journal / Publication Source
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.journal}
+                    onChange={(e) => setFormData({ ...formData, journal: e.target.value })}
+                    placeholder="e.g., ஓர் எளிய வழிகாட்டி"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -301,27 +329,26 @@ const AdminPublications: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 pt-4">
                   <button
                     onClick={handleSavePublication}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
                   >
                     Save
                   </button>
                   <button
                     onClick={handleCancelPublication}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                    className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
-            </div>
-          )}
+          </Modal>
 
           {/* Publications List */}
           <div className="space-y-4">
-            {filteredPublications.map((publication) => (
+            {filteredPublications.map((publication: any) => (
               <div
                 key={publication.id}
                 className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"

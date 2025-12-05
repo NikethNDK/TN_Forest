@@ -1,34 +1,10 @@
 import React from 'react';
 import FacultyCard from '../components/faculty/FacultyCard';
-
-interface FacultyMember {
-  name: string;
-  position: string;
-}
+import { getFacultyContent } from '../services/admin/adminDataService';
 
 const Faculty: React.FC = () => {
-  const facultyMembers: FacultyMember[] = [
-    {
-      name: "Thiru R.S.Rajakannappan",
-      position: "Hon'ble Minister for Forests"
-    },
-    {
-      name: "Tmt. Supriya Sahu, IAS",
-      position: "Additional Chief Secretary to Government, Environment, Climate Change and Forests Department"
-    },
-    {
-      name: "Thiru.Srinivas R. Reddy, IFS",
-      position: "Principal Chief Conservator of Forests (HoFF) & CEO, CAMPA (FAC)"
-    },
-    {
-      name: "Thiru Rakesh Kumar Dogra, IFS",
-      position: "Principal Chief Conservator of Forests and Chief Wildlife Warden & Principal Chief Conservator of Forests (Project Tiger) (FAC)"
-    },
-    {
-      name: "Thiru I Anwardeen, IFS",
-      position: "Principal Chief Conservator of Forests (Research and Education) Chennai"
-    }
-  ];
+  const facultyContent = getFacultyContent();
+  const facultyMembers = facultyContent.members;
 
   return (
     <div className="py-12 bg-gray-50 min-h-screen">

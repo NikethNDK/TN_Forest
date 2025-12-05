@@ -7,13 +7,16 @@ import {
   Phone, 
   GitBranch,
   LayoutDashboard
+  // Info
 } from 'lucide-react';
 
 const AdminDashboard: React.FC = () => {
   const quickLinks = [
     { path: '/admin/home', label: 'Home Page', icon: Home, color: 'bg-green-600' },
     { path: '/admin/about', label: 'About Page', icon: Users, color: 'bg-green-700' },
+    { path: '/admin/faculty', label: 'Faculty Page', icon: Users, color: 'bg-green-600' },
     { path: '/admin/publications', label: 'Publications', icon: FileText, color: 'bg-green-800' },
+    // { path: '/admin/information', label: 'Information', icon: Info, color: 'bg-green-700' },
     { path: '/admin/contact', label: 'Contact Page', icon: Phone, color: 'bg-green-900' },
     { path: '/admin/divisions/modern-nursery', label: 'Divisions', icon: GitBranch, color: 'bg-forest-green-800' },
   ];

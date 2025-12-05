@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, FileText } from 'lucide-react';
 import type { Experiment } from '../../types';
 import ImageUploader from './ImageUploader';
 import { uploadPDFFile } from '../../services/admin/fileUploadService';
+import Modal from './Modal';
 
 interface ExperimentEditorProps {
   experiments: Experiment[];
@@ -116,88 +117,90 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
         </button>
       </div>
 
-      {showForm && (
-        <div className="mb-6 p-6 bg-gray-50 rounded-lg border-2 border-green-200">
-          <h4 className="font-semibold text-green-900 mb-4">
-            {editingId !== null ? 'Edit' : 'Add'} Experiment
-          </h4>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title *
-              </label>
-              <input
-                type="text"
-                value={formData.title || ''}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Year
-              </label>
-              <input
-                type="number"
-                value={formData.year || new Date().getFullYear()}
-                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                value={formData.description || ''}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <ImageUploader
-                currentImage={formData.imagePath}
-                onImageChange={(imagePath) => setFormData({ ...formData, imagePath })}
-                directory="experiments"
-                label="Experiment Image"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                PDF Link (URL or upload)
-              </label>
-              <input
-                type="text"
-                value={formData.pdfPath || ''}
-                onChange={(e) => setFormData({ ...formData, pdfPath: e.target.value })}
-                placeholder="Enter PDF URL or upload file"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
-              />
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handlePDFUpload}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Save
-              </button>
-              <button
-                onClick={handleCancel}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
+      <Modal
+        isOpen={showForm}
+        onClose={handleCancel}
+        title={editingId !== null ? 'Edit Experiment' : 'Add Experiment'}
+        size="lg"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Title *
+            </label>
+            <input
+              type="text"
+              value={formData.title || ''}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Enter experiment title"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Year
+            </label>
+            <input
+              type="number"
+              value={formData.year || new Date().getFullYear()}
+              onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              value={formData.description || ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              placeholder="Enter experiment description"
+            />
+          </div>
+          <div>
+            <ImageUploader
+              currentImage={formData.imagePath}
+              onImageChange={(imagePath) => setFormData({ ...formData, imagePath })}
+              directory="experiments"
+              label="Experiment Image"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              PDF Link (URL or upload)
+            </label>
+            <input
+              type="text"
+              value={formData.pdfPath || ''}
+              onChange={(e) => setFormData({ ...formData, pdfPath: e.target.value })}
+              placeholder="Enter PDF URL or upload file"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
+            />
+            <input
+              type="file"
+              accept="application/pdf"
+              onChange={handlePDFUpload}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+          </div>
+          <div className="flex gap-2 pt-4">
+            <button
+              onClick={handleSave}
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+            >
+              Save
+            </button>
+            <button
+              onClick={handleCancel}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
+            >
+              Cancel
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
 
       <div className="space-y-3">
         {experiments.map((experiment) => (

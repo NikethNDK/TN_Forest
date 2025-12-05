@@ -22,9 +22,6 @@ import {
   addContentBlock,
   updateContentBlock,
   deleteContentBlock,
-  updateMissionVision,
-  addCustomBox,
-  deleteCustomBox,
   updateGalleryImages,
   addUsefulLink,
   updateUsefulLink,
@@ -102,21 +99,6 @@ const AdminHome: React.FC = () => {
     });
   };
 
-  // Mission & Vision
-  const handleMissionVisionUpdate = (mission: string, vision: string) => {
-    const updated = updateMissionVision(mission, vision);
-    setHomeContent({ ...homeContent, missionVision: updated });
-  };
-
-  const handleCustomBoxAdd = (box: { id: string; title: string; content: string }) => {
-    const updated = addCustomBox(box);
-    setHomeContent({ ...homeContent, missionVision: { ...homeContent.missionVision, customBoxes: updated } });
-  };
-
-  const handleCustomBoxDelete = (id: string) => {
-    const updated = deleteCustomBox(id);
-    setHomeContent({ ...homeContent, missionVision: { ...homeContent.missionVision, customBoxes: updated } });
-  };
 
   // Gallery
   const handleGalleryImageAdd = (imagePath: string) => {
@@ -139,12 +121,10 @@ const AdminHome: React.FC = () => {
   };
 
   const sections = [
-    { id: 'slider', label: 'Slider Images', icon: Image },
+    { id: 'slider', label: 'Rotating Images', icon: Image },
     { id: 'news', label: 'Latest News', icon: FileText },
     { id: 'events', label: 'Latest Events', icon: Calendar },
-    { id: 'content', label: 'Content Area', icon: FileText },
-    { id: 'mission', label: 'Mission & Vision', icon: FileText },
-    { id: 'gallery', label: 'Gallery Highlights', icon: Image },
+    { id: 'gallery', label: 'Gallery Carousel', icon: Image },
     { id: 'links', label: 'Useful Links', icon: LinkIcon },
   ];
 
@@ -154,7 +134,7 @@ const AdminHome: React.FC = () => {
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-green-900">Rotating Slider Images</h3>
+              <h3 className="text-xl font-bold text-green-900">Rotating Image Strip</h3>
               <div className="text-sm text-gray-600">
                 {homeContent.sliderImages.length} images
               </div>
@@ -261,105 +241,13 @@ const AdminHome: React.FC = () => {
           </div>
         );
 
-      case 'mission':
-        return (
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h3 className="text-xl font-bold text-green-900 mb-4">Mission & Vision Boxes</h3>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mission Title
-                  </label>
-                  <input
-                    type="text"
-                    value={homeContent.missionVision.mission.title}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mission Content
-                  </label>
-                  <textarea
-                    value={homeContent.missionVision.mission.content}
-                    onChange={(e) => handleMissionVisionUpdate(e.target.value, homeContent.missionVision.vision.content)}
-                    rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vision Title
-                  </label>
-                  <input
-                    type="text"
-                    value={homeContent.missionVision.vision.title}
-                    readOnly
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Vision Content
-                  </label>
-                  <textarea
-                    value={homeContent.missionVision.vision.content}
-                    onChange={(e) => handleMissionVisionUpdate(homeContent.missionVision.mission.content, e.target.value)}
-                    rows={6}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-green-900">Custom Boxes</h3>
-                <button
-                  onClick={() => {
-                    const newBox = {
-                      id: `box-${Date.now()}`,
-                      title: '',
-                      content: ''
-                    };
-                    handleCustomBoxAdd(newBox);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Custom Box
-                </button>
-              </div>
-              <div className="space-y-3">
-                {homeContent.missionVision.customBoxes.map((box) => (
-                  <div key={box.id} className="border border-gray-200 rounded-lg p-4">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-green-900 mb-2">{box.title || 'Untitled Box'}</h4>
-                        <p className="text-gray-600 text-sm">{box.content || 'No content'}</p>
-                      </div>
-                      <button
-                        onClick={() => handleCustomBoxDelete(box.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-
       case 'gallery':
         return (
           <div className="space-y-6">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-green-900">Gallery Highlights (Max 10 images)</h3>
+              <h3 className="text-xl font-bold text-green-900">Gallery Carousel Images</h3>
               <div className="text-sm text-gray-600">
-                {homeContent.galleryImages.length} / 10 images
+                {homeContent.galleryImages.length} images
               </div>
             </div>
             <div className="bg-white rounded-lg shadow-lg p-6">

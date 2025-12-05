@@ -1,33 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Plus, Edit, Trash2, MapPin, Phone, Mail } from 'lucide-react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Plus, Edit, Trash2, Phone } from 'lucide-react';
 import {
   getDivision,
   updateDivisionHeading,
-  getResearchCenter,
   addResearchCenter,
   updateResearchCenter,
   deleteResearchCenter,
-  addExperiment,
-  updateExperiment,
-  deleteExperiment,
   updateTollFreeNumber,
   getTollFreeNumber
 } from '../../services/admin/adminDataService';
 import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
 import CustomFieldEditor, { CustomField } from '../../components/admin/CustomFieldEditor';
-import ExperimentEditor from '../../components/admin/ExperimentEditor';
 import ImageUploader from '../../components/admin/ImageUploader';
-import type { ResearchCenter, Experiment, Coordinates } from '../../types';
+import Modal from '../../components/admin/Modal';
+import type { ResearchCenter, Coordinates } from '../../types';
 
 const AdminDivision: React.FC = () => {
   const { divisionSlug } = useParams<{ divisionSlug: string }>();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const division = divisionSlug ? getDivision(divisionSlug) : undefined;
   
   const [divisionHeading, setDivisionHeading] = useState(division?.name || '');
-  const [divisionDescription, setDivisionDescription] = useState(division?.description || '');
   const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
-  const [selectedCenter, setSelectedCenter] = useState<ResearchCenter | null>(null);
   const [editingCenter, setEditingCenter] = useState<ResearchCenter | null>(null);
   const [showCenterForm, setShowCenterForm] = useState(false);
   const [tollFreeNumber, setTollFreeNumber] = useState(getTollFreeNumber());
@@ -46,13 +42,47 @@ const AdminDivision: React.FC = () => {
   useEffect(() => {
     if (division) {
       setDivisionHeading(division.name);
-      setDivisionDescription(division.description || '');
     }
   }, [division]);
 
+  const handleEditCenter = (center: ResearchCenter) => {
+    const customFields: CustomField[] = [];
+    if (center.area) customFields.push({ id: 'area', label: 'Area', value: center.area });
+    if (center.district) customFields.push({ id: 'district', label: 'District', value: center.district });
+    if (center.range) customFields.push({ id: 'range', label: 'Range', value: center.range });
+
+    setCenterFormData({
+      name: center.name,
+      location: center.location,
+      description: center.description || '',
+      coordinates: center.coordinates,
+      image: '',
+      customFields,
+      phone: '',
+      email: ''
+    });
+    setEditingCenter(center);
+    setShowCenterForm(true);
+  };
+
+  // Check if we need to open edit modal from query param
+  useEffect(() => {
+    const editCenterId = searchParams.get('editCenter');
+    if (editCenterId && divisionSlug && division) {
+      const centerId = parseInt(editCenterId);
+      const center = division.researchCenters?.find(c => c.id === centerId);
+      if (center) {
+        handleEditCenter(center);
+        // Remove query param
+        setSearchParams({});
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, divisionSlug, division]);
+
   const handleDivisionHeadingUpdate = () => {
     if (divisionSlug) {
-      updateDivisionHeading(divisionSlug, divisionHeading, divisionDescription);
+      updateDivisionHeading(divisionSlug, divisionHeading, '');
     }
   };
 
@@ -76,25 +106,6 @@ const AdminDivision: React.FC = () => {
     setShowCenterForm(true);
   };
 
-  const handleEditCenter = (center: ResearchCenter) => {
-    const customFields: CustomField[] = [];
-    if (center.area) customFields.push({ id: 'area', label: 'Area', value: center.area });
-    if (center.district) customFields.push({ id: 'district', label: 'District', value: center.district });
-    if (center.range) customFields.push({ id: 'range', label: 'Range', value: center.range });
-
-    setCenterFormData({
-      name: center.name,
-      location: center.location,
-      description: center.description,
-      coordinates: center.coordinates,
-      image: '',
-      customFields,
-      phone: '',
-      email: ''
-    });
-    setEditingCenter(center);
-    setShowCenterForm(true);
-  };
 
   const handleSaveCenter = () => {
     if (!centerFormData.name || !centerFormData.location) {
@@ -126,15 +137,18 @@ const AdminDivision: React.FC = () => {
 
     if (editingCenter) {
       updateResearchCenter(divisionSlug, editingCenter.id, centerData);
+      handleCancelCenter();
     } else {
+      // Add new center
       addResearchCenter(divisionSlug, centerData as Omit<ResearchCenter, 'id'>);
-    }
-
-    handleCancelCenter();
-    // Refresh division data
-    const updatedDivision = getDivision(divisionSlug);
-    if (updatedDivision) {
-      setSelectedCenter(null);
+      // Get the newly added center (it will have the highest ID)
+      const updatedDivision = getDivision(divisionSlug);
+      if (updatedDivision && updatedDivision.researchCenters) {
+        const newCenter = updatedDivision.researchCenters[updatedDivision.researchCenters.length - 1];
+        handleCancelCenter();
+        // Navigate to the new research center page
+        navigate(`/admin/divisions/${divisionSlug}/centers/${newCenter.id}`);
+      }
     }
   };
 
@@ -157,17 +171,7 @@ const AdminDivision: React.FC = () => {
     if (window.confirm('Are you sure you want to delete this research center? All experiments will also be deleted.')) {
       if (divisionSlug) {
         deleteResearchCenter(divisionSlug, centerId);
-        if (selectedCenter?.id === centerId) {
-          setSelectedCenter(null);
-        }
       }
-    }
-  };
-
-  const handleExperimentsChange = (experiments: Experiment[]) => {
-    if (selectedCenter && divisionSlug) {
-      updateResearchCenter(divisionSlug, selectedCenter.id, { experiments });
-      setSelectedCenter({ ...selectedCenter, experiments });
     }
   };
 
@@ -196,35 +200,19 @@ const AdminDivision: React.FC = () => {
         {/* Division Heading */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-bold text-green-900 mb-4">Division Heading</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Heading
-              </label>
-              <input
-                type="text"
-                value={divisionHeading}
-                onChange={(e) => {
-                  setDivisionHeading(e.target.value);
-                  handleDivisionHeadingUpdate();
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                value={divisionDescription}
-                onChange={(e) => {
-                  setDivisionDescription(e.target.value);
-                  handleDivisionHeadingUpdate();
-                }}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Heading
+            </label>
+            <input
+              type="text"
+              value={divisionHeading}
+              onChange={(e) => {
+                setDivisionHeading(e.target.value);
+                handleDivisionHeadingUpdate();
+              }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
           </div>
         </div>
 
@@ -249,134 +237,141 @@ const AdminDivision: React.FC = () => {
             </button>
           </div>
 
-          {/* Research Center Form */}
-          {showCenterForm && (
-            <div className="mb-6 p-6 bg-gray-50 rounded-lg border-2 border-green-200">
-              <h3 className="font-semibold text-green-900 mb-4">
-                {editingCenter ? 'Edit' : 'Add'} Research Center
-              </h3>
-              <div className="space-y-4">
+          {/* Research Center Form Modal */}
+          <Modal
+            isOpen={showCenterForm}
+            onClose={handleCancelCenter}
+            title={editingCenter ? 'Edit Research Center' : 'Add Research Center'}
+            size="xl"
+          >
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  value={centerFormData.name}
+                  onChange={(e) => setCenterFormData({ ...centerFormData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="e.g., Thoppur Modern Nursery Centre"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Location *
+                </label>
+                <input
+                  type="text"
+                  value={centerFormData.location}
+                  onChange={(e) => setCenterFormData({ ...centerFormData, location: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="e.g., Thoppur RF, Dharmapuri"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Name *
+                    Latitude
                   </label>
                   <input
-                    type="text"
-                    value={centerFormData.name}
-                    onChange={(e) => setCenterFormData({ ...centerFormData, name: e.target.value })}
+                    type="number"
+                    step="any"
+                    value={centerFormData.coordinates.lat}
+                    onChange={(e) => setCenterFormData({
+                      ...centerFormData,
+                      coordinates: { ...centerFormData.coordinates, lat: parseFloat(e.target.value) || 0 }
+                    })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="11.96828"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Location *
+                    Longitude
                   </label>
                   <input
-                    type="text"
-                    value={centerFormData.location}
-                    onChange={(e) => setCenterFormData({ ...centerFormData, location: e.target.value })}
+                    type="number"
+                    step="any"
+                    value={centerFormData.coordinates.lng}
+                    onChange={(e) => setCenterFormData({
+                      ...centerFormData,
+                      coordinates: { ...centerFormData.coordinates, lng: parseFloat(e.target.value) || 0 }
+                    })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="78.05200"
                   />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Latitude
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={centerFormData.coordinates.lat}
-                      onChange={(e) => setCenterFormData({
-                        ...centerFormData,
-                        coordinates: { ...centerFormData.coordinates, lat: parseFloat(e.target.value) || 0 }
-                      })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Longitude
-                    </label>
-                    <input
-                      type="number"
-                      step="any"
-                      value={centerFormData.coordinates.lng}
-                      onChange={(e) => setCenterFormData({
-                        ...centerFormData,
-                        coordinates: { ...centerFormData.coordinates, lng: parseFloat(e.target.value) || 0 }
-                      })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <ImageUploader
-                    currentImage={centerFormData.image}
-                    onImageChange={(imagePath) => setCenterFormData({ ...centerFormData, image: imagePath })}
-                    directory="centers"
-                    label="Center Image"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={centerFormData.description}
-                    onChange={(e) => setCenterFormData({ ...centerFormData, description: e.target.value })}
-                    rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <CustomFieldEditor
-                    fields={centerFormData.customFields}
-                    onFieldsChange={(fields) => setCenterFormData({ ...centerFormData, customFields: fields })}
-                    label="Custom Fields (Area, District, Range, etc.)"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="text"
-                      value={centerFormData.phone}
-                      onChange={(e) => setCenterFormData({ ...centerFormData, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={centerFormData.email}
-                      onChange={(e) => setCenterFormData({ ...centerFormData, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSaveCenter}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={handleCancelCenter}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                  >
-                    Cancel
-                  </button>
                 </div>
               </div>
+              <div>
+                <ImageUploader
+                  currentImage={centerFormData.image}
+                  onImageChange={(imagePath) => setCenterFormData({ ...centerFormData, image: imagePath })}
+                  directory="centers"
+                  label="Center Image (Optional)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description (Optional)
+                </label>
+                <textarea
+                  value={centerFormData.description}
+                  onChange={(e) => setCenterFormData({ ...centerFormData, description: e.target.value })}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter center description (optional)"
+                />
+              </div>
+              <div>
+                <CustomFieldEditor
+                  fields={centerFormData.customFields}
+                  onFieldsChange={(fields) => setCenterFormData({ ...centerFormData, customFields: fields })}
+                  label="Custom Fields (Area, District, Range, etc.)"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    value={centerFormData.phone}
+                    onChange={(e) => setCenterFormData({ ...centerFormData, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., 0442-27514565"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={centerFormData.email}
+                    onChange={(e) => setCenterFormData({ ...centerFormData, email: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    placeholder="e.g., research@tnfrd.gov.in"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <button
+                  onClick={handleSaveCenter}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={handleCancelCenter}
+                  className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
-          )}
+          </Modal>
 
           {/* Research Centers List */}
           <div className="space-y-4 mb-6">
@@ -384,13 +379,15 @@ const AdminDivision: React.FC = () => {
               <div
                 key={center.id}
                 className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => setSelectedCenter(center)}
+                onClick={() => navigate(`/admin/divisions/${divisionSlug}/centers/${center.id}`)}
               >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <h3 className="font-semibold text-green-900 mb-2">{center.name}</h3>
                     <p className="text-sm text-gray-600 mb-2">{center.location}</p>
-                    <p className="text-sm text-gray-500 line-clamp-2">{center.description}</p>
+                    {center.description && (
+                      <p className="text-sm text-gray-500 line-clamp-2">{center.description}</p>
+                    )}
                   </div>
                   <div className="flex gap-2 ml-4">
                     <button
@@ -399,6 +396,7 @@ const AdminDivision: React.FC = () => {
                         handleEditCenter(center);
                       }}
                       className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      title="Edit"
                     >
                       <Edit className="h-4 w-4" />
                     </button>
@@ -408,6 +406,7 @@ const AdminDivision: React.FC = () => {
                         handleDeleteCenter(center.id);
                       }}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -422,25 +421,6 @@ const AdminDivision: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* Selected Center Details */}
-          {selectedCenter && (
-            <div className="border-t border-gray-200 pt-6 mt-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-green-900">{selectedCenter.name}</h3>
-                <button
-                  onClick={() => setSelectedCenter(null)}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  Close
-                </button>
-              </div>
-              <ExperimentEditor
-                experiments={selectedCenter.experiments || []}
-                onExperimentsChange={handleExperimentsChange}
-              />
-            </div>
-          )}
         </div>
 
         {/* Toll-Free Number */}
