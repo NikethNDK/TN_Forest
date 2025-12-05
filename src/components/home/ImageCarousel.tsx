@@ -1,33 +1,38 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 
-// Import all images from assets
-import AlwarmalaiImage from '../../assets/Alwarmalai.jpeg';
-import EdaikkalImage from '../../assets/Edaikkal.jpeg';
-import HarurMNCImage from '../../assets/Harur MNC.jpeg';
-import JamunamarathurImage from '../../assets/Jamunamarathur.jpeg';
-import KalamavoorImage from '../../assets/Kalamavoor.jpeg';
-import KathiripuramImage from '../../assets/Kathiripuram.jpeg';
-import MaragattaImage from '../../assets/Maragatta.jpeg';
-import MelchengamImage from '../../assets/Melchengam.jpeg';
-import ThoppurImage from '../../assets/Thoppur.jpeg';
-import ValkaraduImage from '../../assets/Valkaradu.jpeg';
-
 const ImageCarousel: React.FC = () => {
+  // All images from public/gallery subfolders
   const images: string[] = [
-    AlwarmalaiImage,
-    EdaikkalImage,
-    HarurMNCImage,
-    JamunamarathurImage,
-    KalamavoorImage,
-    KathiripuramImage,
-    MaragattaImage,
-    MelchengamImage,
-    ThoppurImage,
-    ValkaraduImage
+    // Website - MND - Gallery - Melchengam (6 images)
+    '/gallery/Website - MND - Gallery -  Melchengam/Adina cordifolia - Melchengam.jpg',
+    '/gallery/Website - MND - Gallery -  Melchengam/Aegle marmalos - Melchengam.jpg',
+    '/gallery/Website - MND - Gallery -  Melchengam/Albizzia richardiana - Melchengam.jpg',
+    '/gallery/Website - MND - Gallery -  Melchengam/Automatic Weather Station - Melchengam.jpg',
+    '/gallery/Website - MND - Gallery -  Melchengam/Boswellia serrata - Melchengam.jpg',
+    '/gallery/Website - MND - Gallery -  Melchengam/Terminalia chebula - Melchengam.jpg',
+    // Website - MND - Gallery - Edaikkal (3 images)
+    '/gallery/Website - MND - Gallery - Edaikkal/Hildegardia populifolia - Critically Endangered - Edaikkal.jpg',
+    '/gallery/Website - MND - Gallery - Edaikkal/Syzygium cuminii - Edaikkal.jpg',
+    '/gallery/Website - MND - Gallery - Edaikkal/Terminalia chebula - Edaikkal.jpg',
+    // Website - MND - Gallery - Jamunamarathur (7 images)
+    '/gallery/Website - MND - Gallery - Jamunamarathur/Bambusa tulda - Jamunamarathur.jpg',
+    '/gallery/Website - MND - Gallery - Jamunamarathur/Bambusa tulda - Jamunamarathur(1).jpg',
+    '/gallery/Website - MND - Gallery - Jamunamarathur/Bambusa vulgaris - Jamunamarathur.jpg',
+    '/gallery/Website - MND - Gallery - Jamunamarathur/Melia dubia - Jamunamarathur (1).jpg',
+    '/gallery/Website - MND - Gallery - Jamunamarathur/Melia dubia - Jamunamarathur (2).jpg',
+    '/gallery/Website - MND - Gallery - Jamunamarathur/Sapindus emarginatus - Jamunamarathur.jpg',
+    '/gallery/Website - MND - Gallery - Jamunamarathur/Terminalia chebula - Jamunamarathur.jpg',
+    // Website - MND - Gallery - Vermicasting Production (2 images)
+    '/gallery/Website - MND - Gallery - Vermicasting Production/Vermicasting Production Shed.jpg',
+    '/gallery/Website - MND - Gallery - Vermicasting Production/Vermicasting Production Tubs.jpg'
   ];
 
   const [featuredIndex, setFeaturedIndex] = useState<number>(0);
-  const [gridIndices, setGridIndices] = useState<number[]>([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+  const [gridIndices, setGridIndices] = useState<number[]>(() => {
+    // Initialize grid with 9 random images (excluding index 0 which is featured)
+    const availableIndices = Array.from({ length: images.length - 1 }, (_, i) => i + 1);
+    return availableIndices.sort(() => Math.random() - 0.5).slice(0, 9);
+  });
   const featuredIndexRef = useRef<number>(0);
 
   useEffect(() => {
@@ -36,16 +41,20 @@ const ImageCarousel: React.FC = () => {
 
   const rotateFeatured = useCallback(() => {
     setGridIndices((prevGrid) => {
-      const randomIndex = Math.floor(Math.random() * prevGrid.length);
-      const selectedGridIndex = prevGrid[randomIndex];
+      // Pick a random image from ALL images (0-17) to be the new featured image
+      const allIndices = Array.from({ length: images.length }, (_, i) => i);
+      const availableForFeatured = allIndices.filter(idx => idx !== featuredIndexRef.current);
+      const newFeaturedIndex = availableForFeatured[Math.floor(Math.random() * availableForFeatured.length)];
       
+      // Replace a random grid position with the old featured image
+      const randomGridPosition = Math.floor(Math.random() * prevGrid.length);
       const newGrid = [...prevGrid];
-      newGrid[randomIndex] = featuredIndexRef.current;
+      newGrid[randomGridPosition] = featuredIndexRef.current;
       
-      setFeaturedIndex(selectedGridIndex);
+      setFeaturedIndex(newFeaturedIndex);
       return newGrid;
     });
-  }, []);
+  }, [images.length]);
 
   const handleGridImageClick = (gridImageIndex: number, gridPosition: number): void => {
     setGridIndices((prevGrid) => {

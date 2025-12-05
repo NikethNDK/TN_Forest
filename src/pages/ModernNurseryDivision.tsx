@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 're
 import type { ResearchCenter, Experiment, Coordinates } from '../types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import ImageCarousel from '../components/home/ImageCarousel';
 
 // Fix for default marker icon in React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -543,6 +544,11 @@ const ModernNurseryDivision: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Image Gallery Carousel */}
+        <div className="mt-16">
+          <ImageCarousel />
         </div>
 
         {/* Toll Free Number Box */}
