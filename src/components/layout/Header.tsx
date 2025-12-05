@@ -22,7 +22,7 @@ const Header: React.FC = () => {
         
         {/* Title */}
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-white mb-2 sm:mb-3 md:mb-4 px-1 leading-tight drop-shadow-lg">
-          Tamil Nadu Forest Department Research Wing
+          TAMIL NADU FOREST DEPARTMENT - RESEARCH WING
         </h1>
         
         {/* Subtitle */}

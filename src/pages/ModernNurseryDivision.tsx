@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 're
 import type { ResearchCenter, Experiment, Coordinates } from '../types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import ImageCarousel from '../components/home/ImageCarousel';
 
 // Fix for default marker icon in React
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -447,7 +448,7 @@ const ModernNurseryDivision: React.FC = () => {
                 {/* MODERN NURSERY DIVISION AT A GLANCE */}
                 <div className="bg-white rounded-lg shadow-lg p-8">
                   {/* Introduction Section */}
-                  <div className="mb-8">
+                  {/* <div className="mb-8">
                     <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
                       Historical Background
                     </h3>
@@ -462,20 +463,18 @@ const ModernNurseryDivision: React.FC = () => {
                         Parallelly, the Transfer Technology Division was dedicated to educating farmers about innovative forestry technologies. This involved organizing workshops, field demonstrations, and training sessions to ensure that farmers were well-informed about the latest advancements in tree cultivation.
                       </p>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Formation Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
                     <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
-                      Formation of Modern Nursery Division
+                     Background 
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
                       <p className="text-justify">
-                        Following the closure of the Tamil Nadu Agricultural Development Programme scheme on <strong>March 30, 1998</strong>, effective <strong>April 1, 1999</strong>, several centers across diverse agro-climatic zones were brought under a new entity known as the <strong>Modern Nursery Division</strong> (for short hereinafter Division), headquartered in Dharmapuri. This was formalized by <strong>G.O.M.S.No.54</strong> issued by the Environment and Forests Department on <strong>February 26, 1999</strong>.
+                        The <strong>Modern Nursery Division</strong> (for short hereinafter Division), headquartered in Dharmapuri was formalized by <strong>G.O.M.S.No.54</strong> issued by the Environment and Forests Department on <strong>February 26, 1999</strong>.
                       </p>
-                      <p className="text-justify">
-                        Importantly, this restructuring did not create any new positions; instead, personnel were redeployed from existing Divisions and Circles. This ensured continuity in operations while optimizing resource allocation to meet the evolving needs.
-                      </p>
+                      
                       <p className="text-justify">
                         The formation of the Division marked a significant step towards improving the infrastructure for quality seedling production and distribution in Tamil Nadu. By focusing on modern nursery practices, the Division aims to enhance the quality of planting material available to the stake holders. Furthermore, it marked a significant milestone in the Tamil Nadu Forest Department in the areas of research and production of Biofertilizers. Under a single Division it facilitated a more cohesive approach to research, development, production and technology transfer, ultimately benefiting the forest department, line departments and agricultural community at large.
                       </p>
@@ -485,13 +484,9 @@ const ModernNurseryDivision: React.FC = () => {
                   {/* Administrative History Section */}
                   <div className="mb-8 border-t border-gray-200 pt-8">
                     <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
-                      Administrative History
+                      Administrative Setup
                     </h3>
-                    <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
-                      <p className="text-justify">
-                        Initially the division was established in 1999 under the supervision of the <strong>Research Circle, Chennai</strong>. In line with <strong>G.O.(Ms) No.149</strong> of the Environment and Forest (FR. Spl.B) Department, dated <strong>November 14, 2011</strong>, the division was brought under the administrative control the <strong>Genetics Circle in Coimbatore</strong>, and later on again brought and continue to function under the control of <strong>Research circle, Chennai</strong>.
-                      </p>
-                    </div>
+                    
                   </div>
 
                   {/* Focus Areas Image Section */}
@@ -526,7 +521,7 @@ const ModernNurseryDivision: React.FC = () => {
                     </h3>
                     <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
                       <p className="text-justify">
-                        To further our commitment to quality, the Bio-Fertilizers Research and Production Unit received <strong>ISO certification in July 2013</strong>, affirming our adherence to rigorous standards. This certification applies to the laboratory and production facilities for VAM and vermicompost across five Modern Nursery Centres: <strong>Thoppur, Harur, Kalamavoor, Valkaradu, and Alwarmalai</strong>.
+                        To further our commitment to quality, the Bio-Fertilizers Research and Production Units are <strong>ISO 9001:2015</strong> certified, affirming our adherence to rigorous standards. This certification applies to the production facilities for Biofertilizer production at Dharmapuri and VAM and Vermicompost across five Modern Nursery Centres: <strong>Thoppur, Harur, Kalamavoor, Valkaradu, and Alwarmalai</strong>.
                       </p>
                     </div>
                   </div>
@@ -541,7 +536,7 @@ const ModernNurseryDivision: React.FC = () => {
                         Additionally, a <strong>Forest Tree Seed Centre</strong> was established at <strong>M.R.Palayam</strong> to ensure availability of forest tree seeds for current and future needs. This initiative aims to provide high-quality, purified seeds to the Forest Department, as well as to farmers, industries, sister departments, and other stakeholders.
                       </p>
                       <p className="text-justify">
-                        The formation of this seed centre was announced by the <strong>Honorable Chief Minister of Tamil Nadu</strong> on <strong>August 11, 2016</strong>, during a session of the Tamil Nadu State Assembly. Following this, <strong>G.O. No. 97</strong> was issued by the Environment and Forests (FRIV) Department on <strong>April 20, 2017</strong>, formalizing the establishment.
+                        The formation of this seed centre was announced on <strong>August 11, 2016</strong>, on the floor of the Tamil Nadu State Assembly. The issuance of <strong>G.O. No. 97</strong> Tamil Nadu Forest Department Research WingEnvironment and Forests (FRIV) Department on <strong>April 20, 2017</strong>, formalized the establishment.
                       </p>
                     </div>
                   </div>
@@ -549,6 +544,11 @@ const ModernNurseryDivision: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Image Gallery Carousel */}
+        <div className="mt-16">
+          <ImageCarousel />
         </div>
 
         {/* Toll Free Number Box */}
