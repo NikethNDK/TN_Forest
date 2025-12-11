@@ -1,68 +1,137 @@
-import React, { useState } from 'react';
-import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Users, Loader2 } from 'lucide-react';
 import {
-  getFacultyContent,
+  subscribeToFaculty,
   addFacultyMember,
   updateFacultyMember,
-  deleteFacultyMember
-} from '../../services/admin/adminDataService';
+  deleteFacultyMember,
+  swapFacultyOrder
+} from '../../services/firebase/facultyService';
+import type { FacultyMember } from '../../types';
 import Modal from '../../components/admin/Modal';
 
 const AdminFaculty: React.FC = () => {
-  const [facultyContent, setFacultyContent] = useState(getFacultyContent());
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [facultyMembers, setFacultyMembers] = useState<FacultyMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', position: '' });
   const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Subscribe to real-time faculty updates
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    const unsubscribe = subscribeToFaculty(
+      (members) => {
+        setFacultyMembers(members);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+
+    // Cleanup: unsubscribe when component unmounts
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const handleAddMember = () => {
     setFormData({ name: '', position: '' });
-    setEditingIndex(null);
+    setEditingId(null);
     setShowForm(true);
   };
 
-  const handleEditMember = (index: number) => {
-    setFormData(facultyContent.members[index]);
-    setEditingIndex(index);
-    setShowForm(true);
+  const handleEditMember = (id: string) => {
+    const member = facultyMembers.find(m => m.id === id);
+    if (member) {
+      setFormData({ name: member.name, position: member.position });
+      setEditingId(id);
+      setShowForm(true);
+    }
   };
 
-  const handleSaveMember = () => {
+  const handleSaveMember = async () => {
     if (!formData.name.trim() || !formData.position.trim()) {
       alert('Please fill in all required fields');
       return;
     }
 
-    if (editingIndex !== null) {
-      const updated = updateFacultyMember(editingIndex, formData);
-      setFacultyContent({ ...facultyContent, members: updated });
-    } else {
-      const updated = addFacultyMember(formData);
-      setFacultyContent({ ...facultyContent, members: updated });
+    try {
+      setSaving(true);
+      setError(null);
+
+      if (editingId) {
+        await updateFacultyMember(editingId, formData);
+      } else {
+        await addFacultyMember(formData);
+      }
+
+      // No need to refresh - real-time listener will update automatically
+      handleCancelMember();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save faculty member');
+      console.error('Error saving faculty member:', err);
+    } finally {
+      setSaving(false);
     }
-    handleCancelMember();
   };
 
   const handleCancelMember = () => {
     setFormData({ name: '', position: '' });
-    setEditingIndex(null);
+    setEditingId(null);
     setShowForm(false);
+    setError(null);
   };
 
-  const handleDeleteMember = (index: number) => {
-    if (window.confirm('Are you sure you want to delete this faculty member?')) {
-      const updated = deleteFacultyMember(index);
-      setFacultyContent({ ...facultyContent, members: updated });
+  const handleDeleteMember = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this faculty member?')) {
+      return;
+    }
+
+    try {
+      setError(null);
+      await deleteFacultyMember(id);
+      // No need to refresh - real-time listener will update automatically
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete faculty member');
+      console.error('Error deleting faculty member:', err);
     }
   };
 
-  const handleMoveMember = (index: number, direction: 'up' | 'down') => {
+  const handleMoveMember = async (index: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= facultyContent.members.length) return;
+    if (newIndex < 0 || newIndex >= facultyMembers.length) return;
 
-    const updated = [...facultyContent.members];
-    [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
-    setFacultyContent({ ...facultyContent, members: updated });
+    try {
+      setError(null);
+      const currentMember = facultyMembers[index];
+      const targetMember = facultyMembers[newIndex];
+      
+      await swapFacultyOrder(currentMember.id, targetMember.id);
+      // No need to refresh - real-time listener will update automatically
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reorder faculty members');
+      console.error('Error reordering faculty:', err);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+          <span className="ml-3 text-gray-600">Loading faculty members...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -70,6 +139,12 @@ const AdminFaculty: React.FC = () => {
         <h1 className="text-4xl font-bold text-green-900 mb-2">Faculty Page Management</h1>
         <p className="text-gray-600">Manage faculty members and leadership team</p>
       </div>
+
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          {error}
+        </div>
+      )}
 
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="flex justify-between items-center mb-6">
@@ -89,7 +164,7 @@ const AdminFaculty: React.FC = () => {
         <Modal
           isOpen={showForm}
           onClose={handleCancelMember}
-          title={editingIndex !== null ? 'Edit Faculty Member' : 'Add Faculty Member'}
+          title={editingId !== null ? 'Edit Faculty Member' : 'Add Faculty Member'}
           size="md"
         >
           <div className="space-y-4">
@@ -103,6 +178,7 @@ const AdminFaculty: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="e.g., Thiru R.S.Rajakannappan"
+                disabled={saving}
               />
             </div>
             <div>
@@ -115,18 +191,22 @@ const AdminFaculty: React.FC = () => {
                 onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="e.g., Hon'ble Minister for Forests"
+                disabled={saving}
               />
             </div>
             <div className="flex gap-2 pt-4">
               <button
                 onClick={handleSaveMember}
-                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
+                {saving && <Loader2 className="h-4 w-4 animate-spin" />}
                 Save
               </button>
               <button
                 onClick={handleCancelMember}
-                className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -135,9 +215,9 @@ const AdminFaculty: React.FC = () => {
         </Modal>
 
         <div className="space-y-4">
-          {facultyContent.members.map((member: { name: string; position: string }, index: number) => (
+          {facultyMembers.map((member, index) => (
             <div
-              key={index}
+              key={member.id}
               className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-start justify-between">
@@ -153,7 +233,7 @@ const AdminFaculty: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleMoveMember(index, 'down')}
-                      disabled={index === facultyContent.members.length - 1}
+                      disabled={index === facultyMembers.length - 1}
                       className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
                       title="Move down"
                     >
@@ -167,14 +247,14 @@ const AdminFaculty: React.FC = () => {
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleEditMember(index)}
+                    onClick={() => handleEditMember(member.id)}
                     className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                     title="Edit"
                   >
                     <Edit className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDeleteMember(index)}
+                    onClick={() => handleDeleteMember(member.id)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete"
                   >
@@ -185,7 +265,7 @@ const AdminFaculty: React.FC = () => {
             </div>
           ))}
 
-          {facultyContent.members.length === 0 && (
+          {facultyMembers.length === 0 && !loading && (
             <div className="text-center py-12 text-gray-500">
               <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <p>No faculty members yet. Click "Add Member" to create one.</p>

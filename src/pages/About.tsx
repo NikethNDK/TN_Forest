@@ -1,38 +1,35 @@
-import React from 'react';
-import { Target, Eye } from 'lucide-react';
-
-interface LeadershipMember {
-  name: string;
-  position: string;
-}
+import React, { useState, useEffect } from 'react';
+import { Target, Eye, Loader2 } from 'lucide-react';
+import FacultyCard from '../components/faculty/FacultyCard';
+import { subscribeToFaculty } from '../services/firebase/facultyService';
+import type { FacultyMember } from '../types';
 
 const About: React.FC = () => {
-  const leadershipMembers: LeadershipMember[] = [
-    {
-      name: "Thiru R.S.Rajakannappan",
-      position: "Hon'ble Minister for Forests"
-    },
-    {
-      name: "Tmt. Supriya Sahu, IAS",
-      position: "Additional Chief Secretary to Government, Environment, Climate Change and Forests Department"
-    },
-    {
-      name: "Thiru.Srinivas R. Reddy, IFS",
-      position: "Principal Chief Conservator of Forests (HoFF) & CEO, CAMPA (FAC)"
-    },
-    {
-      name: "Thiru Rakesh Kumar Dogra, IFS",
-      position: "Principal Chief Conservator of Forests and Chief Wildlife Warden & Principal Chief Conservator of Forests (Project Tiger) (FAC)"
-    },
-    {
-      name: "Thiru I Anwardeen, IFS",
-      position: "Principal Chief Conservator of Forests (Research and Education) Chennai"
-    },
-    {
-      name: "K.Geethanjali, IFS",
-      position: "Chief Conservator of Forests (Research), Chennai"
-    }
-  ];
+  const [facultyMembers, setFacultyMembers] = useState<FacultyMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    const unsubscribe = subscribeToFaculty(
+      (members) => {
+        setFacultyMembers(members);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+
+    // Cleanup: unsubscribe when component unmounts
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -104,36 +101,45 @@ const About: React.FC = () => {
       </section>
 
       {/* Leadership & Governance Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-green-900 mb-4">
+            <h2 className="text-2xl md:text-3xl font-medium text-gray-900 mb-2">
               Leadership & Governance
             </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              The distinguished leadership team guiding the Tamil Nadu Forest Department Research Wing
+            <p className="text-sm text-gray-500 max-w-xl mx-auto">
+              The distinguished leadership team of the Tamil Nadu Forest Department.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {leadershipMembers.map((member, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-xl p-8 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl"
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+              <span className="ml-3 text-gray-600">Loading faculty members...</span>
+            </div>
+          ) : error ? (
+            <div className="text-center py-12">
+              <p className="text-red-600 mb-4">Error loading faculty members: {error}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
               >
-                <div className="flex flex-col h-full">
-                  <h3 className="text-xl font-bold text-green-900 mb-3 leading-tight">
-                    {member.name}
-                  </h3>
-                  {member.position && (
-                    <p className="text-gray-700 leading-relaxed">
-                      {member.position}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+                Retry
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+              {facultyMembers.map((member) => (
+                <FacultyCard key={member.id} member={member} />
+              ))}
+            </div>
+          )}
+
+          {!loading && !error && facultyMembers.length === 0 && (
+            <div className="text-center py-12 text-gray-500">
+              <p>No faculty members available at this time.</p>
+            </div>
+          )}
         </div>
       </section>
     </div>
@@ -141,4 +147,3 @@ const About: React.FC = () => {
 };
 
 export default About;
-

@@ -185,6 +185,10 @@ let adminData: {
       {
         name: "Thiru I Anwardeen, IFS",
         position: "Principal Chief Conservator of Forests (Research and Education) Chennai"
+      },
+      {
+        name: "K.Geethanjali, IFS",
+        position: "Chief Conservator of Forests (Research), Chennai"
       }
     ]
   },

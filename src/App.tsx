@@ -4,7 +4,7 @@ import Layout from './components/layout/Layout';
 import QueryProvider from './providers/QueryProvider';
 import Home from './pages/Home';
 import About from './pages/About';
-import Faculty from './pages/Faculty';
+// import Faculty from './pages/Faculty';
 // import Information from './pages/Information';
 import Publication from './pages/Publication';
 import ContactUs from './pages/ContactUs';
@@ -50,7 +50,7 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/faculty" element={<Faculty />} />
+                {/* <Route path="/faculty" element={<Faculty />} /> */}
                 {/* <Route path="/information" element={<Information />} /> */}
                 <Route path="/publication" element={<Publication />} />
                 <Route path="/contact" element={<ContactUs />} />

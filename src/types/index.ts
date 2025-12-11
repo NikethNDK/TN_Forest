@@ -134,3 +134,13 @@ export interface ImportantLink {
   icon: string;
 }
 
+// Faculty Member type
+export interface FacultyMember {
+  id: string;  // Firestore document ID
+  name: string;
+  position: string;
+  order: number;
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
+}
+
