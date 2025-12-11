@@ -144,3 +144,11 @@ export interface FacultyMember {
   updatedAt?: any;  // Firestore Timestamp
 }
 
+// Mission Vision type
+export interface MissionVision {
+  mission: string;
+  vision: string;
+  updatedAt?: any;  // Firestore Timestamp
+  updatedBy?: string;
+}
+
