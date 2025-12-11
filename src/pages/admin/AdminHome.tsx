@@ -4,7 +4,6 @@ import {
   FileText, 
   Calendar, 
   Link as LinkIcon,
-  Plus,
   Trash2,
   ArrowUp,
   ArrowDown
@@ -12,21 +11,22 @@ import {
 import {
   getHomeContent,
   updateSliderImages,
-  addNews,
-  updateNews,
-  deleteNews,
-  addEvent,
-  updateEvent,
-  deleteEvent,
   updateContentArea,
   addContentBlock,
   updateContentBlock,
   deleteContentBlock,
-  updateGalleryImages,
-  addUsefulLink,
-  updateUsefulLink,
-  deleteUsefulLink
+  updateGalleryImages
 } from '../../services/admin/adminDataService';
+import {
+  subscribeToNews,
+  addNewsItem,
+  updateNewsItem,
+  deleteNewsItem,
+  subscribeToEvents,
+  addEventItem,
+  updateEventItem,
+  deleteEventItem
+} from '../../services/firebase/newsEventService';
 import ImageUploader from '../../components/admin/ImageUploader';
 import NewsEventEditor from '../../components/admin/NewsEventEditor';
 import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
@@ -36,6 +36,10 @@ import type { NewsItem, Event, ImportantLink } from '../../types';
 const AdminHome: React.FC = () => {
   const [homeContent, setHomeContent] = useState(getHomeContent());
   const [activeSection, setActiveSection] = useState<string>('slider');
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoadingNews, setIsLoadingNews] = useState(true);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
 
   // Slider Images
   const handleSliderImageAdd = (imagePath: string) => {
@@ -47,7 +51,7 @@ const AdminHome: React.FC = () => {
 
   const handleSliderImageRemove = (index: number) => {
     // Use confirmation dialog if needed, but for now just remove
-    const updated = homeContent.sliderImages.filter((_, i) => i !== index);
+    const updated = homeContent.sliderImages.filter((_: string, i: number) => i !== index);
     setHomeContent({ ...homeContent, sliderImages: updateSliderImages(updated) });
   };
 
@@ -60,14 +64,90 @@ const AdminHome: React.FC = () => {
     setHomeContent({ ...homeContent, sliderImages: updateSliderImages(updated) });
   };
 
-  // News
-  const handleNewsChange = (news: NewsItem[]) => {
-    setHomeContent({ ...homeContent, news });
+  // Subscribe to Firebase for real-time updates
+  useEffect(() => {
+    const unsubscribeNews = subscribeToNews(
+      (newsItems) => {
+        setNews(newsItems);
+        setIsLoadingNews(false);
+      },
+      (error) => {
+        console.error('Error in news subscription:', error);
+        setIsLoadingNews(false);
+      }
+    );
+
+    const unsubscribeEvents = subscribeToEvents(
+      (eventItems) => {
+        setEvents(eventItems);
+        setIsLoadingEvents(false);
+      },
+      (error) => {
+        console.error('Error in events subscription:', error);
+        setIsLoadingEvents(false);
+      }
+    );
+
+    return () => {
+      unsubscribeNews();
+      unsubscribeEvents();
+    };
+  }, []);
+
+  // News handlers
+  const handleAddNews = async (item: Omit<NewsItem, 'id' | 'createdAt' | 'updatedAt' | 'order'>) => {
+    try {
+      await addNewsItem(item);
+    } catch (error) {
+      console.error('Error adding news:', error);
+      throw error;
+    }
   };
 
-  // Events
-  const handleEventsChange = (events: Event[]) => {
-    setHomeContent({ ...homeContent, events });
+  const handleEditNews = async (id: string, updates: Partial<NewsItem>) => {
+    try {
+      await updateNewsItem(id, updates);
+    } catch (error) {
+      console.error('Error updating news:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteNews = async (id: string) => {
+    try {
+      await deleteNewsItem(id);
+    } catch (error) {
+      console.error('Error deleting news:', error);
+      throw error;
+    }
+  };
+
+  // Events handlers
+  const handleAddEvent = async (item: Omit<Event, 'id' | 'createdAt' | 'updatedAt' | 'order'>) => {
+    try {
+      await addEventItem(item);
+    } catch (error) {
+      console.error('Error adding event:', error);
+      throw error;
+    }
+  };
+
+  const handleEditEvent = async (id: string, updates: Partial<Event>) => {
+    try {
+      await updateEventItem(id, updates);
+    } catch (error) {
+      console.error('Error updating event:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    try {
+      await deleteEventItem(id);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      throw error;
+    }
   };
 
   // Content Area
@@ -78,8 +158,8 @@ const AdminHome: React.FC = () => {
 
   const handleContentBlocksChange = (blocks: ContentBlock[]) => {
     // Convert ContentBlock[] to the format expected by the service
-    blocks.forEach(block => {
-      const existing = homeContent.contentArea.blocks.find(b => b.id === block.id);
+    blocks.forEach((block: ContentBlock) => {
+      const existing = homeContent.contentArea.blocks.find((b: { id: string }) => b.id === block.id);
       if (existing) {
         updateContentBlock(block.id, { heading: block.heading, text: block.text, image: block.image });
       } else {
@@ -87,8 +167,8 @@ const AdminHome: React.FC = () => {
       }
     });
     // Remove deleted blocks
-    homeContent.contentArea.blocks.forEach(block => {
-      if (!blocks.find(b => b.id === block.id)) {
+    homeContent.contentArea.blocks.forEach((block: { id: string }) => {
+      if (!blocks.find((b: ContentBlock) => b.id === block.id)) {
         deleteContentBlock(block.id);
       }
     });
@@ -109,7 +189,7 @@ const AdminHome: React.FC = () => {
 
   const handleGalleryImageRemove = (index: number) => {
     // Use confirmation dialog if needed, but for now just remove
-    const updated = homeContent.galleryImages.filter((_, i) => i !== index);
+    const updated = homeContent.galleryImages.filter((_: string, i: number) => i !== index);
     setHomeContent({ ...homeContent, galleryImages: updateGalleryImages(updated) });
   };
 
@@ -146,7 +226,7 @@ const AdminHome: React.FC = () => {
                 />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-                {homeContent.sliderImages.map((image, index) => (
+                {homeContent.sliderImages.map((image: string, index: number) => (
                   <div key={index} className="relative group">
                     <img
                       src={image}
@@ -185,20 +265,26 @@ const AdminHome: React.FC = () => {
       case 'news':
         return (
           <NewsEventEditor
-            items={homeContent.news}
-            onItemsChange={handleNewsChange}
+            items={news}
+            onAdd={handleAddNews}
+            onEdit={handleEditNews}
+            onDelete={handleDeleteNews}
             title="Latest News"
             itemType="news"
+            isLoading={isLoadingNews}
           />
         );
 
       case 'events':
         return (
           <NewsEventEditor
-            items={homeContent.events}
-            onItemsChange={handleEventsChange}
+            items={events}
+            onAdd={handleAddEvent}
+            onEdit={handleEditEvent}
+            onDelete={handleDeleteEvent}
             title="Latest Events"
             itemType="event"
+            isLoading={isLoadingEvents}
           />
         );
 
@@ -259,7 +345,7 @@ const AdminHome: React.FC = () => {
                 </div>
               )}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
-                {homeContent.galleryImages.map((image, index) => (
+                {homeContent.galleryImages.map((image: string, index: number) => (
                   <div key={index} className="relative group">
                     <img
                       src={image}

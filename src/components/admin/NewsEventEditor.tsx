@@ -1,71 +1,154 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import type { NewsItem, Event } from '../../types';
 import Modal from './Modal';
+import ConfirmationDialog from '../common/ConfirmationDialog';
+import { useConfirmation } from '../../hooks/useConfirmation';
 
 interface NewsEventEditorProps<T extends NewsItem | Event> {
   items: T[];
-  onItemsChange: (items: T[]) => void;
+  onItemsChange?: (items: T[]) => void;  // Optional for backward compatibility
+  onAdd?: (item: Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'order'>) => Promise<void>;
+  onEdit?: (id: string, item: Partial<T>) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
   title: string;
   itemType: 'news' | 'event';
+  isLoading?: boolean;
 }
 
 const NewsEventEditor = <T extends NewsItem | Event>({
   items,
   onItemsChange,
+  onAdd,
+  onEdit,
+  onDelete,
   title,
-  itemType
+  itemType,
+  isLoading = false
 }: NewsEventEditorProps<T>) => {
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<T | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const confirmation = useConfirmation();
 
   const handleAdd = () => {
     const newItem = {
       date: '',
       title: '',
       excerpt: '',
-      link: ''
+      link: undefined
     } as T;
     setFormData(newItem);
-    setEditingIndex(null);
+    setEditingId(null);
     setShowForm(true);
   };
 
-  const handleEdit = (index: number) => {
-    setFormData({ ...items[index] });
-    setEditingIndex(index);
-    setShowForm(true);
-  };
-
-  const handleSave = () => {
-    if (!formData) return;
-
-    if (editingIndex !== null) {
-      const updated = [...items];
-      updated[editingIndex] = formData;
-      onItemsChange(updated);
-    } else {
-      onItemsChange([...items, formData]);
+  const handleEdit = (id: string) => {
+    const item = items.find(i => i.id === id);
+    if (item) {
+      setFormData({ ...item });
+      setEditingId(id);
+      setShowForm(true);
     }
-    handleCancel();
+  };
+
+  const handleSave = async () => {
+    if (!formData || !formData.title.trim()) return;
+
+    setIsSaving(true);
+    try {
+      if (editingId && onEdit) {
+        // Edit existing item
+        await onEdit(editingId, {
+          date: formData.date,
+          title: formData.title,
+          excerpt: formData.excerpt,
+          link: formData.link
+        } as Partial<T>);
+      } else if (onAdd) {
+        // Add new item
+        await onAdd({
+          date: formData.date,
+          title: formData.title,
+          excerpt: formData.excerpt,
+          link: formData.link
+        } as Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'order'>);
+      } else if (onItemsChange) {
+        // Fallback to old behavior
+        if (editingId) {
+          const index = items.findIndex(i => i.id === editingId);
+          if (index !== -1) {
+            const updated = [...items];
+            updated[index] = formData;
+            onItemsChange(updated);
+          }
+        } else {
+          onItemsChange([...items, formData]);
+        }
+      }
+      handleCancel();
+    } catch (error) {
+      console.error('Error saving item:', error);
+      // Error will be handled by parent component via toast
+      throw error;
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setFormData(null);
-    setEditingIndex(null);
+    setEditingId(null);
     setShowForm(false);
   };
 
-  const handleDelete = (index: number) => {
-    if (window.confirm(`Are you sure you want to delete this ${itemType}?`)) {
-      const updated = items.filter((_, i) => i !== index);
-      onItemsChange(updated);
-    }
+  const handleDelete = (id: string) => {
+    const item = items.find(i => i.id === id);
+    confirmation.confirm(
+      {
+        title: `Delete ${itemType === 'news' ? 'News' : 'Event'}`,
+        message: `Are you sure you want to delete "${item?.title || 'this item'}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger'
+      },
+      async () => {
+        try {
+          setDeletingId(id);
+          if (onDelete) {
+            await onDelete(id);
+          } else if (onItemsChange) {
+            // Fallback to old behavior
+            const updated = items.filter(item => item.id !== id);
+            onItemsChange(updated);
+          }
+        } catch (error) {
+          console.error('Error deleting item:', error);
+          // Error will be handled by parent component via toast
+          throw error;
+        } finally {
+          setDeletingId(null);
+        }
+      }
+    );
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
+    <>
+      <ConfirmationDialog
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.close}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title || 'Confirm Action'}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        isLoading={deletingId !== null}
+      />
+      <div className="bg-white rounded-lg shadow-lg p-6">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold text-green-900">{title}</h3>
         <button
@@ -80,7 +163,7 @@ const NewsEventEditor = <T extends NewsItem | Event>({
       <Modal
         isOpen={showForm}
         onClose={handleCancel}
-        title={editingIndex !== null ? `Edit ${itemType === 'news' ? 'News' : 'Event'}` : `Add ${itemType === 'news' ? 'News' : 'Event'}`}
+        title={editingId !== null ? `Edit ${itemType === 'news' ? 'News' : 'Event'}` : `Add ${itemType === 'news' ? 'News' : 'Event'}`}
         size="md"
       >
         <div className="space-y-4">
@@ -122,26 +205,28 @@ const NewsEventEditor = <T extends NewsItem | Event>({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Link
+              Link (Optional)
             </label>
             <input
               type="text"
               value={formData?.link || ''}
-              onChange={(e) => setFormData({ ...formData!, link: e.target.value } as T)}
-              placeholder="/news/article-name"
+              onChange={(e) => setFormData({ ...formData!, link: e.target.value.trim() || undefined } as T)}
+              placeholder="/news/article-name or https://example.com"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
           <div className="flex gap-2 pt-4">
             <button
               onClick={handleSave}
-              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+              disabled={isSaving || !formData?.title.trim()}
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save
+              {isSaving ? 'Saving...' : 'Save'}
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
+              disabled={isSaving}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
@@ -150,9 +235,14 @@ const NewsEventEditor = <T extends NewsItem | Event>({
       </Modal>
 
       <div className="space-y-3">
-        {items.map((item, index) => (
+        {isLoading && items.length === 0 && (
+          <div className="text-center py-8 text-gray-500">
+            <p>Loading {itemType}...</p>
+          </div>
+        )}
+        {items.map((item) => (
           <div
-            key={index}
+            key={item.id || Math.random()}
             className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
           >
             <div className="flex justify-between items-start">
@@ -160,20 +250,24 @@ const NewsEventEditor = <T extends NewsItem | Event>({
                 <p className="text-sm text-gray-500 mb-1">{item.date}</p>
                 <h4 className="font-semibold text-green-900 mb-2">{item.title}</h4>
                 <p className="text-sm text-gray-600 mb-2 line-clamp-2">{item.excerpt}</p>
-                <a href={item.link} className="text-sm text-green-600 hover:underline">
-                  {item.link}
-                </a>
+                {item.link && (
+                  <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-sm text-green-600 hover:underline">
+                    {item.link}
+                  </a>
+                )}
               </div>
               <div className="flex gap-2 ml-4">
                 <button
-                  onClick={() => handleEdit(index)}
-                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                  onClick={() => item.id && handleEdit(item.id)}
+                  disabled={!item.id}
+                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
                 >
                   <Edit className="h-4 w-4" />
                 </button>
                 <button
-                  onClick={() => handleDelete(index)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  onClick={() => item.id && handleDelete(item.id)}
+                  disabled={!item.id}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -189,6 +283,7 @@ const NewsEventEditor = <T extends NewsItem | Event>({
         )}
       </div>
     </div>
+    </>
   );
 };
 

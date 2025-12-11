@@ -122,18 +122,26 @@ export interface ContactLocation {
 
 // News Item type
 export interface NewsItem {
+  id?: string;  // Firestore document ID
   date: string;
   title: string;
   excerpt: string;
-  link: string;
+  link?: string;  // Optional link/URL
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
+  order?: number;  // For sorting
 }
 
 // Event type
 export interface Event {
+  id?: string;  // Firestore document ID
   date: string;
   title: string;
   excerpt: string;
-  link: string;
+  link?: string;  // Optional link/URL
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
+  order?: number;  // For sorting
 }
 
 // Image Carousel Item type
