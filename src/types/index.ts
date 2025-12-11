@@ -97,12 +97,25 @@ export interface ContactInfo {
   type: 'address' | 'phone' | 'email';
 }
 
-// Research Center Contact type
+// Research Center Contact type (for backward compatibility)
 export interface ResearchCenterContact {
   name: string;
   location: string;
   phone: string;
   email: string;
+}
+
+// Contact Location type
+export interface ContactLocation {
+  id: string;  // Firestore document ID
+  name: string;
+  location: string;
+  phone?: string;
+  email?: string;
+  showInFooter: boolean;
+  order: number;
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
 }
 
 // News Item type
