@@ -46,10 +46,9 @@ const AdminHome: React.FC = () => {
   };
 
   const handleSliderImageRemove = (index: number) => {
-    if (window.confirm('Are you sure you want to remove this image from the slider?')) {
-      const updated = homeContent.sliderImages.filter((_, i) => i !== index);
-      setHomeContent({ ...homeContent, sliderImages: updateSliderImages(updated) });
-    }
+    // Use confirmation dialog if needed, but for now just remove
+    const updated = homeContent.sliderImages.filter((_, i) => i !== index);
+    setHomeContent({ ...homeContent, sliderImages: updateSliderImages(updated) });
   };
 
   const handleSliderImageMove = (index: number, direction: 'up' | 'down') => {
@@ -109,10 +108,9 @@ const AdminHome: React.FC = () => {
   };
 
   const handleGalleryImageRemove = (index: number) => {
-    if (window.confirm('Are you sure you want to remove this image from the gallery?')) {
-      const updated = homeContent.galleryImages.filter((_, i) => i !== index);
-      setHomeContent({ ...homeContent, galleryImages: updateGalleryImages(updated) });
-    }
+    // Use confirmation dialog if needed, but for now just remove
+    const updated = homeContent.galleryImages.filter((_, i) => i !== index);
+    setHomeContent({ ...homeContent, galleryImages: updateGalleryImages(updated) });
   };
 
   // Useful Links

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, MapPin, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin } from 'lucide-react';
 import {
   subscribeToContactLocations,
   addContactLocation,
@@ -10,8 +10,14 @@ import {
 } from '../../services/firebase/contactService';
 import type { ContactLocation } from '../../types';
 import Modal from '../../components/admin/Modal';
+import { useToast, ToastContainer } from '../../components/admin/Toast';
+import { useConfirmation } from '../../hooks/useConfirmation';
+import ConfirmationDialog from '../../components/common/ConfirmationDialog';
+import { LoadingSpinner, ErrorMessage, EmptyState, FormField } from '../../components/common';
 
 const AdminContact: React.FC = () => {
+  const { toasts, showToast, removeToast } = useToast();
+  const confirmation = useConfirmation();
   const [locations, setLocations] = useState<ContactLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +34,7 @@ const AdminContact: React.FC = () => {
   const [showOverrideConfirm, setShowOverrideConfirm] = useState(false);
   const [overrideLocationName, setOverrideLocationName] = useState('');
   const [pendingFooterLocationId, setPendingFooterLocationId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Subscribe to real-time updates
   useEffect(() => {
@@ -41,8 +48,10 @@ const AdminContact: React.FC = () => {
         setError(null);
       },
       (err) => {
-        setError(err.message);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load contact locations';
+        setError(errorMessage);
         setLoading(false);
+        showToast(errorMessage, 'error');
       }
     );
 
@@ -80,7 +89,7 @@ const AdminContact: React.FC = () => {
 
   const handleSave = async () => {
     if (!formData.name.trim() || !formData.location.trim()) {
-      alert('Please fill in all required fields');
+      showToast('Please fill in all required fields', 'error');
       return;
     }
 
@@ -144,10 +153,12 @@ const AdminContact: React.FC = () => {
         }
       }
 
+      showToast(editingId ? 'Location updated successfully' : 'Location added successfully', 'success');
       handleCancel();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save location');
-      console.error('Error saving location:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save location';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setSaving(false);
     }
@@ -160,6 +171,7 @@ const AdminContact: React.FC = () => {
       
       if (pendingFooterLocationId) {
         await setFooterLocation(pendingFooterLocationId, true);
+        showToast('Footer location updated successfully', 'success');
       }
       
       setShowOverrideConfirm(false);
@@ -167,8 +179,9 @@ const AdminContact: React.FC = () => {
       setPendingFooterLocationId(null);
       handleCancel(); // Close form after override
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to set footer location');
-      console.error('Error setting footer location:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to set footer location';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
     } finally {
       setSaving(false);
     }
@@ -196,18 +209,28 @@ const AdminContact: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this location?')) {
-      return;
-    }
-
-    try {
-      setError(null);
-      await deleteContactLocation(id);
-      // Real-time listener will update automatically
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete location');
-      console.error('Error deleting location:', err);
-    }
+    confirmation.confirm(
+      {
+        title: 'Delete Location',
+        message: 'Are you sure you want to delete this location?',
+        variant: 'danger'
+      },
+      async () => {
+        setDeletingId(id);
+        try {
+          setError(null);
+          await deleteContactLocation(id);
+          showToast('Location deleted successfully', 'success');
+          // Real-time listener will update automatically
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : 'Failed to delete location';
+          setError(errorMessage);
+          showToast(errorMessage, 'error');
+        } finally {
+          setDeletingId(null);
+        }
+      }
+    );
   };
 
   const footerLocation = locations.find(l => l.showInFooter);
@@ -215,26 +238,31 @@ const AdminContact: React.FC = () => {
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <span className="ml-3 text-gray-600">Loading contact locations...</span>
-        </div>
+        <LoadingSpinner message="Loading contact locations..." />
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ConfirmationDialog
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.close}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title || 'Confirm Action'}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        isLoading={deletingId !== null}
+      />
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-green-900 mb-2">Contact Page Management</h1>
         <p className="text-gray-600">Manage location boxes and footer contact information</p>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} className="mb-4" />}
 
       <div className="space-y-8">
         {/* Location Boxes */}
@@ -257,10 +285,7 @@ const AdminContact: React.FC = () => {
             size="md"
           >
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Title *
-                </label>
+              <FormField label="Title" required>
                 <input
                   type="text"
                   value={formData.name}
@@ -269,11 +294,8 @@ const AdminContact: React.FC = () => {
                   placeholder="e.g., Main Office Location"
                   disabled={saving}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address *
-                </label>
+              </FormField>
+              <FormField label="Address" required>
                 <textarea
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -282,11 +304,8 @@ const AdminContact: React.FC = () => {
                   placeholder="Enter full address"
                   disabled={saving}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
+              </FormField>
+              <FormField label="Phone Number">
                 <input
                   type="text"
                   value={formData.phone}
@@ -295,11 +314,8 @@ const AdminContact: React.FC = () => {
                   placeholder="e.g., 0442-27514565"
                   disabled={saving}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
+              </FormField>
+              <FormField label="Email">
                 <input
                   type="email"
                   value={formData.email}
@@ -308,7 +324,7 @@ const AdminContact: React.FC = () => {
                   placeholder="e.g., research@tnfrd.gov.in"
                   disabled={saving}
                 />
-              </div>
+              </FormField>
               <div className="flex items-center">
                 <input
                   type="checkbox"
@@ -331,10 +347,9 @@ const AdminContact: React.FC = () => {
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Save
+                  {saving ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   onClick={handleCancel}
@@ -365,10 +380,9 @@ const AdminContact: React.FC = () => {
                 <button
                   onClick={handleConfirmOverride}
                   disabled={saving}
-                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-                  Yes, Replace
+                  {saving ? 'Processing...' : 'Yes, Replace'}
                 </button>
                 <button
                   onClick={handleCancelOverride}
@@ -426,7 +440,8 @@ const AdminContact: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleDelete(location.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      disabled={deletingId === location.id}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                       title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -437,9 +452,7 @@ const AdminContact: React.FC = () => {
             ))}
 
             {locations.length === 0 && !loading && (
-              <div className="text-center py-12 text-gray-500">
-                <p>No locations yet. Click "Add Location" to create one.</p>
-              </div>
+              <EmptyState message='No locations yet. Click "Add Location" to create one.' icon={MapPin} />
             )}
           </div>
         </div>

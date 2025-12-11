@@ -14,12 +14,18 @@ import ContentBlockEditor, { ContentBlock } from '../../components/admin/Content
 import CustomFieldEditor, { CustomField } from '../../components/admin/CustomFieldEditor';
 import ImageUploader from '../../components/admin/ImageUploader';
 import Modal from '../../components/admin/Modal';
+import { useToast, ToastContainer } from '../../components/admin/Toast';
+import { useConfirmation } from '../../hooks/useConfirmation';
+import ConfirmationDialog from '../../components/common/ConfirmationDialog';
 import type { ResearchCenter, Coordinates } from '../../types';
 
 const AdminDivision: React.FC = () => {
   const { divisionSlug } = useParams<{ divisionSlug: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { toasts, showToast, removeToast } = useToast();
+  const confirmation = useConfirmation();
+  const [deletingCenterId, setDeletingCenterId] = useState<number | null>(null);
   const division = divisionSlug ? getDivision(divisionSlug) : undefined;
   
   const [divisionHeading, setDivisionHeading] = useState(division?.name || '');
@@ -109,7 +115,7 @@ const AdminDivision: React.FC = () => {
 
   const handleSaveCenter = () => {
     if (!centerFormData.name || !centerFormData.location) {
-      alert('Please fill in all required fields');
+      showToast('Please fill in all required fields', 'error');
       return;
     }
 
@@ -127,28 +133,34 @@ const AdminDivision: React.FC = () => {
     // Add custom fields
     centerFormData.customFields.forEach(field => {
       if (field.label.toLowerCase() === 'area') {
-        (centerData as any).area = field.value;
+        centerData.area = field.value;
       } else if (field.label.toLowerCase() === 'district') {
-        (centerData as any).district = field.value;
+        centerData.district = field.value;
       } else if (field.label.toLowerCase() === 'range') {
-        (centerData as any).range = field.value;
+        centerData.range = field.value;
       }
     });
 
-    if (editingCenter) {
-      updateResearchCenter(divisionSlug, editingCenter.id, centerData);
-      handleCancelCenter();
-    } else {
-      // Add new center
-      addResearchCenter(divisionSlug, centerData as Omit<ResearchCenter, 'id'>);
-      // Get the newly added center (it will have the highest ID)
-      const updatedDivision = getDivision(divisionSlug);
-      if (updatedDivision && updatedDivision.researchCenters) {
-        const newCenter = updatedDivision.researchCenters[updatedDivision.researchCenters.length - 1];
+    try {
+      if (editingCenter) {
+        updateResearchCenter(divisionSlug, editingCenter.id, centerData);
+        showToast('Research center updated successfully', 'success');
         handleCancelCenter();
-        // Navigate to the new research center page
-        navigate(`/admin/divisions/${divisionSlug}/centers/${newCenter.id}`);
+      } else {
+        // Add new center
+        addResearchCenter(divisionSlug, centerData as Omit<ResearchCenter, 'id'>);
+        showToast('Research center added successfully', 'success');
+        // Get the newly added center (it will have the highest ID)
+        const updatedDivision = getDivision(divisionSlug);
+        if (updatedDivision && updatedDivision.researchCenters) {
+          const newCenter = updatedDivision.researchCenters[updatedDivision.researchCenters.length - 1];
+          handleCancelCenter();
+          // Navigate to the new research center page
+          navigate(`/admin/divisions/${divisionSlug}/centers/${newCenter.id}`);
+        }
       }
+    } catch (error) {
+      showToast('Failed to save research center', 'error');
     }
   };
 
@@ -168,11 +180,26 @@ const AdminDivision: React.FC = () => {
   };
 
   const handleDeleteCenter = (centerId: number) => {
-    if (window.confirm('Are you sure you want to delete this research center? All experiments will also be deleted.')) {
-      if (divisionSlug) {
-        deleteResearchCenter(divisionSlug, centerId);
+    confirmation.confirm(
+      {
+        title: 'Delete Research Center',
+        message: 'Are you sure you want to delete this research center? All experiments will also be deleted.',
+        variant: 'danger'
+      },
+      () => {
+        if (divisionSlug) {
+          setDeletingCenterId(centerId);
+          try {
+            deleteResearchCenter(divisionSlug, centerId);
+            showToast('Research center deleted successfully', 'success');
+          } catch (error) {
+            showToast('Failed to delete research center', 'error');
+          } finally {
+            setDeletingCenterId(null);
+          }
+        }
       }
-    }
+    );
   };
 
   const handleTollFreeUpdate = () => {
@@ -191,6 +218,18 @@ const AdminDivision: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ConfirmationDialog
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.close}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title || 'Confirm Action'}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        isLoading={deletingCenterId !== null}
+      />
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-green-900 mb-2">{division.name} Management</h1>
         <p className="text-gray-600">Manage division content, research centers, and experiments</p>
@@ -405,7 +444,8 @@ const AdminDivision: React.FC = () => {
                         e.stopPropagation();
                         handleDeleteCenter(center.id);
                       }}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      disabled={deletingCenterId === center.id}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                       title="Delete"
                     >
                       <Trash2 className="h-4 w-4" />

@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Phone, Mail, Clock, MessageCircle, GitBranch, Loader2 } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, MessageCircle, GitBranch } from 'lucide-react';
 import { subscribeToContactLocations } from '../services/firebase/contactService';
 import type { ContactLocation } from '../types';
 import ContactForm from '../components/contact/ContactForm';
+import PageHeader from '../components/common/PageHeader';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorMessage from '../components/common/ErrorMessage';
+import EmptyState from '../components/common/EmptyState';
 
 const ContactUs: React.FC = () => {
   const [locations, setLocations] = useState<ContactLocation[]>([]);
@@ -34,18 +38,11 @@ const ContactUs: React.FC = () => {
   return (
     <div className="py-20 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <p className="text-lg font-semibold text-lime-600 mb-2 uppercase tracking-widest">
-            Reach Out to Our Team
-          </p>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-green-900 mb-4">
-            Connect with the Research Wing
-          </h1>
-          <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            We welcome inquiries from researchers, collaborators, and the public. Use the form 
-            or reach us directly via phone and email.
-          </p>
-        </div>
+        <PageHeader
+          badge="Reach Out to Our Team"
+          title="Connect with the Research Wing"
+          description="We welcome inquiries from researchers, collaborators, and the public. Use the form or reach us directly via phone and email."
+        />
 
         <div className="bg-green-50 rounded-xl shadow-inner p-10 mb-20">
           <h2 className="text-3xl font-bold text-green-900 mb-8 text-center flex items-center justify-center">
@@ -53,53 +50,46 @@ const ContactUs: React.FC = () => {
             Our Research Divisions
           </h2>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-              <span className="ml-3 text-gray-600">Loading research divisions...</span>
-            </div>
+            <LoadingSpinner message="Loading research divisions..." />
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-600 mb-4">Error loading locations: {error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                Retry
-              </button>
-            </div>
+            <ErrorMessage 
+              message={`Error loading locations: ${error}`}
+              onRetry={() => window.location.reload()}
+            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {locations.map((location) => (
-                <div key={location.id} className="bg-white rounded-lg shadow-md p-6 border-b-2 border-green-300 hover:shadow-lg transition-shadow">
-                  <h3 className="text-xl font-semibold text-green-800 mb-4 text-center">{location.name}</h3>
-                  <div className="space-y-3 text-sm">
-                    {location.location && (
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
-                        <span className="text-gray-600">{location.location}</span>
+            <>
+              {locations.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {locations.map((location) => (
+                    <div key={location.id} className="bg-white rounded-lg shadow-md p-6 border-b-2 border-green-300 hover:shadow-lg transition-shadow">
+                      <h3 className="text-xl font-semibold text-green-800 mb-4 text-center">{location.name}</h3>
+                      <div className="space-y-3 text-sm">
+                        {location.location && (
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
+                            <span className="text-gray-600">{location.location}</span>
+                          </div>
+                        )}
+                        {location.phone && (
+                          <div className="flex items-center">
+                            <Phone className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
+                            <span className="text-gray-600">{location.phone}</span>
+                          </div>
+                        )}
+                        {location.email && (
+                          <div className="flex items-center">
+                            <Mail className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
+                            <span className="text-gray-600">{location.email}</span>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {location.phone && (
-                      <div className="flex items-center">
-                        <Phone className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
-                        <span className="text-gray-600">{location.phone}</span>
-                      </div>
-                    )}
-                    {location.email && (
-                      <div className="flex items-center">
-                        <Mail className="h-4 w-4 text-green-600 mr-3 flex-shrink-0" />
-                        <span className="text-gray-600">{location.email}</span>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-          {!loading && !error && locations.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <p>No research divisions available at this time.</p>
-            </div>
+              ) : (
+                <EmptyState message="No research divisions available at this time." />
+              )}
+            </>
           )}
         </div>
 

@@ -8,13 +8,19 @@ import {
   deleteResearchCenter
 } from '../../services/admin/adminDataService';
 import ExperimentEditor from '../../components/admin/ExperimentEditor';
-import type { Experiment } from '../../types';
+import { useConfirmation } from '../../hooks/useConfirmation';
+import ConfirmationDialog from '../../components/common/ConfirmationDialog';
+import { useToast, ToastContainer } from '../../components/admin/Toast';
+import type { Experiment, ResearchCenter } from '../../types';
 
 const AdminResearchCenter: React.FC = () => {
   const { divisionSlug, centerId } = useParams<{ divisionSlug: string; centerId: string }>();
   const navigate = useNavigate();
+  const { toasts, showToast, removeToast } = useToast();
+  const confirmation = useConfirmation();
+  const [deleting, setDeleting] = useState(false);
   
-  const [center, setCenter] = useState(
+  const [center, setCenter] = useState<ResearchCenter | undefined>(
     divisionSlug && centerId 
       ? getResearchCenter(divisionSlug, parseInt(centerId)) 
       : undefined
@@ -35,12 +41,27 @@ const AdminResearchCenter: React.FC = () => {
   };
 
   const handleDeleteCenter = () => {
-    if (window.confirm('Are you sure you want to delete this research center? All experiments will also be deleted.')) {
-      if (divisionSlug && center) {
-        deleteResearchCenter(divisionSlug, center.id);
-        navigate(`/admin/divisions/${divisionSlug}`);
+    confirmation.confirm(
+      {
+        title: 'Delete Research Center',
+        message: 'Are you sure you want to delete this research center? All experiments will also be deleted.',
+        variant: 'danger'
+      },
+      () => {
+        if (divisionSlug && center) {
+          setDeleting(true);
+          try {
+            deleteResearchCenter(divisionSlug, center.id);
+            showToast('Research center deleted successfully', 'success');
+            navigate(`/admin/divisions/${divisionSlug}`);
+          } catch (error) {
+            showToast('Failed to delete research center', 'error');
+          } finally {
+            setDeleting(false);
+          }
+        }
       }
-    }
+    );
   };
 
   const handleEditCenter = () => {
@@ -68,6 +89,18 @@ const AdminResearchCenter: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ConfirmationDialog
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.close}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title || 'Confirm Action'}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        isLoading={deleting}
+      />
       {/* Header */}
       <div className="mb-8">
         <button
@@ -122,24 +155,24 @@ const AdminResearchCenter: React.FC = () => {
             </div>
           )}
 
-          {(center as any).area && (
+          {center.area && (
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Area</h3>
-              <p className="text-gray-600">{(center as any).area}</p>
+              <p className="text-gray-600">{center.area}</p>
             </div>
           )}
 
-          {(center as any).district && (
+          {center.district && (
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">District</h3>
-              <p className="text-gray-600">{(center as any).district}</p>
+              <p className="text-gray-600">{center.district}</p>
             </div>
           )}
 
-          {(center as any).range && (
+          {center.range && (
             <div>
               <h3 className="text-sm font-semibold text-gray-700 mb-2">Range</h3>
-              <p className="text-gray-600">{(center as any).range}</p>
+              <p className="text-gray-600">{center.range}</p>
             </div>
           )}
         </div>

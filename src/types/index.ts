@@ -31,12 +31,14 @@ export interface ResearchCenter {
   id: number;
   name: string;
   location: string;
-  area: string;
-  district: string;
-  range: string;
-  description: string;
+  area?: string;
+  district?: string;
+  range?: string;
+  description?: string;
   experiments: Experiment[];
-  coordinates: Coordinates;
+  coordinates?: Coordinates;
+  phone?: string;
+  email?: string;
 }
 
 // Division type
@@ -163,5 +165,16 @@ export interface MissionVision {
   vision: string;
   updatedAt?: any;  // Firestore Timestamp
   updatedBy?: string;
+}
+
+// Publication type
+export interface Publication {
+  id: number;
+  title: string;
+  year: number;
+  category: string;
+  journal?: string;
+  description?: string;
+  pdfUrl?: string;
 }
 

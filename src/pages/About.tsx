@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Target, Eye, Loader2 } from 'lucide-react';
+import { Target, Eye } from 'lucide-react';
 import FacultyCard from '../components/faculty/FacultyCard';
 import { subscribeToFaculty } from '../services/firebase/facultyService';
 import { subscribeToMissionVision } from '../services/firebase/aboutService';
 import type { FacultyMember, MissionVision } from '../types';
+import PageBanner from '../components/common/PageBanner';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorMessage from '../components/common/ErrorMessage';
+import EmptyState from '../components/common/EmptyState';
+import SectionHeader from '../components/common/SectionHeader';
 
 const About: React.FC = () => {
   const [facultyMembers, setFacultyMembers] = useState<FacultyMember[]>([]);
@@ -57,35 +62,18 @@ const About: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Introductory Banner/Header */}
-      <div 
-        className="relative py-24 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1549490216-3a137b01d1c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
-        }}
-      >
-        <div className="absolute inset-0 bg-green-900/70"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <p className="text-lg font-semibold text-lime-400 mb-2 uppercase tracking-widest">
-            Our Legacy of Science and Stewardship
-          </p>
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4">
-            About the Research Wing
-          </h1>
-          <p className="text-xl md:text-2xl font-light max-w-4xl mx-auto">
-            The Tamil Nadu Forest Department Research Wing is the scientific foundation 
-            for conservation, committed to ecological innovation and sustainable forestry.
-          </p>
-        </div>
-      </div>
+      <PageBanner
+        subtitle="Our Legacy of Science and Stewardship"
+        title="About the Research Wing"
+        description="The Tamil Nadu Forest Department Research Wing is the scientific foundation for conservation, committed to ecological innovation and sustainable forestry."
+        backgroundImage="https://images.unsplash.com/photo-1549490216-3a137b01d1c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      />
       
       {/* Mission and Vision */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {missionVisionLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-              <span className="ml-3 text-gray-600">Loading mission and vision...</span>
-            </div>
+            <LoadingSpinner message="Loading mission and vision..." />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Mission */}
@@ -123,42 +111,30 @@ const About: React.FC = () => {
       {/* Leadership & Governance Section */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-medium text-gray-900 mb-2">
-              Leadership & Governance
-            </h2>
-            <p className="text-sm text-gray-500 max-w-xl mx-auto">
-              The distinguished leadership team of the Tamil Nadu Forest Department.
-            </p>
-          </div>
+          <SectionHeader
+            title="Leadership & Governance"
+            description="The distinguished leadership team of the Tamil Nadu Forest Department."
+          />
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-              <span className="ml-3 text-gray-600">Loading faculty members...</span>
-            </div>
+            <LoadingSpinner message="Loading faculty members..." />
           ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-red-600 mb-4">Error loading faculty members: {error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                Retry
-              </button>
-            </div>
+            <ErrorMessage 
+              message={`Error loading faculty members: ${error}`}
+              onRetry={() => window.location.reload()}
+            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-              {facultyMembers.map((member) => (
-                <FacultyCard key={member.id} member={member} />
-              ))}
-            </div>
-          )}
-
-          {!loading && !error && facultyMembers.length === 0 && (
-            <div className="text-center py-12 text-gray-500">
-              <p>No faculty members available at this time.</p>
-            </div>
+            <>
+              {facultyMembers.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                  {facultyMembers.map((member) => (
+                    <FacultyCard key={member.id} member={member} />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState message="No faculty members available at this time." />
+              )}
+            </>
           )}
         </div>
       </section>

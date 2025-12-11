@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import {
   subscribeToMissionVision,
   updateMissionVision
 } from '../../services/firebase/aboutService';
+import { LoadingSpinner, ErrorMessage } from '../../components/common';
 
 const AdminAbout: React.FC = () => {
   const [localMission, setLocalMission] = useState('');
@@ -55,7 +56,8 @@ const AdminAbout: React.FC = () => {
         setError(null);
       },
       (err) => {
-        setError(err.message);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load mission and vision';
+        setError(errorMessage);
         setLoading(false);
       }
     );
@@ -84,8 +86,8 @@ const AdminAbout: React.FC = () => {
         setSaved(false);
       }, 3000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save mission and vision');
-      console.error('Error saving mission/vision:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save mission and vision';
+      setError(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -97,8 +99,8 @@ const AdminAbout: React.FC = () => {
     setLocalMission(value);
     setSaved(false);
     // Save immediately without debouncing (fire and forget to not block UI)
-    saveToFirestore(value, localVision).catch(err => {
-      console.error('Error saving mission:', err);
+    saveToFirestore(value, localVision).catch(() => {
+      // Error is handled in saveToFirestore
     });
   };
 
@@ -108,18 +110,15 @@ const AdminAbout: React.FC = () => {
     setLocalVision(value);
     setSaved(false);
     // Save immediately without debouncing (fire and forget to not block UI)
-    saveToFirestore(localMission, value).catch(err => {
-      console.error('Error saving vision:', err);
+    saveToFirestore(localMission, value).catch(() => {
+      // Error is handled in saveToFirestore
     });
   };
 
   if (loading) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-          <span className="ml-3 text-gray-600">Loading mission and vision...</span>
-        </div>
+        <LoadingSpinner message="Loading mission and vision..." />
       </div>
     );
   }
@@ -131,11 +130,7 @@ const AdminAbout: React.FC = () => {
         <p className="text-gray-600">Manage mission and vision content</p>
       </div>
 
-      {error && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-          {error}
-        </div>
-      )}
+      {error && <ErrorMessage message={error} className="mb-4" />}
 
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="flex justify-between items-center mb-6">

@@ -10,8 +10,15 @@ import {
 } from '../../services/admin/adminDataService';
 import { uploadPDFFile } from '../../services/admin/fileUploadService';
 import Modal from '../../components/admin/Modal';
+import { useToast, ToastContainer } from '../../components/admin/Toast';
+import { useConfirmation } from '../../hooks/useConfirmation';
+import ConfirmationDialog from '../../components/common/ConfirmationDialog';
+import { FormField, EmptyState } from '../../components/common';
+import type { Publication } from '../../types';
 
 const AdminPublications: React.FC = () => {
+  const { toasts, showToast, removeToast } = useToast();
+  const confirmation = useConfirmation();
   const [publications, setPublications] = useState(getPublications());
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -26,8 +33,10 @@ const AdminPublications: React.FC = () => {
   });
   const [showForm, setShowForm] = useState(false);
   const [categoryForm, setCategoryForm] = useState({ name: '', showForm: false });
+  const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
+  const [deletingPublicationId, setDeletingPublicationId] = useState<number | null>(null);
 
-  const filteredPublications = publications.items.filter((pub: any) => {
+  const filteredPublications = publications.items.filter((pub: Publication) => {
     const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || pub.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -38,14 +47,32 @@ const AdminPublications: React.FC = () => {
       const updated = addCategory(categoryForm.name.trim());
       setPublications({ ...publications, categories: updated });
       setCategoryForm({ name: '', showForm: false });
+      showToast('Category added successfully', 'success');
+    } else {
+      showToast('Please enter a category name', 'error');
     }
   };
 
   const handleDeleteCategory = (category: string) => {
-    if (window.confirm(`Are you sure you want to delete the category "${category}"? Publications in this category will not be deleted.`)) {
-      const updated = deleteCategory(category);
-      setPublications({ ...publications, categories: updated });
-    }
+    confirmation.confirm(
+      {
+        title: 'Delete Category',
+        message: `Are you sure you want to delete the category "${category}"? Publications in this category will not be deleted.`,
+        variant: 'warning'
+      },
+      () => {
+        setDeletingCategory(category);
+        try {
+          const updated = deleteCategory(category);
+          setPublications({ ...publications, categories: updated });
+          showToast('Category deleted successfully', 'success');
+        } catch (error) {
+          showToast('Failed to delete category', 'error');
+        } finally {
+          setDeletingCategory(null);
+        }
+      }
+    );
   };
 
   const handleAddPublication = () => {
@@ -62,14 +89,14 @@ const AdminPublications: React.FC = () => {
   };
 
   const handleEditPublication = (id: number) => {
-    const pub = publications.items.find((p: any) => p.id === id);
+    const pub = publications.items.find((p: Publication) => p.id === id);
     if (pub) {
       setFormData({
         title: pub.title,
         year: pub.year,
         category: pub.category,
-        journal: (pub as any).journal || '',
-        description: pub.description,
+        journal: pub.journal || '',
+        description: pub.description || '',
         pdfUrl: pub.pdfUrl || ''
       });
       setEditingId(id);
@@ -79,18 +106,24 @@ const AdminPublications: React.FC = () => {
 
   const handleSavePublication = async () => {
     if (!formData.title || !formData.category) {
-      alert('Please fill in all required fields');
+      showToast('Please fill in all required fields', 'error');
       return;
     }
 
-    if (editingId !== null) {
-      const updated = updatePublication(editingId, formData);
-      setPublications({ ...publications, items: updated });
-    } else {
-      const updated = addPublication(formData);
-      setPublications({ ...publications, items: updated });
+    try {
+      if (editingId !== null) {
+        const updated = updatePublication(editingId, formData);
+        setPublications({ ...publications, items: updated });
+        showToast('Publication updated successfully', 'success');
+      } else {
+        const updated = addPublication(formData);
+        setPublications({ ...publications, items: updated });
+        showToast('Publication added successfully', 'success');
+      }
+      handleCancelPublication();
+    } catch (error) {
+      showToast('Failed to save publication', 'error');
     }
-    handleCancelPublication();
   };
 
   const handleCancelPublication = () => {
@@ -107,26 +140,58 @@ const AdminPublications: React.FC = () => {
   };
 
   const handleDeletePublication = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this publication?')) {
-      const updated = deletePublication(id);
-      setPublications({ ...publications, items: updated });
-    }
+    confirmation.confirm(
+      {
+        title: 'Delete Publication',
+        message: 'Are you sure you want to delete this publication?',
+        variant: 'danger'
+      },
+      () => {
+        setDeletingPublicationId(id);
+        try {
+          const updated = deletePublication(id);
+          setPublications({ ...publications, items: updated });
+          showToast('Publication deleted successfully', 'success');
+        } catch (error) {
+          showToast('Failed to delete publication', 'error');
+        } finally {
+          setDeletingPublicationId(null);
+        }
+      }
+    );
   };
 
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const result = await uploadPDFFile(file, 'Publications');
-      if (result.success && result.path) {
-        setFormData({ ...formData, pdfUrl: result.path });
-      } else {
-        alert(result.error || 'Failed to upload PDF');
+      try {
+        const result = await uploadPDFFile(file, 'Publications');
+        if (result.success && result.path) {
+          setFormData({ ...formData, pdfUrl: result.path });
+          showToast('PDF uploaded successfully', 'success');
+        } else {
+          showToast(result.error || 'Failed to upload PDF', 'error');
+        }
+      } catch (error) {
+        showToast('Failed to upload PDF', 'error');
       }
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto">
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <ConfirmationDialog
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.close}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title || 'Confirm Action'}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        isLoading={deletingCategory !== null || deletingPublicationId !== null}
+      />
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-green-900 mb-2">Publications Management</h1>
         <p className="text-gray-600">Manage publication categories and listings</p>
@@ -153,10 +218,7 @@ const AdminPublications: React.FC = () => {
             size="sm"
           >
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Category Name *
-                </label>
+              <FormField label="Category Name" required>
                 <input
                   type="text"
                   value={categoryForm.name}
@@ -165,7 +227,7 @@ const AdminPublications: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
                 />
-              </div>
+              </FormField>
               <div className="flex gap-2 pt-4">
                 <button
                   onClick={handleAddCategory}
@@ -192,7 +254,8 @@ const AdminPublications: React.FC = () => {
                 <span>{category}</span>
                 <button
                   onClick={() => handleDeleteCategory(category)}
-                  className="text-red-600 hover:text-red-800"
+                  disabled={deletingCategory === category}
+                  className="text-red-600 hover:text-red-800 disabled:opacity-50"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -249,33 +312,24 @@ const AdminPublications: React.FC = () => {
             size="lg"
           >
             <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Title *
-                  </label>
+                <FormField label="Title" required>
                   <input
                     type="text"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
-                </div>
+                </FormField>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Year
-                    </label>
+                  <FormField label="Year">
                     <input
                       type="number"
                       value={formData.year}
                       onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Category *
-                    </label>
+                  </FormField>
+                  <FormField label="Category" required>
                     <select
                       value={formData.category}
                       onChange={(e) => setFormData({ ...formData, category: e.target.value })}
@@ -286,12 +340,9 @@ const AdminPublications: React.FC = () => {
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
-                  </div>
+                  </FormField>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Journal / Publication Source
-                  </label>
+                <FormField label="Journal / Publication Source">
                   <input
                     type="text"
                     value={formData.journal}
@@ -299,22 +350,16 @@ const AdminPublications: React.FC = () => {
                     placeholder="e.g., ஓர் எளிய வழிகாட்டி"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
+                </FormField>
+                <FormField label="Description">
                   <textarea
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    PDF URL or Upload
-                  </label>
+                </FormField>
+                <FormField label="PDF URL or Upload">
                   <input
                     type="text"
                     value={formData.pdfUrl}
@@ -328,7 +373,7 @@ const AdminPublications: React.FC = () => {
                     onChange={handlePDFUpload}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   />
-                </div>
+                </FormField>
                 <div className="flex gap-2 pt-4">
                   <button
                     onClick={handleSavePublication}
@@ -348,7 +393,7 @@ const AdminPublications: React.FC = () => {
 
           {/* Publications List */}
           <div className="space-y-4">
-            {filteredPublications.map((publication: any) => (
+            {filteredPublications.map((publication: Publication) => (
               <div
                 key={publication.id}
                 className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -364,7 +409,9 @@ const AdminPublications: React.FC = () => {
                     <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
                       <span>Year: {publication.year}</span>
                     </div>
-                    <p className="text-gray-600 mb-2">{publication.description}</p>
+                    {publication.description && (
+                      <p className="text-gray-600 mb-2">{publication.description}</p>
+                    )}
                     {publication.pdfUrl && (
                       <a
                         href={publication.pdfUrl}
@@ -385,7 +432,8 @@ const AdminPublications: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleDeletePublication(publication.id)}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      disabled={deletingPublicationId === publication.id}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -395,9 +443,7 @@ const AdminPublications: React.FC = () => {
             ))}
 
             {filteredPublications.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
-                <p>No publications found matching your criteria.</p>
-              </div>
+              <EmptyState message="No publications found matching your criteria." />
             )}
           </div>
         </div>
