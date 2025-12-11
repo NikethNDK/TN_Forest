@@ -46,7 +46,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       const result = await uploadImageFile(file, directory);
       
       if (result.success && result.path) {
+        // Call the parent callback (async, but we don't need to wait)
         onImageChange(result.path, result.publicId);
+        // Clear preview and file input after successful upload
+        setPreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       } else {
         setError(result.error || 'Upload failed');
         setPreview(null);

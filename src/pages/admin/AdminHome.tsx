@@ -13,8 +13,7 @@ import {
   updateContentArea,
   addContentBlock,
   updateContentBlock,
-  deleteContentBlock,
-  updateGalleryImages
+  deleteContentBlock
 } from '../../services/admin/adminDataService';
 import {
   subscribeToNews,
@@ -32,6 +31,11 @@ import {
   deleteSliderImage,
   reorderSliderImages
 } from '../../services/firebase/sliderImageService';
+import {
+  subscribeToGalleryImages,
+  addGalleryImage,
+  deleteGalleryImage
+} from '../../services/firebase/galleryImageService';
 import ImageUploader from '../../components/admin/ImageUploader';
 import NewsEventEditor from '../../components/admin/NewsEventEditor';
 import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
@@ -39,7 +43,7 @@ import LinkEditor from '../../components/admin/LinkEditor';
 import { useConfirmation } from '../../hooks/useConfirmation';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog';
 import { toast } from 'react-hot-toast';
-import type { NewsItem, Event, ImportantLink, SliderImage } from '../../types';
+import type { NewsItem, Event, ImportantLink, SliderImage, GalleryImage } from '../../types';
 
 const AdminHome: React.FC = () => {
   const [homeContent, setHomeContent] = useState(getHomeContent());
@@ -47,9 +51,11 @@ const AdminHome: React.FC = () => {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [sliderImages, setSliderImages] = useState<SliderImage[]>([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [isLoadingNews, setIsLoadingNews] = useState(true);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [isLoadingSliderImages, setIsLoadingSliderImages] = useState(true);
+  const [isLoadingGalleryImages, setIsLoadingGalleryImages] = useState(true);
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const confirmation = useConfirmation();
 
@@ -158,10 +164,22 @@ const AdminHome: React.FC = () => {
       }
     );
 
+    const unsubscribeGalleryImages = subscribeToGalleryImages(
+      (images) => {
+        setGalleryImages(images);
+        setIsLoadingGalleryImages(false);
+      },
+      (error) => {
+        console.error('Error in gallery images subscription:', error);
+        setIsLoadingGalleryImages(false);
+      }
+    );
+
     return () => {
       unsubscribeNews();
       unsubscribeEvents();
       unsubscribeSliderImages();
+      unsubscribeGalleryImages();
     };
   }, []);
 
@@ -250,18 +268,54 @@ const AdminHome: React.FC = () => {
   };
 
 
-  // Gallery
-  const handleGalleryImageAdd = (imagePath: string) => {
-    if (imagePath && homeContent.galleryImages.length < 10) {
-      const updated = updateGalleryImages([...homeContent.galleryImages, imagePath]);
-      setHomeContent({ ...homeContent, galleryImages: updated });
+  // Gallery Images
+  const handleGalleryImageAdd = async (imagePath: string, publicId?: string) => {
+    if (imagePath && publicId) {
+      try {
+        await addGalleryImage({
+          url: imagePath,
+          publicId: publicId,
+          order: galleryImages.length
+        });
+        toast.success('Gallery image added successfully');
+      } catch (error) {
+        console.error('Error adding gallery image:', error);
+        toast.error('Failed to add gallery image');
+      }
     }
   };
 
-  const handleGalleryImageRemove = (index: number) => {
-    // Use confirmation dialog if needed, but for now just remove
-    const updated = homeContent.galleryImages.filter((_: string, i: number) => i !== index);
-    setHomeContent({ ...homeContent, galleryImages: updateGalleryImages(updated) });
+  const handleGalleryImageRemove = (image: GalleryImage) => {
+    if (!image.id || !image.publicId) return;
+    
+    confirmation.confirm(
+      {
+        title: 'Delete Gallery Image',
+        message: 'Are you sure you want to delete this image? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger'
+      },
+      async () => {
+        try {
+          setDeletingImageId(image.id!);
+          const result = await deleteGalleryImage(image.id!, image.publicId);
+          
+          if (result.cloudinaryDeleted) {
+            toast.success('Gallery image deleted successfully');
+          } else {
+            toast.error(`Failed to delete from Cloudinary: ${result.error || 'Unknown error'}. Image kept in database.`, {
+              duration: 5000
+            });
+          }
+        } catch (error: any) {
+          console.error('Error deleting gallery image:', error);
+          toast.error('Failed to delete gallery image');
+        } finally {
+          setDeletingImageId(null);
+        }
+      }
+    );
   };
 
   // Useful Links
@@ -420,37 +474,55 @@ const AdminHome: React.FC = () => {
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-bold text-green-900">Gallery Carousel Images</h3>
               <div className="text-sm text-gray-600">
-                {homeContent.galleryImages.length} images
+                {isLoadingGalleryImages ? 'Loading...' : `${galleryImages.length} images`}
               </div>
             </div>
+            
             <div className="bg-white rounded-lg shadow-lg p-6">
-              {homeContent.galleryImages.length < 10 && (
-                <div className="mb-4">
-                  <ImageUploader
-                    onImageChange={handleGalleryImageAdd}
-                    directory="gallery"
-                    label="Add Gallery Image"
-                  />
+              <div className="mb-4">
+                <ImageUploader
+                  onImageChange={(url, publicId) => handleGalleryImageAdd(url, publicId)}
+                  directory="tn-forest/images/gallery"
+                  label="Add New Gallery Image"
+                />
+              </div>
+              {isLoadingGalleryImages ? (
+                <div className="text-center py-8 text-gray-500">Loading images...</div>
+              ) : galleryImages.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">No gallery images yet. Upload your first image above.</div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
+                  {galleryImages.map((image, index) => (
+                    <div key={image.id || index} className="relative group">
+                      <img
+                        src={image.url}
+                        alt={`Gallery ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                      />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                        <button
+                          onClick={() => handleGalleryImageRemove(image)}
+                          disabled={deletingImageId === image.id}
+                          className="p-2 bg-red-500 text-white rounded-lg disabled:opacity-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
-                {homeContent.galleryImages.map((image: string, index: number) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={image}
-                      alt={`Gallery ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
-                    />
-                    <button
-                      onClick={() => handleGalleryImageRemove(index)}
-                      className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
             </div>
+            <ConfirmationDialog
+              isOpen={confirmation.isOpen}
+              onClose={confirmation.close}
+              onConfirm={confirmation.onConfirm}
+              title={confirmation.title || 'Confirm Action'}
+              message={confirmation.message}
+              confirmText={confirmation.confirmText}
+              cancelText={confirmation.cancelText}
+              variant={confirmation.variant}
+            />
           </div>
         );
 

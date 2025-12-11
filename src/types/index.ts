@@ -196,3 +196,13 @@ export interface SliderImage {
   updatedAt?: any; // Firestore Timestamp
 }
 
+// Gallery Image type
+export interface GalleryImage {
+  id?: string; // Firestore document ID
+  url: string; // Cloudinary secure URL
+  publicId: string; // Cloudinary public ID for deletion
+  order: number; // Display order
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
+}
+
