@@ -1,13 +1,19 @@
 /**
  * File Upload Service
  * 
- * Handles file uploads to the public directory.
- * In a production environment, this would upload to a cloud storage service.
+ * Handles secure file uploads to Cloudinary using Firebase Cloud Functions
+ * for signature generation. This ensures the API secret is never exposed
+ * to the client.
  */
+
+import { generateUploadSignature } from '../../config/firebase';
+import { cloudinaryConfig, CLOUDINARY_UPLOAD_URL } from '../../config/cloudinary';
+import { getIdToken } from '../firebase/authService';
 
 export interface UploadResult {
   success: boolean;
-  path?: string;
+  path?: string; // Cloudinary secure URL
+  publicId?: string; // Cloudinary public ID for future reference
   error?: string;
 }
 
@@ -35,53 +41,210 @@ export const validatePDFFile = (file: File): { valid: boolean; error?: string } 
   return { valid: true };
 };
 
-export const uploadImageFile = async (file: File, directory: string = 'images'): Promise<UploadResult> => {
+/**
+ * Upload image file to Cloudinary with secure signature
+ */
+export const uploadImageFile = async (
+  file: File,
+  directory: string = 'tn-forest/images'
+): Promise<UploadResult> => {
   const validation = validateImageFile(file);
   if (!validation.valid) {
     return { success: false, error: validation.error };
   }
 
   try {
-    // In a real application, this would upload to a server/cloud storage
-    // For now, we'll create a local file path reference
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `/${directory}/${fileName}`;
+    // Step 1: Get authentication token
+    const authToken = await getIdToken();
+    if (!authToken) {
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to upload files.'
+      };
+    }
+
+    // Step 2: Request upload signature from Firebase Cloud Function
+    const signatureResponse = await generateUploadSignature({
+      fileType: file.type,
+      fileSize: file.size,
+      folder: directory,
+    });
+
+    const { signature, timestamp, folder } = signatureResponse.data;
+
+    if (!signature || !timestamp) {
+      return {
+        success: false,
+        error: 'Failed to generate upload signature. Please try again.'
+      };
+    }
+
+    // Step 3: Prepare FormData for Cloudinary upload
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('api_key', cloudinaryConfig.apiKey);
+    formData.append('timestamp', timestamp.toString());
+    formData.append('signature', signature);
     
-    // Create a FileReader to get the file as a data URL for preview
-    // In production, you would send this to your backend API
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    
+    if (folder) {
+      formData.append('folder', folder);
+    }
+
+    // Step 4: Upload file to Cloudinary
+    const uploadResponse = await fetch(CLOUDINARY_UPLOAD_URL, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error?.message || 'Failed to upload file to Cloudinary.'
+      };
+    }
+
+    const uploadData = await uploadResponse.json();
+
+    // Step 5: Return secure URL
     return {
       success: true,
-      path: filePath
+      path: uploadData.secure_url, // Cloudinary secure URL
+      publicId: uploadData.public_id, // For future reference/updates
     };
-  } catch (error) {
+  } catch (error: any) {
+    // Handle Firebase Functions errors
+    if (error.code === 'unauthenticated') {
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to upload files.'
+      };
+    }
+    if (error.code === 'permission-denied') {
+      return {
+        success: false,
+        error: 'Permission denied. Admin access required to upload files.'
+      };
+    }
+    if (error.code === 'invalid-argument') {
+      return {
+        success: false,
+        error: error.message || 'Invalid file. Please check file type and size.'
+      };
+    }
+    if (error.code === 'functions/internal') {
+      // Include the full error message for internal errors to help debug
+      return {
+        success: false,
+        error: error.message || error.details || 'Cloudinary configuration error. Please check server logs.'
+      };
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload file'
+      error: error.message || error.details || 'Failed to upload file. Please try again.'
     };
   }
 };
 
-export const uploadPDFFile = async (file: File, directory: string = 'publications'): Promise<UploadResult> => {
+/**
+ * Upload PDF file to Cloudinary with secure signature
+ */
+export const uploadPDFFile = async (
+  file: File,
+  directory: string = 'tn-forest/documents'
+): Promise<UploadResult> => {
   const validation = validatePDFFile(file);
   if (!validation.valid) {
     return { success: false, error: validation.error };
   }
 
   try {
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `/${directory}/${fileName}`;
+    // Step 1: Get authentication token
+    const authToken = await getIdToken();
+    if (!authToken) {
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to upload files.'
+      };
+    }
+
+    // Step 2: Request upload signature from Firebase Cloud Function
+    const signatureResponse = await generateUploadSignature({
+      fileType: file.type,
+      fileSize: file.size,
+      folder: directory,
+    });
+
+    const { signature, timestamp, folder } = signatureResponse.data;
+
+    if (!signature || !timestamp) {
+      return {
+        success: false,
+        error: 'Failed to generate upload signature. Please try again.'
+      };
+    }
+
+    // Step 3: Prepare FormData for Cloudinary upload
+    // Note: For PDFs, we use the raw upload endpoint
+    const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/raw/upload`;
     
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('api_key', cloudinaryConfig.apiKey);
+    formData.append('timestamp', timestamp.toString());
+    formData.append('signature', signature);
+    
+    if (folder) {
+      formData.append('folder', folder);
+    }
+
+    // Step 4: Upload file to Cloudinary
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.error?.message || 'Failed to upload file to Cloudinary.'
+      };
+    }
+
+    const uploadData = await uploadResponse.json();
+
+    // Step 5: Return secure URL
     return {
       success: true,
-      path: filePath
+      path: uploadData.secure_url, // Cloudinary secure URL
+      publicId: uploadData.public_id, // For future reference/updates
     };
-  } catch (error) {
+  } catch (error: any) {
+    // Handle Firebase Functions errors
+    if (error.code === 'unauthenticated') {
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to upload files.'
+      };
+    }
+    if (error.code === 'permission-denied') {
+      return {
+        success: false,
+        error: 'Permission denied. Admin access required to upload files.'
+      };
+    }
+    if (error.code === 'invalid-argument') {
+      return {
+        success: false,
+        error: error.message || 'Invalid file. Please check file type and size.'
+      };
+    }
+
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to upload file'
+      error: error.message || 'Failed to upload file. Please try again.'
     };
   }
 };
@@ -99,5 +262,60 @@ export const createImagePreview = (file: File): Promise<string> => {
     reader.onerror = () => reject(new Error('Failed to read file'));
     reader.readAsDataURL(file);
   });
+};
+
+/**
+ * Delete image from Cloudinary
+ * Uses Firebase Cloud Function for secure deletion
+ */
+export const deleteImageFromCloudinary = async (publicId: string): Promise<{ success: boolean; error?: string }> => {
+  try {
+    // Get authentication token
+    const authToken = await getIdToken();
+    if (!authToken) {
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to delete files.'
+      };
+    }
+
+    // Call Firebase Cloud Function to delete image
+    const { deleteCloudinaryImage } = await import('../../config/firebase');
+    const deleteResponse = await deleteCloudinaryImage({ publicId });
+
+    if (deleteResponse.data.success) {
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        error: deleteResponse.data.message || 'Failed to delete image from Cloudinary.'
+      };
+    }
+  } catch (error: any) {
+    // Handle Firebase Functions errors
+    if (error.code === 'unauthenticated') {
+      return {
+        success: false,
+        error: 'Authentication required. Please log in to delete files.'
+      };
+    }
+    if (error.code === 'permission-denied') {
+      return {
+        success: false,
+        error: 'Permission denied. Admin access required to delete files.'
+      };
+    }
+    if (error.code === 'invalid-argument') {
+      return {
+        success: false,
+        error: error.message || 'Invalid public ID provided.'
+      };
+    }
+
+    return {
+      success: false,
+      error: error.message || 'Failed to delete image. Please try again.'
+    };
+  }
 };
 

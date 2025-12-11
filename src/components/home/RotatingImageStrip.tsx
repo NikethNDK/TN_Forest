@@ -1,46 +1,63 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-// Import all images from assets
-import AlwarmalaiImage from '../../assets/Alwarmalai.jpeg';
-import EdaikkalImage from '../../assets/Edaikkal.jpeg';
-import HarurMNCImage from '../../assets/Harur MNC.jpeg';
-import JamunamarathurImage from '../../assets/Jamunamarathur.jpeg';
-import KalamavoorImage from '../../assets/Kalamavoor.jpeg';
-import KathiripuramImage from '../../assets/Kathiripuram.jpeg';
-import MaragattaImage from '../../assets/Maragatta.jpeg';
-import MelchengamImage from '../../assets/Melchengam.jpeg';
-import ThoppurImage from '../../assets/Thoppur.jpeg';
-import ValkaraduImage from '../../assets/Valkaradu.jpeg';
+import { subscribeToSliderImages } from '../../services/firebase/sliderImageService';
 
 const RotatingImageStrip: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  
-  const images: string[] = [
-    AlwarmalaiImage,
-    EdaikkalImage,
-    HarurMNCImage,
-    JamunamarathurImage,
-    KalamavoorImage,
-    KathiripuramImage,
-    MaragattaImage,
-    MelchengamImage,
-    ThoppurImage,
-    ValkaraduImage
-  ];
+  const [images, setImages] = useState<string[]>([]);
+
+  // Subscribe to slider images from Firebase
+  useEffect(() => {
+    const unsubscribe = subscribeToSliderImages(
+      (sliderImages) => {
+        // Extract URLs and sort by order
+        const imageUrls = sliderImages
+          .sort((a, b) => (a.order || 0) - (b.order || 0))
+          .map(img => img.url);
+        setImages(imageUrls);
+        
+        // Reset to first image if current index is out of bounds
+        if (imageUrls.length > 0 && currentIndex >= imageUrls.length) {
+          setCurrentIndex(0);
+        }
+      },
+      (error) => {
+        console.error('Error loading slider images:', error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [currentIndex]);
 
   const nextImage = useCallback(() => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    if (images.length > 0) {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }
   }, [images.length]);
 
   const prevImage = (): void => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    if (images.length > 0) {
+      setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    }
   };
 
   useEffect(() => {
+    if (images.length === 0) return;
+    
     const interval = setInterval(nextImage, 5000);
     return () => clearInterval(interval);
-  }, [nextImage]);
+  }, [nextImage, images.length]);
+
+  // Show placeholder if no images
+  if (images.length === 0) {
+    return (
+      <section className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden flex items-center justify-center">
+        <div className="text-white text-center">
+          <p className="text-lg">No slider images available</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden">

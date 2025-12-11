@@ -4,7 +4,7 @@ import { uploadImageFile, createImagePreview, validateImageFile } from '../../se
 
 interface ImageUploaderProps {
   currentImage?: string;
-  onImageChange: (imagePath: string) => void;
+  onImageChange: (imagePath: string, publicId?: string) => void;
   directory?: string;
   label?: string;
   accept?: string;
@@ -42,11 +42,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       const previewUrl = await createImagePreview(file);
       setPreview(previewUrl);
 
-      // Upload file (in production, this would upload to server)
+      // Upload file to Cloudinary
       const result = await uploadImageFile(file, directory);
       
       if (result.success && result.path) {
-        onImageChange(result.path);
+        onImageChange(result.path, result.publicId);
       } else {
         setError(result.error || 'Upload failed');
         setPreview(null);

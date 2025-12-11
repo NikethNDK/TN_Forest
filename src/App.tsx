@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
 import Layout from './components/layout/Layout';
 import QueryProvider from './providers/QueryProvider';
 import Home from './pages/Home';
@@ -26,6 +27,7 @@ import AdminLogin from './pages/admin/AdminLogin';
 const App: React.FC = () => {
   return (
     <QueryProvider>
+      <Toaster position="top-right" />
       <Router>
         <Routes>
           {/* Admin Login */}

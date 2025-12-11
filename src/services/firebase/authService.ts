@@ -85,3 +85,18 @@ export const isAuthenticatedAdmin = async (): Promise<boolean> => {
   
   return await checkAdminStatus(user.uid);
 };
+
+/**
+ * Get the current user's ID token for authenticated requests
+ */
+export const getIdToken = async (): Promise<string | null> => {
+  const user = auth.currentUser;
+  if (!user) return null;
+  
+  try {
+    return await user.getIdToken();
+  } catch (error) {
+    console.error('Error getting ID token:', error);
+    return null;
+  }
+};
