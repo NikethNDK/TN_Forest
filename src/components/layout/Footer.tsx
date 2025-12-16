@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Globe, Clock, UserCheck } from 'lucide-react';
 import { subscribeToFooterLocation } from '../../services/firebase/contactService';
+import { incrementVisitorCount, subscribeToVisitorCount } from '../../services/firebase/visitorService';
 import type { ContactLocation } from '../../types';
 
 // Function to format the date and time
@@ -19,15 +20,42 @@ const formatDateTime = (date: Date): string => {
 
 const Footer: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const [visitors] = useState<number>(Math.floor(Math.random() * (9000 - 5000 + 1)) + 5000);
+  const [visitors, setVisitors] = useState<number>(0);
   const [footerLocation, setFooterLocation] = useState<ContactLocation | null>(null);
 
+  // Update current time every second
   useEffect(() => {
     const timerId = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
     return () => clearInterval(timerId);
+  }, []);
+
+  // Track visitor count on component mount
+  useEffect(() => {
+    // Increment visitor count when footer loads
+    incrementVisitorCount().catch((error) => {
+      console.error('Error incrementing visitor count:', error);
+      // Don't show error to user, just log it
+    });
+  }, []);
+
+  // Subscribe to real-time visitor count updates
+  useEffect(() => {
+    const unsubscribe = subscribeToVisitorCount(
+      (count) => {
+        setVisitors(count);
+      },
+      (err) => {
+        console.error('Error loading visitor count:', err);
+        // Don't show error to user, just use default/empty
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Subscribe to footer location updates
