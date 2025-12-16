@@ -177,13 +177,17 @@ export interface MissionVision {
 
 // Publication type
 export interface Publication {
-  id: number;
+  id?: string; // Firestore document ID
   title: string;
   year: number;
   category: string;
   journal?: string;
   description?: string;
   pdfUrl?: string;
+  pdfPublicId?: string; // Cloudinary public ID for deletion
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
+  order?: number; // For sorting
 }
 
 // Slider Image type

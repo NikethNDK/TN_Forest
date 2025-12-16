@@ -328,7 +328,7 @@ const AdminHome: React.FC = () => {
     { id: 'news', label: 'Latest News', icon: FileText },
     { id: 'events', label: 'Latest Events', icon: Calendar },
     { id: 'gallery', label: 'Gallery Carousel', icon: Image },
-    { id: 'links', label: 'Useful Links', icon: LinkIcon },
+    // { id: 'links', label: 'Useful Links', icon: LinkIcon },
   ];
 
   const renderSection = () => {

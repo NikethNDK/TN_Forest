@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 import {
-  getPublications,
-  addCategory,
-  deleteCategory,
   addPublication,
   updatePublication,
-  deletePublication
-} from '../../services/admin/adminDataService';
+  deletePublication,
+  subscribeToPublications
+} from '../../services/firebase/publicationService';
+import {
+  getCategories,
+  addCategory,
+  deleteCategory
+} from '../../services/firebase/publicationCategoryService';
 import { uploadPDFFile } from '../../services/admin/fileUploadService';
+import { deleteCloudinaryImage } from '../../config/firebase';
 import Modal from '../../components/admin/Modal';
 import { useToast, ToastContainer } from '../../components/admin/Toast';
 import { useConfirmation } from '../../hooks/useConfirmation';
@@ -19,35 +23,77 @@ import type { Publication } from '../../types';
 const AdminPublications: React.FC = () => {
   const { toasts, showToast, removeToast } = useToast();
   const confirmation = useConfirmation();
-  const [publications, setPublications] = useState(getPublications());
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isLoadingPublications, setIsLoadingPublications] = useState(true);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     year: new Date().getFullYear(),
     category: '',
     journal: '',
     description: '',
-    pdfUrl: ''
+    pdfUrl: '',
+    pdfPublicId: ''
   });
   const [showForm, setShowForm] = useState(false);
   const [categoryForm, setCategoryForm] = useState({ name: '', showForm: false });
   const [deletingCategory, setDeletingCategory] = useState<string | null>(null);
-  const [deletingPublicationId, setDeletingPublicationId] = useState<number | null>(null);
+  const [deletingPublicationId, setDeletingPublicationId] = useState<string | null>(null);
 
-  const filteredPublications = publications.items.filter((pub: Publication) => {
+  // Load categories on mount
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const cats = await getCategories();
+        setCategories(cats);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        showToast('Failed to load categories', 'error');
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  // Subscribe to publications for real-time updates
+  useEffect(() => {
+    const unsubscribe = subscribeToPublications(
+      (pubs) => {
+        setPublications(pubs);
+        setIsLoadingPublications(false);
+      },
+      (error) => {
+        console.error('Error in publications subscription:', error);
+        setIsLoadingPublications(false);
+        showToast('Failed to load publications', 'error');
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const filteredPublications = publications.filter((pub: Publication) => {
     const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || pub.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const handleAddCategory = () => {
+  const handleAddCategory = async () => {
     if (categoryForm.name.trim()) {
-      const updated = addCategory(categoryForm.name.trim());
-      setPublications({ ...publications, categories: updated });
-      setCategoryForm({ name: '', showForm: false });
-      showToast('Category added successfully', 'success');
+      try {
+        const updated = await addCategory(categoryForm.name.trim());
+        setCategories(updated);
+        setCategoryForm({ name: '', showForm: false });
+        showToast('Category added successfully', 'success');
+      } catch (error) {
+        showToast('Failed to add category', 'error');
+      }
     } else {
       showToast('Please enter a category name', 'error');
     }
@@ -60,11 +106,11 @@ const AdminPublications: React.FC = () => {
         message: `Are you sure you want to delete the category "${category}"? Publications in this category will not be deleted.`,
         variant: 'warning'
       },
-      () => {
+      async () => {
         setDeletingCategory(category);
         try {
-          const updated = deleteCategory(category);
-          setPublications({ ...publications, categories: updated });
+          const updated = await deleteCategory(category);
+          setCategories(updated);
           showToast('Category deleted successfully', 'success');
         } catch (error) {
           showToast('Failed to delete category', 'error');
@@ -79,17 +125,18 @@ const AdminPublications: React.FC = () => {
     setFormData({
       title: '',
       year: new Date().getFullYear(),
-      category: publications.categories[0] || '',
+      category: categories[0] || '',
       journal: '',
       description: '',
-      pdfUrl: ''
+      pdfUrl: '',
+      pdfPublicId: ''
     });
     setEditingId(null);
     setShowForm(true);
   };
 
-  const handleEditPublication = (id: number) => {
-    const pub = publications.items.find((p: Publication) => p.id === id);
+  const handleEditPublication = (id: string) => {
+    const pub = publications.find((p: Publication) => p.id === id);
     if (pub) {
       setFormData({
         title: pub.title,
@@ -97,7 +144,8 @@ const AdminPublications: React.FC = () => {
         category: pub.category,
         journal: pub.journal || '',
         description: pub.description || '',
-        pdfUrl: pub.pdfUrl || ''
+        pdfUrl: pub.pdfUrl || '',
+        pdfPublicId: pub.pdfPublicId || ''
       });
       setEditingId(id);
       setShowForm(true);
@@ -112,16 +160,31 @@ const AdminPublications: React.FC = () => {
 
     try {
       if (editingId !== null) {
-        const updated = updatePublication(editingId, formData);
-        setPublications({ ...publications, items: updated });
+        await updatePublication(editingId, {
+          title: formData.title,
+          year: formData.year,
+          category: formData.category,
+          journal: formData.journal,
+          description: formData.description,
+          pdfUrl: formData.pdfUrl,
+          pdfPublicId: formData.pdfPublicId
+        });
         showToast('Publication updated successfully', 'success');
       } else {
-        const updated = addPublication(formData);
-        setPublications({ ...publications, items: updated });
+        await addPublication({
+          title: formData.title,
+          year: formData.year,
+          category: formData.category,
+          journal: formData.journal,
+          description: formData.description,
+          pdfUrl: formData.pdfUrl,
+          pdfPublicId: formData.pdfPublicId
+        });
         showToast('Publication added successfully', 'success');
       }
       handleCancelPublication();
     } catch (error) {
+      console.error('Error saving publication:', error);
       showToast('Failed to save publication', 'error');
     }
   };
@@ -133,26 +196,41 @@ const AdminPublications: React.FC = () => {
       category: '',
       journal: '',
       description: '',
-      pdfUrl: ''
+      pdfUrl: '',
+      pdfPublicId: ''
     });
     setEditingId(null);
     setShowForm(false);
   };
 
-  const handleDeletePublication = (id: number) => {
+  const handleDeletePublication = (id: string) => {
     confirmation.confirm(
       {
         title: 'Delete Publication',
         message: 'Are you sure you want to delete this publication?',
         variant: 'danger'
       },
-      () => {
+      async () => {
         setDeletingPublicationId(id);
         try {
-          const updated = deletePublication(id);
-          setPublications({ ...publications, items: updated });
+          // Find publication to get pdfPublicId
+          const pub = publications.find((p: Publication) => p.id === id);
+          
+          // Delete PDF from Cloudinary if it exists
+          if (pub?.pdfPublicId) {
+            try {
+              await deleteCloudinaryImage({ publicId: pub.pdfPublicId });
+            } catch (cloudinaryError) {
+              // Log but continue with Firestore deletion
+              console.error('Error deleting PDF from Cloudinary:', cloudinaryError);
+            }
+          }
+          
+          // Delete from Firestore
+          await deletePublication(id);
           showToast('Publication deleted successfully', 'success');
         } catch (error) {
+          console.error('Error deleting publication:', error);
           showToast('Failed to delete publication', 'error');
         } finally {
           setDeletingPublicationId(null);
@@ -165,14 +243,19 @@ const AdminPublications: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       try {
-        const result = await uploadPDFFile(file, 'Publications');
+        const result = await uploadPDFFile(file, 'tn-forest/publications');
         if (result.success && result.path) {
-          setFormData({ ...formData, pdfUrl: result.path });
+          setFormData({ 
+            ...formData, 
+            pdfUrl: result.path,
+            pdfPublicId: result.publicId || ''
+          });
           showToast('PDF uploaded successfully', 'success');
         } else {
           showToast(result.error || 'Failed to upload PDF', 'error');
         }
       } catch (error) {
+        console.error('Error uploading PDF:', error);
         showToast('Failed to upload PDF', 'error');
       }
     }
@@ -246,7 +329,10 @@ const AdminPublications: React.FC = () => {
           </Modal>
 
           <div className="flex flex-wrap gap-2">
-            {publications.categories.map((category: string) => (
+            {isLoadingCategories ? (
+              <p className="text-gray-500">Loading categories...</p>
+            ) : (
+              categories.map((category: string) => (
               <div
                 key={category}
                 className="flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full"
@@ -260,7 +346,8 @@ const AdminPublications: React.FC = () => {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
-            ))}
+            ))
+            )}
           </div>
         </div>
 
@@ -297,7 +384,7 @@ const AdminPublications: React.FC = () => {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
                 <option value="all">All Categories</option>
-                {publications.categories.map((category: string) => (
+                {categories.map((category: string) => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </select>
@@ -336,7 +423,7 @@ const AdminPublications: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     >
                       <option value="">Select category</option>
-                      {publications.categories.map((cat: string) => (
+                      {categories.map((cat: string) => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
@@ -393,11 +480,16 @@ const AdminPublications: React.FC = () => {
 
           {/* Publications List */}
           <div className="space-y-4">
-            {filteredPublications.map((publication: Publication) => (
-              <div
-                key={publication.id}
-                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
+            {isLoadingPublications ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Loading publications...</p>
+              </div>
+            ) : filteredPublications.length > 0 ? (
+              filteredPublications.map((publication: Publication, index: number) => (
+                <div
+                  key={publication.id || `pub-${index}`}
+                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                >
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-2">
@@ -424,25 +516,28 @@ const AdminPublications: React.FC = () => {
                     )}
                   </div>
                   <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={() => handleEditPublication(publication.id)}
-                      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDeletePublication(publication.id)}
-                      disabled={deletingPublicationId === publication.id}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    {publication.id && (
+                      <>
+                        <button
+                          onClick={() => handleEditPublication(publication.id!)}
+                          className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeletePublication(publication.id!)}
+                          disabled={deletingPublicationId === publication.id}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
-
-            {filteredPublications.length === 0 && (
+            ))
+            ) : (
               <EmptyState message="No publications found matching your criteria." />
             )}
           </div>
