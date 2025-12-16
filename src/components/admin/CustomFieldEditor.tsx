@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, X, Edit } from 'lucide-react';
 import Modal from './Modal';
+import type { CustomField } from '../../types';
 
-export interface CustomField {
-  id: string;
-  label: string;
-  value: string;
-}
+// Re-export for backward compatibility
+export type { CustomField };
 
 interface CustomFieldEditorProps {
   fields: CustomField[];

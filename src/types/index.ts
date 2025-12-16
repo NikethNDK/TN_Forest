@@ -13,41 +13,62 @@ export interface Coordinates {
 
 // Experiment type
 export interface Experiment {
-  id: number;
+  id?: string | number; // Firestore document ID (string) or legacy numeric ID
   title: string;
   year: number;
-  pdfPath?: string;
+  pdfPath?: string; // Legacy field, use pdfUrl instead
   description?: string;
-  imagePath?: string;
+  imagePath?: string; // Legacy field, use imageUrl instead
   type?: 'current' | 'completed';
   pdfUrl?: string;
+  pdfPublicId?: string; // Cloudinary public ID for deletion
+  imageUrl?: string;
+  imagePublicId?: string; // Cloudinary public ID for deletion
   startDate?: string;
   endDate?: string;
   status?: string;
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // Research Center type
+// Custom Field type for research centers
+export interface CustomField {
+  id: string;
+  label: string;
+  value: string;
+}
+
 export interface ResearchCenter {
-  id: number;
+  id?: string | number; // Firestore document ID (string) or legacy numeric ID
   name: string;
   location: string;
-  area?: string;
-  district?: string;
-  range?: string;
+  area?: string; // Deprecated: use customFields instead, kept for backward compatibility
+  district?: string; // Deprecated: use customFields instead, kept for backward compatibility
+  range?: string; // Deprecated: use customFields instead, kept for backward compatibility
   description?: string;
-  experiments: Experiment[];
+  experiments?: Experiment[]; // Optional, may be in subcollection
   coordinates?: Coordinates;
   phone?: string;
   email?: string;
+  imageUrl?: string;
+  imagePublicId?: string; // Cloudinary public ID for deletion
+  customFields?: CustomField[]; // Array of custom key-value fields
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // Division type
 export interface Division {
-  id: number;
+  id?: string | number; // Firestore document ID (string) or legacy numeric ID
   name: string;
   slug: string;
   description?: string;
-  researchCenters?: ResearchCenter[];
+  researchCenters?: ResearchCenter[]; // Optional, may be in subcollection
+  tollFreeNumber?: string;
+  contentBlocks?: Array<{ id: string; heading: string; text: string; image?: string }>;
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // Shop Product type

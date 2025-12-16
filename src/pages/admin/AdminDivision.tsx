@@ -2,22 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, Edit, Trash2, Phone } from 'lucide-react';
 import {
-  getDivision,
-  updateDivisionHeading,
+  subscribeToDivision,
+  updateDivision,
+  updateTollFreeNumber
+  // updateContentBlocks
+} from '../../services/firebase/divisionService';
+import {
+  subscribeToResearchCenters,
   addResearchCenter,
   updateResearchCenter,
-  deleteResearchCenter,
-  updateTollFreeNumber,
-  getTollFreeNumber
-} from '../../services/admin/adminDataService';
-import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
+  deleteResearchCenter
+} from '../../services/firebase/researchCenterService';
+// TODO: Enable when making content blocks live
+// import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
 import CustomFieldEditor, { CustomField } from '../../components/admin/CustomFieldEditor';
 import ImageUploader from '../../components/admin/ImageUploader';
+// Image upload is handled by ImageUploader component
+// import { uploadImageFile } from '../../services/admin/fileUploadService';
 import Modal from '../../components/admin/Modal';
 import { useToast, ToastContainer } from '../../components/admin/Toast';
 import { useConfirmation } from '../../hooks/useConfirmation';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog';
-import type { ResearchCenter, Coordinates } from '../../types';
+import type { ResearchCenter, Coordinates, Division } from '../../types';
 
 const AdminDivision: React.FC = () => {
   const { divisionSlug } = useParams<{ divisionSlug: string }>();
@@ -25,86 +31,177 @@ const AdminDivision: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toasts, showToast, removeToast } = useToast();
   const confirmation = useConfirmation();
-  const [deletingCenterId, setDeletingCenterId] = useState<number | null>(null);
-  const division = divisionSlug ? getDivision(divisionSlug) : undefined;
+  const [deletingCenterId, setDeletingCenterId] = useState<string | null>(null);
   
-  const [divisionHeading, setDivisionHeading] = useState(division?.name || '');
-  const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
+  const [division, setDivision] = useState<Division | null>(null);
+  const [researchCenters, setResearchCenters] = useState<ResearchCenter[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCenters, setIsLoadingCenters] = useState(true);
+  
+  const [divisionHeading, setDivisionHeading] = useState('');
+  // TODO: Enable when making content blocks live
+  // const [contentBlocks, setContentBlocks] = useState<ContentBlock[]>([]);
   const [editingCenter, setEditingCenter] = useState<ResearchCenter | null>(null);
   const [showCenterForm, setShowCenterForm] = useState(false);
-  const [tollFreeNumber, setTollFreeNumber] = useState(getTollFreeNumber());
+  const [tollFreeNumber, setTollFreeNumber] = useState('');
 
   const [centerFormData, setCenterFormData] = useState({
     name: '',
     location: '',
     description: '',
     coordinates: { lat: 0, lng: 0 } as Coordinates,
-    image: '',
+    imageUrl: '',
+    imagePublicId: '',
     customFields: [] as CustomField[],
     phone: '',
     email: ''
   });
 
+  // Subscribe to division data
   useEffect(() => {
-    if (division) {
-      setDivisionHeading(division.name);
+    if (!divisionSlug) {
+      setIsLoading(false);
+      return;
     }
-  }, [division]);
+
+    setIsLoading(true);
+    const unsubscribe = subscribeToDivision(
+      divisionSlug,
+      (divisionData) => {
+        if (divisionData) {
+          setDivision(divisionData);
+          setDivisionHeading(divisionData.name);
+          setTollFreeNumber(divisionData.tollFreeNumber || '');
+          // TODO: Enable when making content blocks live
+          // setContentBlocks(divisionData.contentBlocks || []);
+        } else {
+          setDivision(null);
+        }
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error('Error loading division:', error);
+        showToast('Failed to load division', 'error');
+        setIsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [divisionSlug]);
+
+  // Subscribe to research centers
+  useEffect(() => {
+    if (!division?.id) {
+      setIsLoadingCenters(false);
+      return;
+    }
+
+    setIsLoadingCenters(true);
+    const divisionId = typeof division.id === 'string' ? division.id : division.id.toString();
+    const unsubscribe = subscribeToResearchCenters(
+      divisionId,
+      (centers) => {
+        setResearchCenters(centers);
+        setIsLoadingCenters(false);
+      },
+      (error) => {
+        console.error('Error loading research centers:', error);
+        showToast('Failed to load research centers', 'error');
+        setIsLoadingCenters(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [division?.id]);
+
+  // Check if we need to open edit modal from query param
+  useEffect(() => {
+    const editCenterId = searchParams.get('editCenter');
+    if (editCenterId && division && researchCenters.length > 0) {
+      const center = researchCenters.find(c => c.id === editCenterId || c.id?.toString() === editCenterId);
+      if (center) {
+        handleEditCenter(center);
+        setSearchParams({});
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, division, researchCenters]);
 
   const handleEditCenter = (center: ResearchCenter) => {
-    const customFields: CustomField[] = [];
-    if (center.area) customFields.push({ id: 'area', label: 'Area', value: center.area });
-    if (center.district) customFields.push({ id: 'district', label: 'District', value: center.district });
-    if (center.range) customFields.push({ id: 'range', label: 'Range', value: center.range });
+    // Load customFields from center, or convert from legacy area/district/range fields
+    let customFields: CustomField[] = [];
+    
+    if (center.customFields && center.customFields.length > 0) {
+      // Use existing customFields
+      customFields = [...center.customFields];
+    } else {
+      // Convert legacy fields to customFields for backward compatibility
+      if (center.area) customFields.push({ id: 'area', label: 'Area', value: center.area });
+      if (center.district) customFields.push({ id: 'district', label: 'District', value: center.district });
+      if (center.range) customFields.push({ id: 'range', label: 'Range', value: center.range });
+    }
 
     setCenterFormData({
       name: center.name,
       location: center.location,
       description: center.description || '',
-      coordinates: center.coordinates,
-      image: '',
+      coordinates: center.coordinates || { lat: 0, lng: 0 },
+      imageUrl: center.imageUrl || '',
+      imagePublicId: center.imagePublicId || '',
       customFields,
-      phone: '',
-      email: ''
+      phone: center.phone || '',
+      email: center.email || ''
     });
     setEditingCenter(center);
     setShowCenterForm(true);
   };
 
-  // Check if we need to open edit modal from query param
-  useEffect(() => {
-    const editCenterId = searchParams.get('editCenter');
-    if (editCenterId && divisionSlug && division) {
-      const centerId = parseInt(editCenterId);
-      const center = division.researchCenters?.find(c => c.id === centerId);
-      if (center) {
-        handleEditCenter(center);
-        // Remove query param
-        setSearchParams({});
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, divisionSlug, division]);
-
-  const handleDivisionHeadingUpdate = () => {
-    if (divisionSlug) {
-      updateDivisionHeading(divisionSlug, divisionHeading, '');
+  const handleDivisionHeadingUpdate = async () => {
+    if (!division?.id) return;
+    
+    const divisionId = typeof division.id === 'string' ? division.id : division.id.toString();
+    
+    try {
+      await updateDivision(divisionId, { name: divisionHeading });
+      showToast('Division heading updated', 'success');
+    } catch (error) {
+      console.error('Error updating division heading:', error);
+      showToast('Failed to update division heading', 'error');
     }
   };
 
-  const handleContentBlocksChange = (blocks: ContentBlock[]) => {
-    setContentBlocks(blocks);
-    // In a real app, this would save to the division's content blocks
-  };
+  // TODO: Enable when making content blocks live
+  // const handleContentBlocksChange = async (blocks: ContentBlock[]) => {
+  //   setContentBlocks(blocks);
+  //   if (!division?.id) return;
+  //   
+  //   const divisionId = typeof division.id === 'string' ? division.id : division.id.toString();
+  //   
+  //   try {
+  //     await updateContentBlocks(divisionId, blocks);
+  //     showToast('Content blocks updated', 'success');
+  //   } catch (error) {
+  //     console.error('Error updating content blocks:', error);
+  //     showToast('Failed to update content blocks', 'error');
+  //   }
+  // };
 
   const handleAddCenter = () => {
+    // Initialize with default fields: Area, District, Range
+    const defaultFields: CustomField[] = [
+      { id: `field-${Date.now()}-1`, label: 'Area', value: '' },
+      { id: `field-${Date.now()}-2`, label: 'District', value: '' },
+      { id: `field-${Date.now()}-3`, label: 'Range', value: '' }
+    ];
+    
     setCenterFormData({
       name: '',
       location: '',
       description: '',
       coordinates: { lat: 0, lng: 0 },
-      image: '',
-      customFields: [],
+      imageUrl: '',
+      imagePublicId: '',
+      customFields: defaultFields,
       phone: '',
       email: ''
     });
@@ -112,54 +209,64 @@ const AdminDivision: React.FC = () => {
     setShowCenterForm(true);
   };
 
+  // Image upload is handled directly by ImageUploader component
 
-  const handleSaveCenter = () => {
+  const handleSaveCenter = async () => {
     if (!centerFormData.name || !centerFormData.location) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
 
-    if (!divisionSlug) return;
+    if (!division?.id) {
+      showToast('Division not loaded', 'error');
+      return;
+    }
 
-    // Convert custom fields to research center properties
-    const centerData: Partial<ResearchCenter> = {
+    const divisionId = typeof division.id === 'string' ? division.id : division.id.toString();
+
+    // Build center data with customFields
+    const centerData: Omit<ResearchCenter, 'id' | 'createdAt' | 'updatedAt' | 'experiments'> = {
       name: centerFormData.name,
       location: centerFormData.location,
       description: centerFormData.description,
-      coordinates: centerFormData.coordinates,
-      experiments: editingCenter?.experiments || []
+      coordinates: centerFormData.coordinates.lat !== 0 && centerFormData.coordinates.lng !== 0
+        ? centerFormData.coordinates
+        : undefined,
+      imageUrl: centerFormData.imageUrl || undefined,
+      imagePublicId: centerFormData.imagePublicId || undefined,
+      phone: centerFormData.phone || undefined,
+      email: centerFormData.email || undefined,
+      // Store all customFields as an array
+      customFields: centerFormData.customFields.filter(field => field.label.trim() && field.value.trim())
     };
 
-    // Add custom fields
+    // Also set legacy fields for backward compatibility (if they exist in customFields)
     centerFormData.customFields.forEach(field => {
-      if (field.label.toLowerCase() === 'area') {
-        centerData.area = field.value;
-      } else if (field.label.toLowerCase() === 'district') {
-        centerData.district = field.value;
-      } else if (field.label.toLowerCase() === 'range') {
-        centerData.range = field.value;
+      const labelLower = field.label.toLowerCase().trim();
+      if (labelLower === 'area' && field.value.trim()) {
+        centerData.area = field.value.trim();
+      } else if (labelLower === 'district' && field.value.trim()) {
+        centerData.district = field.value.trim();
+      } else if (labelLower === 'range' && field.value.trim()) {
+        centerData.range = field.value.trim();
       }
     });
 
     try {
-      if (editingCenter) {
-        updateResearchCenter(divisionSlug, editingCenter.id, centerData);
+      if (editingCenter && editingCenter.id && typeof editingCenter.id === 'string') {
+        await updateResearchCenter(divisionId, editingCenter.id, centerData);
         showToast('Research center updated successfully', 'success');
         handleCancelCenter();
       } else {
         // Add new center
-        addResearchCenter(divisionSlug, centerData as Omit<ResearchCenter, 'id'>);
+        const newCenterId = await addResearchCenter(divisionId, centerData);
         showToast('Research center added successfully', 'success');
-        // Get the newly added center (it will have the highest ID)
-        const updatedDivision = getDivision(divisionSlug);
-        if (updatedDivision && updatedDivision.researchCenters) {
-          const newCenter = updatedDivision.researchCenters[updatedDivision.researchCenters.length - 1];
-          handleCancelCenter();
-          // Navigate to the new research center page
-          navigate(`/admin/divisions/${divisionSlug}/centers/${newCenter.id}`);
-        }
+        handleCancelCenter();
+        // Navigate to the new research center page
+        navigate(`/admin/divisions/${divisionSlug}/centers/${newCenterId}`);
       }
     } catch (error) {
+      console.error('Error saving research center:', error);
       showToast('Failed to save research center', 'error');
     }
   };
@@ -170,7 +277,8 @@ const AdminDivision: React.FC = () => {
       location: '',
       description: '',
       coordinates: { lat: 0, lng: 0 },
-      image: '',
+      imageUrl: '',
+      imagePublicId: '',
       customFields: [],
       phone: '',
       email: ''
@@ -179,32 +287,61 @@ const AdminDivision: React.FC = () => {
     setShowCenterForm(false);
   };
 
-  const handleDeleteCenter = (centerId: number) => {
+  const handleDeleteCenter = (centerId: string | number) => {
     confirmation.confirm(
       {
         title: 'Delete Research Center',
         message: 'Are you sure you want to delete this research center? All experiments will also be deleted.',
         variant: 'danger'
       },
-      () => {
-        if (divisionSlug) {
-          setDeletingCenterId(centerId);
-          try {
-            deleteResearchCenter(divisionSlug, centerId);
-            showToast('Research center deleted successfully', 'success');
-          } catch (error) {
-            showToast('Failed to delete research center', 'error');
-          } finally {
-            setDeletingCenterId(null);
-          }
+      async () => {
+        if (!division?.id) return;
+        
+        const divisionId = typeof division.id === 'string' ? division.id : division.id.toString();
+        const centerIdStr = typeof centerId === 'string' ? centerId : centerId.toString();
+        const center = researchCenters.find(c => c.id === centerIdStr || c.id === centerId);
+        
+        setDeletingCenterId(centerIdStr);
+        try {
+          await deleteResearchCenter(
+            divisionId,
+            centerIdStr,
+            center?.imagePublicId
+          );
+          showToast('Research center deleted successfully', 'success');
+        } catch (error) {
+          console.error('Error deleting research center:', error);
+          showToast('Failed to delete research center', 'error');
+        } finally {
+          setDeletingCenterId(null);
         }
       }
     );
   };
 
-  const handleTollFreeUpdate = () => {
-    updateTollFreeNumber(tollFreeNumber);
+  const handleTollFreeUpdate = async () => {
+    if (!division?.id) return;
+    
+    const divisionId = typeof division.id === 'string' ? division.id : division.id.toString();
+    
+    try {
+      await updateTollFreeNumber(divisionId, tollFreeNumber);
+      showToast('Toll-free number updated', 'success');
+    } catch (error) {
+      console.error('Error updating toll-free number:', error);
+      showToast('Failed to update toll-free number', 'error');
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center py-12">
+          <p className="text-gray-600">Loading division...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!division) {
     return (
@@ -243,25 +380,32 @@ const AdminDivision: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Heading
             </label>
-            <input
-              type="text"
-              value={divisionHeading}
-              onChange={(e) => {
-                setDivisionHeading(e.target.value);
-                handleDivisionHeadingUpdate();
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={divisionHeading}
+                onChange={(e) => setDivisionHeading(e.target.value)}
+                onBlur={handleDivisionHeadingUpdate}
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <button
+                onClick={handleDivisionHeadingUpdate}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Content Blocks */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
+        {/* TODO: Enable when making content blocks live */}
+        {/* <div className="bg-white rounded-lg shadow-lg p-6">
           <ContentBlockEditor
             blocks={contentBlocks}
             onBlocksChange={handleContentBlocksChange}
           />
-        </div>
+        </div> */}
 
         {/* Research Centers */}
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -311,7 +455,7 @@ const AdminDivision: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Latitude
+                    Latitude *
                   </label>
                   <input
                     type="number"
@@ -323,11 +467,12 @@ const AdminDivision: React.FC = () => {
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="11.96828"
+                    required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Longitude
+                    Longitude *
                   </label>
                   <input
                     type="number"
@@ -339,14 +484,21 @@ const AdminDivision: React.FC = () => {
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="78.05200"
+                    required
                   />
                 </div>
               </div>
               <div>
                 <ImageUploader
-                  currentImage={centerFormData.image}
-                  onImageChange={(imagePath) => setCenterFormData({ ...centerFormData, image: imagePath })}
-                  directory="centers"
+                  currentImage={centerFormData.imageUrl}
+                  onImageChange={(imagePath, publicId) => {
+                    setCenterFormData({
+                      ...centerFormData,
+                      imageUrl: imagePath,
+                      imagePublicId: publicId || ''
+                    });
+                  }}
+                  directory="tn-forest/images/centers"
                   label="Center Image (Optional)"
                 />
               </div>
@@ -413,54 +565,62 @@ const AdminDivision: React.FC = () => {
           </Modal>
 
           {/* Research Centers List */}
-          <div className="space-y-4 mb-6">
-            {division.researchCenters?.map((center) => (
-              <div
-                key={center.id}
-                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                onClick={() => navigate(`/admin/divisions/${divisionSlug}/centers/${center.id}`)}
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-green-900 mb-2">{center.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{center.location}</p>
-                    {center.description && (
-                      <p className="text-sm text-gray-500 line-clamp-2">{center.description}</p>
-                    )}
-                  </div>
-                  <div className="flex gap-2 ml-4">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditCenter(center);
-                      }}
-                      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                      title="Edit"
-                    >
-                      <Edit className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteCenter(center.id);
-                      }}
-                      disabled={deletingCenterId === center.id}
-                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+          {isLoadingCenters ? (
+            <div className="text-center py-8 text-gray-500">
+              <p>Loading research centers...</p>
+            </div>
+          ) : (
+            <div className="space-y-4 mb-6">
+              {researchCenters.map((center) => (
+                <div
+                  key={center.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors cursor-pointer"
+                  onClick={() => navigate(`/admin/divisions/${divisionSlug}/centers/${center.id}`)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-green-900 mb-2">{center.name}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{center.location}</p>
+                      {center.description && (
+                        <p className="text-sm text-gray-500 line-clamp-2">{center.description}</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEditCenter(center);
+                        }}
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (center.id) {
+                            handleDeleteCenter(center.id);
+                          }
+                        }}
+                        disabled={deletingCenterId === center.id?.toString()}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
 
-            {(!division.researchCenters || division.researchCenters.length === 0) && (
-              <div className="text-center py-8 text-gray-500">
-                <p>No research centers yet. Click "Add Research Center" to create one.</p>
-              </div>
-            )}
-          </div>
+              {researchCenters.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No research centers yet. Click "Add Research Center" to create one.</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Toll-Free Number */}
@@ -468,16 +628,22 @@ const AdminDivision: React.FC = () => {
           <h2 className="text-xl font-bold text-green-900 mb-4">Toll-Free Number</h2>
           <div className="flex items-center gap-4">
             <Phone className="h-5 w-5 text-green-600" />
-            <input
-              type="text"
-              value={tollFreeNumber}
-              onChange={(e) => {
-                setTollFreeNumber(e.target.value);
-                handleTollFreeUpdate();
-              }}
-              placeholder="1800-425-2313"
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
+            <div className="flex gap-2 flex-1">
+              <input
+                type="text"
+                value={tollFreeNumber}
+                onChange={(e) => setTollFreeNumber(e.target.value)}
+                onBlur={handleTollFreeUpdate}
+                placeholder="1800-425-2313"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <button
+                onClick={handleTollFreeUpdate}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Save
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -486,4 +652,3 @@ const AdminDivision: React.FC = () => {
 };
 
 export default AdminDivision;
-

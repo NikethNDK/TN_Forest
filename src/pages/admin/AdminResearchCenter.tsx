@@ -3,15 +3,18 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
 import {
   getDivision,
+  subscribeToDivision
+} from '../../services/firebase/divisionService';
+import {
   getResearchCenter,
-  updateResearchCenter,
+  subscribeToResearchCenters,
   deleteResearchCenter
-} from '../../services/admin/adminDataService';
+} from '../../services/firebase/researchCenterService';
 import ExperimentEditor from '../../components/admin/ExperimentEditor';
 import { useConfirmation } from '../../hooks/useConfirmation';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog';
 import { useToast, ToastContainer } from '../../components/admin/Toast';
-import type { Experiment, ResearchCenter } from '../../types';
+import type { ResearchCenter, Division } from '../../types';
 
 const AdminResearchCenter: React.FC = () => {
   const { divisionSlug, centerId } = useParams<{ divisionSlug: string; centerId: string }>();
@@ -20,25 +23,59 @@ const AdminResearchCenter: React.FC = () => {
   const confirmation = useConfirmation();
   const [deleting, setDeleting] = useState(false);
   
-  const [center, setCenter] = useState<ResearchCenter | undefined>(
-    divisionSlug && centerId 
-      ? getResearchCenter(divisionSlug, parseInt(centerId)) 
-      : undefined
-  );
+  const [division, setDivision] = useState<Division | null>(null);
+  const [center, setCenter] = useState<ResearchCenter | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingCenter, setIsLoadingCenter] = useState(true);
 
+  // Subscribe to division
   useEffect(() => {
-    if (divisionSlug && centerId) {
-      const researchCenter = getResearchCenter(divisionSlug, parseInt(centerId));
-      setCenter(researchCenter);
+    if (!divisionSlug) {
+      setIsLoading(false);
+      return;
     }
-  }, [divisionSlug, centerId]);
 
-  const handleExperimentsChange = (experiments: Experiment[]) => {
-    if (center && divisionSlug) {
-      updateResearchCenter(divisionSlug, center.id, { experiments });
-      setCenter({ ...center, experiments });
+    setIsLoading(true);
+    const unsubscribe = subscribeToDivision(
+      divisionSlug,
+      (divisionData) => {
+        setDivision(divisionData);
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error('Error loading division:', error);
+        showToast('Failed to load division', 'error');
+        setIsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [divisionSlug]);
+
+  // Subscribe to research centers to find the specific center
+  useEffect(() => {
+    if (!division?.id || !centerId) {
+      setIsLoadingCenter(false);
+      return;
     }
-  };
+
+    setIsLoadingCenter(true);
+    const unsubscribe = subscribeToResearchCenters(
+      division.id,
+      (centers) => {
+        const foundCenter = centers.find(c => c.id === centerId || c.id?.toString() === centerId);
+        setCenter(foundCenter || null);
+        setIsLoadingCenter(false);
+      },
+      (error) => {
+        console.error('Error loading research center:', error);
+        showToast('Failed to load research center', 'error');
+        setIsLoadingCenter(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [division?.id, centerId]);
 
   const handleDeleteCenter = () => {
     confirmation.confirm(
@@ -47,18 +84,24 @@ const AdminResearchCenter: React.FC = () => {
         message: 'Are you sure you want to delete this research center? All experiments will also be deleted.',
         variant: 'danger'
       },
-      () => {
-        if (divisionSlug && center) {
-          setDeleting(true);
-          try {
-            deleteResearchCenter(divisionSlug, center.id);
-            showToast('Research center deleted successfully', 'success');
-            navigate(`/admin/divisions/${divisionSlug}`);
-          } catch (error) {
-            showToast('Failed to delete research center', 'error');
-          } finally {
-            setDeleting(false);
-          }
+      async () => {
+        if (!division?.id || !center || !center.id) return;
+        
+        const centerIdStr = center.id.toString();
+        setDeleting(true);
+        try {
+          await deleteResearchCenter(
+            division.id,
+            centerIdStr,
+            center.imagePublicId
+          );
+          showToast('Research center deleted successfully', 'success');
+          navigate(`/admin/divisions/${divisionSlug}`);
+        } catch (error) {
+          console.error('Error deleting research center:', error);
+          showToast('Failed to delete research center', 'error');
+        } finally {
+          setDeleting(false);
         }
       }
     );
@@ -66,10 +109,20 @@ const AdminResearchCenter: React.FC = () => {
 
   const handleEditCenter = () => {
     // Navigate back to division page and trigger edit modal
-    navigate(`/admin/divisions/${divisionSlug}?editCenter=${center?.id}`);
+    navigate(`/admin/divisions/${divisionSlug}?editCenter=${centerId}`);
   };
 
-  if (!center) {
+  if (isLoading || isLoadingCenter) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center py-12">
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!center || !division) {
     return (
       <div className="max-w-7xl mx-auto">
         <div className="text-center py-12">
@@ -84,8 +137,6 @@ const AdminResearchCenter: React.FC = () => {
       </div>
     );
   }
-
-  const division = divisionSlug ? getDivision(divisionSlug) : undefined;
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -108,7 +159,7 @@ const AdminResearchCenter: React.FC = () => {
           className="flex items-center gap-2 text-green-600 hover:text-green-700 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to {division?.name || 'Division'}
+          Back to {division.name || 'Division'}
         </button>
         <div className="flex justify-between items-start">
           <div>
@@ -175,15 +226,31 @@ const AdminResearchCenter: React.FC = () => {
               <p className="text-gray-600">{center.range}</p>
             </div>
           )}
+
+          {center.phone && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Phone</h3>
+              <p className="text-gray-600">{center.phone}</p>
+            </div>
+          )}
+
+          {center.email && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-700 mb-2">Email</h3>
+              <p className="text-gray-600">{center.email}</p>
+            </div>
+          )}
         </div>
       </div>
 
       {/* Experiments */}
       <div className="bg-white rounded-lg shadow-lg p-8">
-        <ExperimentEditor
-          experiments={center.experiments || []}
-          onExperimentsChange={handleExperimentsChange}
-        />
+        {division.id && center.id && (
+          <ExperimentEditor
+            divisionId={division.id}
+            centerId={center.id.toString()}
+          />
+        )}
       </div>
     </div>
   );

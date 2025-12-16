@@ -1,36 +1,76 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, FileText } from 'lucide-react';
 import type { Experiment } from '../../types';
 import ImageUploader from './ImageUploader';
 import { uploadPDFFile } from '../../services/admin/fileUploadService';
+import {
+  subscribeToExperiments,
+  addExperiment,
+  updateExperiment,
+  deleteExperiment
+} from '../../services/firebase/experimentService';
+import { useConfirmation } from '../../hooks/useConfirmation';
+import ConfirmationDialog from '../../components/common/ConfirmationDialog';
 import Modal from './Modal';
 
 interface ExperimentEditorProps {
-  experiments: Experiment[];
-  onExperimentsChange: (experiments: Experiment[]) => void;
+  divisionId: string;
+  centerId: string;
 }
 
 const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
-  experiments,
-  onExperimentsChange
+  divisionId,
+  centerId
 }) => {
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [experiments, setExperiments] = useState<Experiment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<Experiment>>({
     title: '',
     description: '',
     year: new Date().getFullYear(),
-    imagePath: undefined,
-    pdfPath: undefined
+    imageUrl: undefined,
+    imagePublicId: undefined,
+    pdfUrl: undefined,
+    pdfPublicId: undefined
   });
   const [showForm, setShowForm] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const confirmation = useConfirmation();
+
+  // Subscribe to experiments
+  useEffect(() => {
+    if (!divisionId || !centerId) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    const unsubscribe = subscribeToExperiments(
+      divisionId,
+      centerId,
+      (experimentsData) => {
+        setExperiments(experimentsData);
+        setIsLoading(false);
+      },
+      (error) => {
+        console.error('Error loading experiments:', error);
+        setIsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [divisionId, centerId]);
 
   const handleAdd = () => {
     setFormData({
       title: '',
       description: '',
       year: new Date().getFullYear(),
-      imagePath: undefined,
-      pdfPath: undefined
+      imageUrl: undefined,
+      imagePublicId: undefined,
+      pdfUrl: undefined,
+      pdfPublicId: undefined
     });
     setEditingId(null);
     setShowForm(true);
@@ -41,10 +81,12 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
       title: experiment.title,
       description: experiment.description || '',
       year: experiment.year || new Date().getFullYear(),
-      imagePath: experiment.imagePath,
-      pdfPath: experiment.pdfPath
+      imageUrl: experiment.imageUrl || experiment.imagePath,
+      imagePublicId: experiment.imagePublicId,
+      pdfUrl: experiment.pdfUrl || experiment.pdfPath,
+      pdfPublicId: experiment.pdfPublicId
     });
-    setEditingId(experiment.id);
+    setEditingId(experiment.id?.toString() || null);
     setShowForm(true);
   };
 
@@ -54,24 +96,33 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
       return;
     }
 
-    const experimentData: Experiment = {
-      id: editingId || Math.max(...experiments.map(e => e.id || 0), 0) + 1,
-      title: formData.title!,
-      description: formData.description,
-      year: formData.year || new Date().getFullYear(),
-      imagePath: formData.imagePath,
-      pdfPath: formData.pdfPath
-    };
-
-    if (editingId !== null) {
-      const updated = experiments.map(e => 
-        e.id === editingId ? experimentData : e
-      );
-      onExperimentsChange(updated);
-    } else {
-      onExperimentsChange([...experiments, experimentData]);
+    if (!divisionId || !centerId) {
+      alert('Division or center ID missing');
+      return;
     }
-    handleCancel();
+
+    try {
+      const experimentData: Omit<Experiment, 'id' | 'createdAt' | 'updatedAt'> = {
+        title: formData.title!,
+        description: formData.description,
+        year: formData.year || new Date().getFullYear(),
+        imageUrl: formData.imageUrl,
+        imagePublicId: formData.imagePublicId,
+        pdfUrl: formData.pdfUrl,
+        pdfPublicId: formData.pdfPublicId
+      };
+
+      if (editingId) {
+        await updateExperiment(divisionId, centerId, editingId, experimentData);
+      } else {
+        await addExperiment(divisionId, centerId, experimentData);
+      }
+      
+      handleCancel();
+    } catch (error) {
+      console.error('Error saving experiment:', error);
+      alert('Failed to save experiment');
+    }
   };
 
   const handleCancel = () => {
@@ -79,33 +130,79 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
       title: '',
       description: '',
       year: new Date().getFullYear(),
-      imagePath: undefined,
-      pdfPath: undefined
+      imageUrl: undefined,
+      imagePublicId: undefined,
+      pdfUrl: undefined,
+      pdfPublicId: undefined
     });
     setEditingId(null);
     setShowForm(false);
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this experiment?')) {
-      onExperimentsChange(experiments.filter(e => e.id !== id));
-    }
+  const handleDelete = (experiment: Experiment) => {
+    if (!experiment.id) return;
+    
+    const experimentId = experiment.id.toString();
+    confirmation.confirm(
+      {
+        title: 'Delete Experiment',
+        message: 'Are you sure you want to delete this experiment? The PDF and image will also be deleted from Cloudinary.',
+        variant: 'danger'
+      },
+      async () => {
+        setDeletingId(experimentId);
+        try {
+          await deleteExperiment(
+            divisionId,
+            centerId,
+            experimentId,
+            experiment.pdfPublicId,
+            experiment.imagePublicId
+          );
+        } catch (error) {
+          console.error('Error deleting experiment:', error);
+          alert('Failed to delete experiment');
+        } finally {
+          setDeletingId(null);
+        }
+      }
+    );
   };
 
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const result = await uploadPDFFile(file, 'experiments');
-      if (result.success && result.path) {
-        setFormData({ ...formData, pdfPath: result.path });
-      } else {
-        alert(result.error || 'Failed to upload PDF');
+      try {
+        const result = await uploadPDFFile(file, 'tn-forest/documents/experiments');
+        if (result.success && result.path && result.publicId) {
+          setFormData({ 
+            ...formData, 
+            pdfUrl: result.path,
+            pdfPublicId: result.publicId
+          });
+        } else {
+          alert(result.error || 'Failed to upload PDF');
+        }
+      } catch (error) {
+        console.error('Error uploading PDF:', error);
+        alert('Failed to upload PDF');
       }
     }
   };
 
   return (
     <div className="space-y-4">
+      <ConfirmationDialog
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.close}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title || 'Confirm Action'}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+        isLoading={deletingId !== null}
+      />
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-green-900">Experiments</h3>
         <button
@@ -161,23 +258,35 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
           </div>
           <div>
             <ImageUploader
-              currentImage={formData.imagePath}
-              onImageChange={(imagePath) => setFormData({ ...formData, imagePath })}
-              directory="experiments"
+              currentImage={formData.imageUrl}
+              onImageChange={(imagePath, publicId) => {
+                setFormData({ 
+                  ...formData, 
+                  imageUrl: imagePath,
+                  imagePublicId: publicId
+                });
+              }}
+              directory="tn-forest/images/experiments"
               label="Experiment Image"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              PDF Link (URL or upload)
+              PDF (Upload file)
             </label>
-            <input
-              type="text"
-              value={formData.pdfPath || ''}
-              onChange={(e) => setFormData({ ...formData, pdfPath: e.target.value })}
-              placeholder="Enter PDF URL or upload file"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent mb-2"
-            />
+            {formData.pdfUrl && (
+              <div className="mb-2 p-2 bg-green-50 rounded-lg">
+                <a
+                  href={formData.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-green-600 hover:underline flex items-center gap-1"
+                >
+                  <FileText className="h-4 w-4" />
+                  Current PDF: {formData.pdfUrl.split('/').pop()}
+                </a>
+              </div>
+            )}
             <input
               type="file"
               accept="application/pdf"
@@ -202,67 +311,79 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
         </div>
       </Modal>
 
-      <div className="space-y-3">
-        {experiments.map((experiment) => (
-          <div
-            key={experiment.id}
-            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-start gap-4">
-              {experiment.imagePath && (
-                <img
-                  src={experiment.imagePath}
-                  alt={experiment.title}
-                  className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                />
-              )}
-              <div className="flex-1">
-                <h4 className="font-semibold text-green-900 mb-1">{experiment.title}</h4>
-                {experiment.year && (
-                  <p className="text-sm text-gray-500 mb-2">Year: {experiment.year}</p>
-                )}
-                {experiment.description && (
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">{experiment.description}</p>
-                )}
-                {experiment.pdfPath && (
-                  <a
-                    href={experiment.pdfPath}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-green-600 hover:underline flex items-center gap-1"
-                  >
-                    <FileText className="h-4 w-4" />
-                    View PDF
-                  </a>
-                )}
+      {isLoading ? (
+        <div className="text-center py-8 text-gray-500">
+          <p>Loading experiments...</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {experiments.map((experiment) => {
+            const experimentId = experiment.id?.toString();
+            const imageUrl = experiment.imageUrl || experiment.imagePath;
+            const pdfUrl = experiment.pdfUrl || experiment.pdfPath;
+            
+            return (
+              <div
+                key={experimentId || experiment.title}
+                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+              >
+                <div className="flex items-start gap-4">
+                  {imageUrl && (
+                    <img
+                      src={imageUrl}
+                      alt={experiment.title}
+                      className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-green-900 mb-1">{experiment.title}</h4>
+                    {experiment.year && (
+                      <p className="text-sm text-gray-500 mb-2">Year: {experiment.year}</p>
+                    )}
+                    {experiment.description && (
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">{experiment.description}</p>
+                    )}
+                    {pdfUrl && (
+                      <a
+                        href={pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-green-600 hover:underline flex items-center gap-1"
+                      >
+                        <FileText className="h-4 w-4" />
+                        View PDF
+                      </a>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(experiment)}
+                      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(experiment)}
+                      disabled={deletingId === experimentId}
+                      className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(experiment)}
-                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                >
-                  <Edit className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(experiment.id!)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+            );
+          })}
 
-        {experiments.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
-            <p>No experiments yet. Click "Add Experiment" to create one.</p>
-          </div>
-        )}
-      </div>
+          {experiments.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              <p>No experiments yet. Click "Add Experiment" to create one.</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
 
 export default ExperimentEditor;
-
