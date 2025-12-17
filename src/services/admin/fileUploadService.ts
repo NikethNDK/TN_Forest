@@ -46,7 +46,8 @@ export const validatePDFFile = (file: File): { valid: boolean; error?: string } 
  */
 export const uploadImageFile = async (
   file: File,
-  directory: string = 'tn-forest/images'
+  directory: string = 'tn-forest/images',
+  onProgress?: (progress: number) => void
 ): Promise<UploadResult> => {
   const validation = validateImageFile(file);
   if (!validation.valid) {
@@ -91,27 +92,58 @@ export const uploadImageFile = async (
     }
 
     // Step 4: Upload file to Cloudinary
-    const uploadResponse = await fetch(CLOUDINARY_UPLOAD_URL, {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const uploadData = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-    if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json().catch(() => ({}));
+        if (onProgress) {
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const progress = Math.round((event.loaded / event.total) * 100);
+              onProgress(progress);
+            }
+          };
+        }
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response);
+            } catch (error) {
+              reject(new Error('Failed to parse upload response'));
+            }
+          } else {
+            try {
+              const errorData = JSON.parse(xhr.responseText);
+              reject(new Error(errorData.error?.message || 'Failed to upload file to Cloudinary.'));
+            } catch {
+              reject(new Error('Failed to upload file to Cloudinary.'));
+            }
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Network error during upload'));
+        };
+
+        xhr.open('POST', CLOUDINARY_UPLOAD_URL);
+        xhr.send(formData);
+      });
+
+      // Step 5: Return secure URL
+      return {
+        success: true,
+        path: uploadData.secure_url, // Cloudinary secure URL
+        publicId: uploadData.public_id, // For future reference/updates
+      };
+    } catch (uploadError: any) {
+      // Handle upload-specific errors
       return {
         success: false,
-        error: errorData.error?.message || 'Failed to upload file to Cloudinary.'
+        error: uploadError.message || 'Failed to upload file to Cloudinary.'
       };
     }
-
-    const uploadData = await uploadResponse.json();
-
-    // Step 5: Return secure URL
-    return {
-      success: true,
-      path: uploadData.secure_url, // Cloudinary secure URL
-      publicId: uploadData.public_id, // For future reference/updates
-    };
   } catch (error: any) {
     // Handle Firebase Functions errors
     if (error.code === 'unauthenticated') {
@@ -152,7 +184,8 @@ export const uploadImageFile = async (
  */
 export const uploadPDFFile = async (
   file: File,
-  directory: string = 'tn-forest/documents'
+  directory: string = 'tn-forest/documents',
+  onProgress?: (progress: number) => void
 ): Promise<UploadResult> => {
   const validation = validatePDFFile(file);
   if (!validation.valid) {
@@ -200,27 +233,58 @@ export const uploadPDFFile = async (
     }
 
     // Step 4: Upload file to Cloudinary
-    const uploadResponse = await fetch(uploadUrl, {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const uploadData = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
 
-    if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json().catch(() => ({}));
+        if (onProgress) {
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const progress = Math.round((event.loaded / event.total) * 100);
+              onProgress(progress);
+            }
+          };
+        }
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response);
+            } catch (error) {
+              reject(new Error('Failed to parse upload response'));
+            }
+          } else {
+            try {
+              const errorData = JSON.parse(xhr.responseText);
+              reject(new Error(errorData.error?.message || 'Failed to upload file to Cloudinary.'));
+            } catch {
+              reject(new Error('Failed to upload file to Cloudinary.'));
+            }
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error('Network error during upload'));
+        };
+
+        xhr.open('POST', uploadUrl);
+        xhr.send(formData);
+      });
+
+      // Step 5: Return secure URL
+      return {
+        success: true,
+        path: uploadData.secure_url, // Cloudinary secure URL
+        publicId: uploadData.public_id, // For future reference/updates
+      };
+    } catch (uploadError: any) {
+      // Handle upload-specific errors
       return {
         success: false,
-        error: errorData.error?.message || 'Failed to upload file to Cloudinary.'
+        error: uploadError.message || 'Failed to upload file to Cloudinary.'
       };
     }
-
-    const uploadData = await uploadResponse.json();
-
-    // Step 5: Return secure URL
-    return {
-      success: true,
-      path: uploadData.secure_url, // Cloudinary secure URL
-      publicId: uploadData.public_id, // For future reference/updates
-    };
   } catch (error: any) {
     // Handle Firebase Functions errors
     if (error.code === 'unauthenticated') {

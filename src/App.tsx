@@ -23,6 +23,10 @@ import AdminContact from './pages/admin/AdminContact';
 import AdminDivision from './pages/admin/AdminDivision';
 import AdminResearchCenter from './pages/admin/AdminResearchCenter';
 import AdminLogin from './pages/admin/AdminLogin';
+import StateForestResearchDivision from './pages/StateForestResearchDivision';
+import ForestGeneticsDivision from './pages/ForestGeneticsDivision';
+import IndustrialWoodResearchDivision from './pages/IndustrialWoodResearchDivision';
+import AgroForestryResearchDivision from './pages/AgroForestryResearchDivision';
 
 const App: React.FC = () => {
   return (
@@ -58,6 +62,10 @@ const App: React.FC = () => {
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/divisions" element={<Divisions />} />
                 <Route path="/divisions/modern-nursery" element={<ModernNurseryDivision />} />
+                <Route path="/divisions/state-forest-research" element={<StateForestResearchDivision />} />
+                <Route path="/divisions/forest-genetics" element={<ForestGeneticsDivision />} />
+                <Route path="/divisions/industrial-wood" element={<IndustrialWoodResearchDivision />} />
+                <Route path="/divisions/agro-forestry" element={<AgroForestryResearchDivision />} />
                 <Route path="/shop" element={<Shop />} />
               </Routes>
             </Layout>
