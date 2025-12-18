@@ -40,7 +40,8 @@ const Home: React.FC = () => {
     <div className="min-h-screen bg-white">
       <WelcomeModal latestNews={latestNews} events={events} />
       <RotatingImageStrip />
-      <NewsAndInfoSection />
+      {/* Performance optimization: Pass news/events as props to avoid duplicate subscriptions */}
+      <NewsAndInfoSection latestNews={latestNews} events={events} />
       <ImageCarousel scope="global" />
       <LinksCarousel />
     </div>

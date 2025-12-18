@@ -1,36 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { subscribeToNews, subscribeToEvents } from '../../services/firebase/newsEventService';
+import React from 'react';
 import type { NewsItem, Event } from '../../types';
 import RotatingConveyor from './RotatingConveyor';
 
-const NewsAndInfoSection: React.FC = () => {
-  const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
-  const [events, setEvents] = useState<Event[]>([]);
+// Performance optimization: Remove duplicate subscriptions
+// News/events are already subscribed in Home.tsx and passed as props
+interface NewsAndInfoSectionProps {
+  latestNews: NewsItem[];
+  events: Event[];
+}
 
-  useEffect(() => {
-    const unsubscribeNews = subscribeToNews(
-      (newsItems) => {
-        setLatestNews(newsItems);
-      },
-      (error) => {
-        console.error('Error in news subscription:', error);
-      }
-    );
-
-    const unsubscribeEvents = subscribeToEvents(
-      (eventItems) => {
-        setEvents(eventItems);
-      },
-      (error) => {
-        console.error('Error in events subscription:', error);
-      }
-    );
-
-    return () => {
-      unsubscribeNews();
-      unsubscribeEvents();
-    };
-  }, []);
+const NewsAndInfoSection: React.FC<NewsAndInfoSectionProps> = ({ latestNews, events }) => {
 
   return (
     <section className="py-12 md:py-20 bg-gradient-to-b from-gray-50 to-white">

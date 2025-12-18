@@ -182,5 +182,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
   );
 };
 
-export default RotatingConveyor;
+// Memoize component to prevent unnecessary re-renders when parent updates
+// Props are stable (items array reference changes only when data updates)
+export default React.memo(RotatingConveyor);
 
