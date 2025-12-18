@@ -1,139 +1,141 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Target, Eye } from 'lucide-react';
-
-interface LeadershipMember {
-  name: string;
-  position: string;
-}
+import FacultyCard from '../components/faculty/FacultyCard';
+import { subscribeToFaculty } from '../services/firebase/facultyService';
+import { subscribeToMissionVision } from '../services/firebase/aboutService';
+import type { FacultyMember, MissionVision } from '../types';
+import PageBanner from '../components/common/PageBanner';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import ErrorMessage from '../components/common/ErrorMessage';
+import EmptyState from '../components/common/EmptyState';
+import SectionHeader from '../components/common/SectionHeader';
 
 const About: React.FC = () => {
-  const leadershipMembers: LeadershipMember[] = [
-    {
-      name: "Thiru R.S.Rajakannappan",
-      position: "Hon'ble Minister for Forests"
-    },
-    {
-      name: "Tmt. Supriya Sahu, IAS",
-      position: "Additional Chief Secretary to Government, Environment, Climate Change and Forests Department"
-    },
-    {
-      name: "Thiru.Srinivas R. Reddy, IFS",
-      position: "Principal Chief Conservator of Forests (HoFF) & CEO, CAMPA (FAC)"
-    },
-    {
-      name: "Thiru Rakesh Kumar Dogra, IFS",
-      position: "Principal Chief Conservator of Forests and Chief Wildlife Warden & Principal Chief Conservator of Forests (Project Tiger) (FAC)"
-    },
-    {
-      name: "Thiru I Anwardeen, IFS",
-      position: "Principal Chief Conservator of Forests (Research and Education) Chennai"
-    },
-    {
-      name: "K.Geethanjali, IFS",
-      position: "Chief Conservator of Forests (Research), Chennai"
-    }
-  ];
+  const [facultyMembers, setFacultyMembers] = useState<FacultyMember[]>([]);
+  const [missionVision, setMissionVision] = useState<MissionVision | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [missionVisionLoading, setMissionVisionLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Subscribe to faculty members
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+
+    const unsubscribe = subscribeToFaculty(
+      (members) => {
+        setFacultyMembers(members);
+        setLoading(false);
+        setError(null);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Subscribe to mission and vision
+  useEffect(() => {
+    setMissionVisionLoading(true);
+
+    const unsubscribe = subscribeToMissionVision(
+      (data) => {
+        setMissionVision(data);
+        setMissionVisionLoading(false);
+      },
+      (err) => {
+        console.error('Error loading mission/vision:', err);
+        setMissionVisionLoading(false);
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Introductory Banner/Header */}
-      <div 
-        className="relative py-24 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1549490216-3a137b01d1c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')`,
-        }}
-      >
-        <div className="absolute inset-0 bg-green-900/70"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <p className="text-lg font-semibold text-lime-400 mb-2 uppercase tracking-widest">
-            Our Legacy of Science and Stewardship
-          </p>
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-4">
-            About the Research Wing
-          </h1>
-          <p className="text-xl md:text-2xl font-light max-w-4xl mx-auto">
-            The Tamil Nadu Forest Department Research Wing is the scientific foundation 
-            for conservation, committed to ecological innovation and sustainable forestry.
-          </p>
-        </div>
-      </div>
+      <PageBanner
+        subtitle="Our Legacy of Science and Stewardship"
+        title="About the Research Wing"
+        description="The Tamil Nadu Forest Department Research Wing is the scientific foundation for conservation, committed to ecological innovation and sustainable forestry."
+        backgroundImage="https://images.unsplash.com/photo-1549490216-3a137b01d1c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+      />
       
       {/* Mission and Vision */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Mission */}
-            <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Target className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
-                <h2 className="text-2xl font-bold text-green-900">Our Mission</h2>
+          {missionVisionLoading ? (
+            <LoadingSpinner message="Loading mission and vision..." />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Mission */}
+              <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
+                <div className="flex items-center mb-6">
+                  <Target className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
+                  <h2 className="text-2xl font-bold text-green-900">Our Mission</h2>
+                </div>
+                <div 
+                  className="text-gray-700 leading-relaxed whitespace-pre-wrap"
+                  style={{ whiteSpace: 'pre-wrap' }}
+                >
+                  {missionVision?.mission || 'Mission content will appear here...'}
+                </div>
               </div>
-              <div className="space-y-4">
-                <p className="text-gray-700 leading-relaxed">
-                  To embrace the drive for innovation in soil health by developing and scaling biofertilizer solutions that improve soil fertility, ecosystem resilience, and biodiversity and producing high-quality, climate-resilient tree seedlings to support reforestation and land restoration efforts and sustainable agroforestry.
-                </p>
-                <p className="text-gray-700 leading-relaxed">
-                  By providing superior forest tree seeds to government agencies, stakeholders, and communities, with an aim to promote widespread adoption of sustainable forestry practices. The efforts will also focus on the conservation and management of rare, endangered, and threatened (RET) species, ensuring ecological stability and long-term environmental sustainability.
-                </p>
-                <p className="text-gray-700 leading-relaxed">
-                  Through collaborative research and strategic partnerships, we strive to be a catalyst for transformative change in forest and land management.
-                </p>
-              </div>
-            </div>
 
-            {/* Vision */}
-            <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
-              <div className="flex items-center mb-6">
-                <Eye className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
-                <h2 className="text-2xl font-bold text-green-900">Our Vision</h2>
-              </div>
-              <div className="space-y-4">
-                <p className="text-gray-700 leading-relaxed">
-                  To be a leader in sustainable agroforestry and soil health through innovative biofertilizer production and research, developing advanced microbial inoculants to enhance soil fertility and ecosystem productivity and biodiversity improvement.
-                </p>
-                <p className="text-gray-700 leading-relaxed">
-                  We envision the production of high-quality, climate-resilient seedlings to support reforestation and restoration efforts, while supplying quality forest tree seeds for the forest department, line departments and other stakeholders.
-                </p>
-                <p className="text-gray-700 leading-relaxed">
-                  Our vision extends to fostering sustainable management practices in rare, endangered, and threatened (RET) species for long-term ecological benefits, ensuring that our efforts contribute to a more resilient and sustainable future.
-                </p>
+              {/* Vision */}
+              <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
+                <div className="flex items-center mb-6">
+                  <Eye className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
+                  <h2 className="text-2xl font-bold text-green-900">Our Vision</h2>
+                </div>
+                <div 
+                  className="text-gray-700 leading-relaxed whitespace-pre-wrap"
+                  style={{ whiteSpace: 'pre-wrap' }}
+                >
+                  {missionVision?.vision || 'Vision content will appear here...'}
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
       {/* Leadership & Governance Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-green-900 mb-4">
-              Leadership & Governance
-            </h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              The distinguished leadership team guiding the Tamil Nadu Forest Department Research Wing
-            </p>
-          </div>
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeader
+            title="Leadership & Governance"
+            description="The distinguished leadership team of the Tamil Nadu Forest Department."
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {leadershipMembers.map((member, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl shadow-xl p-8 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl"
-              >
-                <div className="flex flex-col h-full">
-                  <h3 className="text-xl font-bold text-green-900 mb-3 leading-tight">
-                    {member.name}
-                  </h3>
-                  {member.position && (
-                    <p className="text-gray-700 leading-relaxed">
-                      {member.position}
-                    </p>
-                  )}
+          {loading ? (
+            <LoadingSpinner message="Loading faculty members..." />
+          ) : error ? (
+            <ErrorMessage 
+              message={`Error loading faculty members: ${error}`}
+              onRetry={() => window.location.reload()}
+            />
+          ) : (
+            <>
+              {facultyMembers.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                  {facultyMembers.map((member) => (
+                    <FacultyCard key={member.id} member={member} />
+                  ))}
                 </div>
-              </div>
-            ))}
-          </div>
+              ) : (
+                <EmptyState message="No faculty members available at this time." />
+              )}
+            </>
+          )}
         </div>
       </section>
     </div>
@@ -141,4 +143,3 @@ const About: React.FC = () => {
 };
 
 export default About;
-

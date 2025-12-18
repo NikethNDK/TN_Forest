@@ -1,39 +1,39 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { subscribeToGalleryImages } from '../../services/firebase/galleryImageService';
 
 const ImageCarousel: React.FC = () => {
-  // All images from public/gallery subfolders
-  const images: string[] = [
-    // Website - MND - Gallery - Melchengam (6 images)
-    '/gallery/Website - MND - Gallery -  Melchengam/Adina cordifolia - Melchengam.jpg',
-    '/gallery/Website - MND - Gallery -  Melchengam/Aegle marmalos - Melchengam.jpg',
-    '/gallery/Website - MND - Gallery -  Melchengam/Albizzia richardiana - Melchengam.jpg',
-    '/gallery/Website - MND - Gallery -  Melchengam/Automatic Weather Station - Melchengam.jpg',
-    '/gallery/Website - MND - Gallery -  Melchengam/Boswellia serrata - Melchengam.jpg',
-    '/gallery/Website - MND - Gallery -  Melchengam/Terminalia chebula - Melchengam.jpg',
-    // Website - MND - Gallery - Edaikkal (3 images)
-    '/gallery/Website - MND - Gallery - Edaikkal/Hildegardia populifolia - Critically Endangered - Edaikkal.jpg',
-    '/gallery/Website - MND - Gallery - Edaikkal/Syzygium cuminii - Edaikkal.jpg',
-    '/gallery/Website - MND - Gallery - Edaikkal/Terminalia chebula - Edaikkal.jpg',
-    // Website - MND - Gallery - Jamunamarathur (7 images)
-    '/gallery/Website - MND - Gallery - Jamunamarathur/Bambusa tulda - Jamunamarathur.jpg',
-    '/gallery/Website - MND - Gallery - Jamunamarathur/Bambusa tulda - Jamunamarathur(1).jpg',
-    '/gallery/Website - MND - Gallery - Jamunamarathur/Bambusa vulgaris - Jamunamarathur.jpg',
-    '/gallery/Website - MND - Gallery - Jamunamarathur/Melia dubia - Jamunamarathur (1).jpg',
-    '/gallery/Website - MND - Gallery - Jamunamarathur/Melia dubia - Jamunamarathur (2).jpg',
-    '/gallery/Website - MND - Gallery - Jamunamarathur/Sapindus emarginatus - Jamunamarathur.jpg',
-    '/gallery/Website - MND - Gallery - Jamunamarathur/Terminalia chebula - Jamunamarathur.jpg',
-    // Website - MND - Gallery - Vermicasting Production (2 images)
-    '/gallery/Website - MND - Gallery - Vermicasting Production/Vermicasting Production Shed.jpg',
-    '/gallery/Website - MND - Gallery - Vermicasting Production/Vermicasting Production Tubs.jpg'
-  ];
+  const [images, setImages] = useState<string[]>([]);
+
+  // Subscribe to gallery images from Firebase
+  useEffect(() => {
+    const unsubscribe = subscribeToGalleryImages(
+      (galleryImages) => {
+        // Extract URLs and sort by order
+        const imageUrls = galleryImages
+          .sort((a, b) => (a.order || 0) - (b.order || 0))
+          .map(img => img.url);
+        setImages(imageUrls);
+      },
+      (error) => {
+        console.error('Error loading gallery images:', error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
 
   const [featuredIndex, setFeaturedIndex] = useState<number>(0);
-  const [gridIndices, setGridIndices] = useState<number[]>(() => {
-    // Initialize grid with 9 random images (excluding index 0 which is featured)
-    const availableIndices = Array.from({ length: images.length - 1 }, (_, i) => i + 1);
-    return availableIndices.sort(() => Math.random() - 0.5).slice(0, 9);
-  });
+  const [gridIndices, setGridIndices] = useState<number[]>([]);
   const featuredIndexRef = useRef<number>(0);
+
+  // Initialize grid indices when images are loaded
+  useEffect(() => {
+    if (images.length > 0) {
+      // Initialize grid with 9 random images (excluding index 0 which is featured)
+      const availableIndices = Array.from({ length: images.length - 1 }, (_, i) => i + 1);
+      setGridIndices(availableIndices.sort(() => Math.random() - 0.5).slice(0, 9));
+    }
+  }, [images.length]);
 
   useEffect(() => {
     featuredIndexRef.current = featuredIndex;
@@ -66,9 +66,26 @@ const ImageCarousel: React.FC = () => {
   };
 
   useEffect(() => {
+    if (images.length === 0) return;
     const interval = setInterval(rotateFeatured, 5000);
     return () => clearInterval(interval);
-  }, [rotateFeatured]);
+  }, [rotateFeatured, images.length]);
+
+  // Show placeholder if no images
+  if (images.length === 0) {
+    return (
+      <section className="sm:py-12 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-green-900 mb-6 sm:mb-8">
+            Gallery Highlights
+          </h2>
+          <div className="text-center py-12 text-gray-500">
+            <p>No gallery images available yet.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="sm:py-12 bg-white">

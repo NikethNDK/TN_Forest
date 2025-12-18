@@ -1,39 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileText, Calendar, Search, Filter, ExternalLink } from 'lucide-react';
-
-interface Publication {
-  id: number;
-  title: string;
-  year: number;
-  category: string;
-  journal: string;
-  description: string;
-  pdfUrl: string;
-}
+import { getAllPublications } from '../services/firebase/publicationService';
+import { getCategories } from '../services/firebase/publicationCategoryService';
+import type { Publication } from '../types';
 
 const Publication: React.FC = () => {
+  const [publications, setPublications] = useState<Publication[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const publications: Publication[] = [
-    {
-      id: 1,
-      title: "நகர்ப்புறங்களில் மரம் வளர்ப்பு",
-      year: 2024,
-      category: "Research Paper",
-      journal: "ஓர் எளிய வழிகாட்டி",
-      description: "A comprehensive guide on tree planting in urban areas.",
-      pdfUrl: "/Publications/நகர்ப்புறங்களில் மரம் வளர்ப்பு.pdf"
-    },
-  ];
-
-  const categories: string[] = ['all', 'Research Paper', 'Technical Report', 'Annual Report', 'Policy Document'];
+  // Load publications and categories
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const [pubs, cats] = await Promise.all([
+          getAllPublications(),
+          getCategories()
+        ]);
+        setPublications(pubs);
+        setCategories(cats);
+      } catch (err) {
+        console.error('Error loading publications:', err);
+        setError('Failed to load publications. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   const filteredPublications = publications.filter(pub => {
     const matchesSearch = pub.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || pub.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  if (isLoading) {
+    return (
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12">
+            <p className="text-gray-600">Loading publications...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center py-12 bg-white rounded-lg shadow-lg">
+            <p className="text-red-600">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="py-12">
@@ -69,9 +98,10 @@ const Publication: React.FC = () => {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               >
+                <option value="all">All Categories</option>
                 {categories.map(category => (
                   <option key={category} value={category}>
-                    {category === 'all' ? 'All Categories' : category}
+                    {category}
                   </option>
                 ))}
               </select>
@@ -82,8 +112,8 @@ const Publication: React.FC = () => {
         {/* Publications List */}
         <div className="space-y-6">
           {filteredPublications.length > 0 ? (
-            filteredPublications.map((publication) => (
-              <div key={publication.id} className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+            filteredPublications.map((publication, index) => (
+              <div key={publication.id || `pub-${index}`} className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
                 <div className="flex flex-col lg:flex-row lg:items-start gap-4">
                   <div className="flex-1">
                     <div className="flex items-start justify-between mb-3">
@@ -100,28 +130,34 @@ const Publication: React.FC = () => {
                         <Calendar className="h-4 w-4 mr-1" />
                         {publication.year}
                       </div>
-                      <div className="flex items-center">
-                        <FileText className="h-4 w-4 mr-1" />
-                        {publication.journal}
-                      </div>
+                      {publication.journal && (
+                        <div className="flex items-center">
+                          <FileText className="h-4 w-4 mr-1" />
+                          {publication.journal}
+                        </div>
+                      )}
                     </div>
                     
-                    <p className="text-gray-700 mb-4">
-                      {publication.description}
-                    </p>
+                    {publication.description && (
+                      <p className="text-gray-700 mb-4">
+                        {publication.description}
+                      </p>
+                    )}
                   </div>
                   
-                  <div className="flex flex-col gap-2">
-                    <a
-                      href={publication.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="border border-green-600 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center justify-center"
-                    >
-                      <ExternalLink className="h-4 w-4 mr-2" />
-                      View Details
-                    </a>
-                  </div>
+                  {publication.pdfUrl && (
+                    <div className="flex flex-col gap-2">
+                      <a
+                        href={publication.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="border border-green-600 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg font-medium transition-colors duration-300 flex items-center justify-center"
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View PDF
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             ))

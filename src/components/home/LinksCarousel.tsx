@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ExternalLink } from 'lucide-react';
 import type { ImportantLink } from '../../types';
 
 const LinksCarousel: React.FC = () => {
   const [isPaused, setIsPaused] = useState<boolean>(false);
+  const [translateX, setTranslateX] = useState(0);
+  const [isWidthMeasured, setIsWidthMeasured] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef<number | null>(null);
+  const singleSetWidthRef = useRef<number>(0);
+  const scrollSpeed = 1.50; // pixels per frame (adjust for speed)
 
   const importantLinks: ImportantLink[] = [
     { 
@@ -48,7 +55,82 @@ const LinksCarousel: React.FC = () => {
     }
   ];
 
-  const duplicatedLinks = [...importantLinks, ...importantLinks];
+  // Create seamless loop by duplicating items
+  const duplicatedLinks = importantLinks.length > 0 ? [...importantLinks, ...importantLinks] : [];
+
+  // Measure single set width for seamless loop
+  useEffect(() => {
+    if (contentRef.current && importantLinks.length > 0) {
+      const measureWidth = () => {
+        if (!contentRef.current) return;
+        
+        const children = Array.from(contentRef.current.children) as HTMLElement[];
+        
+        if (children.length >= importantLinks.length) {
+          let width = 0;
+          // Measure first set of items (gap-6 adds 24px between items)
+          for (let i = 0; i < importantLinks.length; i++) {
+            if (children[i]) {
+              width += children[i].offsetWidth;
+              // Add spacing between items (except for the last one)
+              if (i < importantLinks.length - 1) {
+                width += 24; // gap-6 = 1.5rem = 24px
+              }
+            }
+          }
+          
+          if (width > 0) {
+            singleSetWidthRef.current = width;
+            setIsWidthMeasured(true);
+          }
+        }
+      };
+      
+      const timeoutId = setTimeout(measureWidth, 100);
+      requestAnimationFrame(measureWidth);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        setIsWidthMeasured(false);
+      };
+    } else {
+      setIsWidthMeasured(false);
+    }
+  }, [importantLinks.length]);
+
+  // Continuous scroll animation
+  useEffect(() => {
+    if (importantLinks.length === 0 || isPaused || !isWidthMeasured || singleSetWidthRef.current === 0) {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      return;
+    }
+
+    const animate = () => {
+      setTranslateX((prev) => {
+        let newX = prev - scrollSpeed;
+        
+        // When we've scrolled one full set, reset seamlessly
+        if (newX <= -singleSetWidthRef.current) {
+          newX = newX + singleSetWidthRef.current;
+        }
+        
+        return newX;
+      });
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(animate);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [importantLinks.length, isPaused, isWidthMeasured, scrollSpeed]);
 
   return (
     <section className="py-8 sm:py-12 bg-gradient-to-r from-green-50 to-lime-50 overflow-hidden">
@@ -86,41 +168,45 @@ const LinksCarousel: React.FC = () => {
         </div>
 
         <div 
-          className="hidden lg:block relative"
+          ref={containerRef}
+          className="hidden lg:block relative overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div className="overflow-hidden">
-            <div 
-              className={`flex gap-6 ${isPaused ? '' : 'animate-scroll'}`}
-              style={{ width: 'fit-content' }}
-            >
-              {duplicatedLinks.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center bg-white rounded-lg p-6 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-green-600 hover:border-lime-500 flex-shrink-0 w-[280px] min-h-[220px]"
-                >
-                  <div className="mb-4 flex-shrink-0 flex items-center justify-center h-[70px] w-[70px]">
-                    <img
-                      src={link.icon}
-                      alt={`${link.title} Logo`}
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  
-                  <h3 className="font-semibold text-green-800 text-center mb-2 flex-grow">
-                    {link.title}
-                  </h3>
-                  <div className="flex justify-center items-center text-green-600 text-sm">
-                    <span className="mr-1">Visit</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </div>
-                </a>
-              ))}
-            </div>
+          <div
+            ref={contentRef}
+            className="flex gap-6"
+            style={{
+              transform: `translateX(${translateX}px)`,
+              willChange: 'transform',
+              width: 'fit-content'
+            }}
+          >
+            {duplicatedLinks.map((link, index) => (
+              <a
+                key={`${link.title}-${Math.floor(index / importantLinks.length)}`}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center bg-white rounded-lg p-6 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-green-600 hover:border-lime-500 flex-shrink-0 w-[280px] min-h-[220px]"
+              >
+                <div className="mb-4 flex-shrink-0 flex items-center justify-center h-[70px] w-[70px]">
+                  <img
+                    src={link.icon}
+                    alt={`${link.title} Logo`}
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+                
+                <h3 className="font-semibold text-green-800 text-center mb-2 flex-grow">
+                  {link.title}
+                </h3>
+                <div className="flex justify-center items-center text-green-600 text-sm">
+                  <span className="mr-1">Visit</span>
+                  <ExternalLink className="h-3 w-3" />
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       </div>

@@ -1,61 +1,36 @@
-import React from 'react';
-import { Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { subscribeToNews, subscribeToEvents } from '../../services/firebase/newsEventService';
 import type { NewsItem, Event } from '../../types';
+import RotatingConveyor from './RotatingConveyor';
 
 const NewsAndInfoSection: React.FC = () => {
-  const latestNews: NewsItem[] = [
-    {
-      date: "Oct 10, 2025",
-      title: "Breakthrough in Bamboo Genetics Research",
-      excerpt: "Scientists identify drought-resistant bamboo varieties suitable for Tamil Nadu climate...",
-      link: "/news/bamboo-genetics"
-    },
-    {
-      date: "Oct 8, 2025",
-      title: "Monthly Forest Health Report Published",
-      excerpt: "September data shows 15% improvement in forest density across protected areas...",
-      link: "/news/monthly-report"
-    },
-    {
-      date: "Oct 5, 2025",
-      title: "New Research Wing Inaugurated",
-      excerpt: "State-of-the-art molecular biology lab opens in Coimbatore campus...",
-      link: "/news/new-wing"
-    },
-    {
-      date: "Oct 2, 2025",
-      title: "Climate Resilience Study Published",
-      excerpt: "New findings on forest adaptation strategies released...",
-      link: "/news/climate-study"
-    }
-  ];
+  const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
 
-  const events: Event[] = [
-    {
-      date: "Sep 28, 2025",
-      title: "Annual Forest Officers Symposium",
-      excerpt: "Over 200 officers attended the three-day knowledge sharing event...",
-      link: "/events/symposium-2025"
-    },
-    {
-      date: "Sep 20, 2025",
-      title: "Community Afforestation Drive",
-      excerpt: "5000 saplings planted in collaboration with local villages...",
-      link: "/events/afforestation"
-    },
-    {
-      date: "Sep 15, 2025",
-      title: "Drone Training Workshop Completed",
-      excerpt: "Field staff trained in advanced aerial survey techniques...",
-      link: "/events/drone-workshop"
-    },
-    {
-      date: "Sep 10, 2025",
-      title: "International Biodiversity Conference",
-      excerpt: "Researchers presented findings on endemic species conservation...",
-      link: "/events/bio-conference"
-    }
-  ];
+  useEffect(() => {
+    const unsubscribeNews = subscribeToNews(
+      (newsItems) => {
+        setLatestNews(newsItems);
+      },
+      (error) => {
+        console.error('Error in news subscription:', error);
+      }
+    );
+
+    const unsubscribeEvents = subscribeToEvents(
+      (eventItems) => {
+        setEvents(eventItems);
+      },
+      (error) => {
+        console.error('Error in events subscription:', error);
+      }
+    );
+
+    return () => {
+      unsubscribeNews();
+      unsubscribeEvents();
+    };
+  }, []);
 
   return (
     <section className="py-12 md:py-20 bg-gradient-to-b from-gray-50 to-white">
@@ -98,23 +73,8 @@ const NewsAndInfoSection: React.FC = () => {
               <span className="w-2 h-6 sm:h-8 bg-lime-400 mr-3"></span>
               Latest News
             </h2>
-            <div className="space-y-4 max-h-80 overflow-y-auto">
-              {latestNews.slice(0, 3).map((news, index) => (
-                <div key={index} className="group">
-                  <p className="text-xs text-gray-500 mb-1 flex items-center">
-                    <Calendar className="h-3 w-3 mr-1" /> {news.date}
-                  </p>
-                  <h3 className="font-bold text-green-800 mb-2 text-sm sm:text-base group-hover:text-green-600 transition-colors">
-                    {news.title}
-                  </h3>
-                  <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">{news.excerpt}</p>
-                  <a href={news.link} className="text-green-600 hover:text-lime-600 text-xs sm:text-sm font-semibold inline-flex items-center">
-                    Read more 
-                    <span className="ml-1 group-hover:ml-2 transition-all">→</span>
-                  </a>
-                  {index < 2 && <hr className="mt-4 border-gray-200" />}
-                </div>
-              ))}
+            <div className="max-h-80">
+              <RotatingConveyor items={latestNews} itemType="news" />
             </div>
           </div>
 
@@ -123,24 +83,8 @@ const NewsAndInfoSection: React.FC = () => {
               Recent Events
               <span className="w-2 h-6 sm:h-8 bg-green-700 ml-3"></span>
             </h2>
-            <div className="space-y-4 max-h-80 overflow-y-auto">
-              {events.slice(0, 3).map((event, index) => (
-                <div key={index} className="group">
-                  <p className="text-xs text-gray-500 mb-1 flex items-center justify-end">
-                    {event.date} <Calendar className="h-3 w-3 ml-1" />
-                  </p>
-                  <h3 className="font-bold text-green-800 mb-2 text-sm sm:text-base text-right group-hover:text-lime-600 transition-colors">
-                    {event.title}
-                  </h3>
-                  <p className="text-gray-600 text-xs sm:text-sm mb-2 text-right line-clamp-2">{event.excerpt}</p>
-                  <a href={event.link} className="text-green-600 hover:text-lime-600 text-xs sm:text-sm font-semibold inline-flex items-center float-right">
-                    <span className="mr-1 group-hover:mr-2 transition-all">←</span>
-                    View details
-                  </a>
-                  <div className="clear-both"></div>
-                  {index < 2 && <hr className="mt-4 border-gray-200" />}
-                </div>
-              ))}
+            <div className="max-h-80">
+              <RotatingConveyor items={events} itemType="event" isRightAligned={true} />
             </div>
           </div>
         </div>
@@ -153,23 +97,8 @@ const NewsAndInfoSection: React.FC = () => {
                   <span className="w-2 h-8 bg-lime-400 mr-3"></span>
                   Latest News
                 </h2>
-                <div className="space-y-6 max-h-96 overflow-y-auto pr-2">
-                  {latestNews.map((news, index) => (
-                    <div key={index} className="group">
-                      <p className="text-xs text-gray-500 mb-1 flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" /> {news.date}
-                      </p>
-                      <h3 className="font-bold text-green-800 mb-2 text-sm xl:text-base group-hover:text-green-600 transition-colors">
-                        {news.title}
-                      </h3>
-                      <p className="text-gray-600 text-xs xl:text-sm mb-2 line-clamp-2">{news.excerpt}</p>
-                      <a href={news.link} className="text-green-600 hover:text-lime-600 text-xs xl:text-sm font-semibold inline-flex items-center">
-                        Read more 
-                        <span className="ml-1 group-hover:ml-2 transition-all">→</span>
-                      </a>
-                      {index < latestNews.length - 1 && <hr className="mt-6 border-gray-200" />}
-                    </div>
-                  ))}
+                <div className="pr-2">
+                  <RotatingConveyor items={latestNews} itemType="news" />
                 </div>
               </div>
             </div>
@@ -214,24 +143,8 @@ const NewsAndInfoSection: React.FC = () => {
                   Recent Events
                   <span className="w-2 h-8 bg-green-700 ml-3"></span>
                 </h2>
-                <div className="space-y-6 max-h-96 overflow-y-auto pl-2">
-                  {events.map((event, index) => (
-                    <div key={index} className="group">
-                      <p className="text-xs text-gray-500 mb-1 flex items-center justify-end">
-                        {event.date} <Calendar className="h-3 w-3 ml-1" />
-                      </p>
-                      <h3 className="font-bold text-green-800 mb-2 text-sm xl:text-base text-right group-hover:text-lime-600 transition-colors">
-                        {event.title}
-                      </h3>
-                      <p className="text-gray-600 text-xs xl:text-sm mb-2 text-right line-clamp-2">{event.excerpt}</p>
-                      <a href={event.link} className="text-green-600 hover:text-lime-600 text-xs xl:text-sm font-semibold inline-flex items-center float-right">
-                        <span className="mr-1 group-hover:mr-2 transition-all">←</span>
-                        View details
-                      </a>
-                      <div className="clear-both"></div>
-                      {index < events.length - 1 && <hr className="mt-6 border-gray-200" />}
-                    </div>
-                  ))}
+                <div className="pl-2">
+                  <RotatingConveyor items={events} itemType="event" isRightAligned={true} />
                 </div>
               </div>
             </div>

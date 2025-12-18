@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { TreePine, Leaf, Users, Award, Globe, ArrowRight } from 'lucide-react';
 import { divisions } from '../data/mockData';
 import type { Division } from '../types';
+import PageHeader from '../components/common/PageHeader';
 
 const Divisions: React.FC = () => {
   const divisionIcons: Record<string, React.ReactNode> = {
@@ -16,16 +17,10 @@ const Divisions: React.FC = () => {
   return (
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-green-800 mb-6">
-            Research Divisions
-          </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Our research is organized into specialized divisions, each focusing on specific 
-            aspects of forest science, conservation, and sustainable development.
-          </p>
-        </div>
+        <PageHeader
+          title="Research Divisions"
+          description="Our research is organized into specialized divisions, each focusing on specific aspects of forest science, conservation, and sustainable development."
+        />
 
         {/* Divisions Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">

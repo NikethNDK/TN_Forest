@@ -102,13 +102,17 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                         </p>
                         <h4 className="font-bold text-green-800 mb-1 text-sm">{news.title}</h4>
                         <p className="text-xs text-gray-600 mb-2 line-clamp-2">{news.excerpt}</p>
-                        <a 
-                          href={news.link} 
-                          className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
-                        >
-                          Read more
-                          <ExternalLink className="h-3 w-3 ml-1" />
-                        </a>
+                        {news.link && (
+                          <a 
+                            href={news.link} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
+                          >
+                            Read more
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -130,13 +134,17 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                         </p>
                         <h4 className="font-bold text-green-800 mb-1 text-sm">{event.title}</h4>
                         <p className="text-xs text-gray-600 mb-2 line-clamp-2">{event.excerpt}</p>
-                        <a 
-                          href={event.link} 
-                          className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
-                        >
-                          View details
-                          <ExternalLink className="h-3 w-3 ml-1" />
-                        </a>
+                        {event.link && (
+                          <a 
+                            href={event.link} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
+                          >
+                            View details
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        )}
                       </div>
                     ))}
                   </div>

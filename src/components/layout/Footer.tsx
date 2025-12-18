@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Phone, Mail, Globe, Clock, UserCheck } from 'lucide-react';
+import { subscribeToFooterLocation } from '../../services/firebase/contactService';
+import { incrementVisitorCount, subscribeToVisitorCount } from '../../services/firebase/visitorService';
+import type { ContactLocation } from '../../types';
 
 // Function to format the date and time
 const formatDateTime = (date: Date): string => {
@@ -17,14 +20,59 @@ const formatDateTime = (date: Date): string => {
 
 const Footer: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const [visitors] = useState<number>(Math.floor(Math.random() * (9000 - 5000 + 1)) + 5000);
+  const [visitors, setVisitors] = useState<number>(0);
+  const [footerLocation, setFooterLocation] = useState<ContactLocation | null>(null);
 
+  // Update current time every second
   useEffect(() => {
     const timerId = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
     return () => clearInterval(timerId);
+  }, []);
+
+  // Track visitor count on component mount
+  useEffect(() => {
+    // Increment visitor count when footer loads
+    incrementVisitorCount().catch((error) => {
+      console.error('Error incrementing visitor count:', error);
+      // Don't show error to user, just log it
+    });
+  }, []);
+
+  // Subscribe to real-time visitor count updates
+  useEffect(() => {
+    const unsubscribe = subscribeToVisitorCount(
+      (count) => {
+        setVisitors(count);
+      },
+      (err) => {
+        console.error('Error loading visitor count:', err);
+        // Don't show error to user, just use default/empty
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // Subscribe to footer location updates
+  useEffect(() => {
+    const unsubscribe = subscribeToFooterLocation(
+      (location) => {
+        setFooterLocation(location);
+      },
+      (err) => {
+        console.error('Error loading footer location:', err);
+        // Don't show error to user, just use default/empty
+      }
+    );
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return (
@@ -76,27 +124,54 @@ const Footer: React.FC = () => {
           {/* Contact Info */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start">
-                <MapPin className="h-4 w-4 mt-1 mr-2 text-green-300 flex-shrink-0" />
-                <span className="text-green-100">
-                  Forest Department Complex,<br />
-                  Chennai, Tamil Nadu 600006
-                </span>
+            {footerLocation ? (
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start">
+                  <MapPin className="h-4 w-4 mt-1 mr-2 text-green-300 flex-shrink-0" />
+                  <span className="text-green-100 whitespace-pre-line">
+                    {footerLocation.location}
+                  </span>
+                </div>
+                {footerLocation.phone && (
+                  <div className="flex items-center">
+                    <Phone className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
+                    <span className="text-green-100">{footerLocation.phone}</span>
+                  </div>
+                )}
+                {footerLocation.email && (
+                  <div className="flex items-center">
+                    <Mail className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
+                    <span className="text-green-100">{footerLocation.email}</span>
+                  </div>
+                )}
+                <div className="flex items-center">
+                  <Globe className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
+                  <span className="text-green-100">www.tnfrd.gov.in</span>
+                </div>
               </div>
-              <div className="flex items-center">
-                <Phone className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                <span className="text-green-100">+91 XXXXX XXXXX</span>
+            ) : (
+              <div className="space-y-3 text-sm">
+                <div className="flex items-start">
+                  <MapPin className="h-4 w-4 mt-1 mr-2 text-green-300 flex-shrink-0" />
+                  <span className="text-green-100">
+                    Forest Department Complex,<br />
+                    Chennai, Tamil Nadu 600006
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <Phone className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
+                  <span className="text-green-100">+91 XXXXX XXXXX</span>
+                </div>
+                <div className="flex items-center">
+                  <Mail className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
+                  <span className="text-green-100">example@example.com</span>
+                </div>
+                <div className="flex items-center">
+                  <Globe className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
+                  <span className="text-green-100">www.tnfrd.gov.in</span>
+                </div>
               </div>
-              <div className="flex items-center">
-                <Mail className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                <span className="text-green-100">example@example.com</span>
-              </div>
-              <div className="flex items-center">
-                <Globe className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                <span className="text-green-100">www.tnfrd.gov.in</span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Dynamic Info */}

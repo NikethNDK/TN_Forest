@@ -13,39 +13,62 @@ export interface Coordinates {
 
 // Experiment type
 export interface Experiment {
-  id: number;
+  id?: string | number; // Firestore document ID (string) or legacy numeric ID
   title: string;
   year: number;
-  pdfPath?: string;
+  pdfPath?: string; // Legacy field, use pdfUrl instead
   description?: string;
-  imagePath?: string;
+  imagePath?: string; // Legacy field, use imageUrl instead
   type?: 'current' | 'completed';
   pdfUrl?: string;
+  pdfPublicId?: string; // Cloudinary public ID for deletion
+  imageUrl?: string;
+  imagePublicId?: string; // Cloudinary public ID for deletion
   startDate?: string;
   endDate?: string;
   status?: string;
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // Research Center type
+// Custom Field type for research centers
+export interface CustomField {
+  id: string;
+  label: string;
+  value: string;
+}
+
 export interface ResearchCenter {
-  id: number;
+  id?: string | number; // Firestore document ID (string) or legacy numeric ID
   name: string;
   location: string;
-  area: string;
-  district: string;
-  range: string;
-  description: string;
-  experiments: Experiment[];
-  coordinates: Coordinates;
+  area?: string; // Deprecated: use customFields instead, kept for backward compatibility
+  district?: string; // Deprecated: use customFields instead, kept for backward compatibility
+  range?: string; // Deprecated: use customFields instead, kept for backward compatibility
+  description?: string;
+  experiments?: Experiment[]; // Optional, may be in subcollection
+  coordinates?: Coordinates;
+  phone?: string;
+  email?: string;
+  imageUrl?: string;
+  imagePublicId?: string; // Cloudinary public ID for deletion
+  customFields?: CustomField[]; // Array of custom key-value fields
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // Division type
 export interface Division {
-  id: number;
+  id?: string | number; // Firestore document ID (string) or legacy numeric ID
   name: string;
   slug: string;
   description?: string;
-  researchCenters?: ResearchCenter[];
+  researchCenters?: ResearchCenter[]; // Optional, may be in subcollection
+  tollFreeNumber?: string;
+  contentBlocks?: Array<{ id: string; heading: string; text: string; image?: string }>;
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // Shop Product type
@@ -97,7 +120,7 @@ export interface ContactInfo {
   type: 'address' | 'phone' | 'email';
 }
 
-// Research Center Contact type
+// Research Center Contact type (for backward compatibility)
 export interface ResearchCenterContact {
   name: string;
   location: string;
@@ -105,20 +128,41 @@ export interface ResearchCenterContact {
   email: string;
 }
 
+// Contact Location type
+export interface ContactLocation {
+  id: string;  // Firestore document ID
+  name: string;
+  location: string;
+  phone?: string;
+  email?: string;
+  showInFooter: boolean;
+  order: number;
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
+}
+
 // News Item type
 export interface NewsItem {
+  id?: string;  // Firestore document ID
   date: string;
   title: string;
   excerpt: string;
-  link: string;
+  link?: string;  // Optional link/URL
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
+  order?: number;  // For sorting
 }
 
 // Event type
 export interface Event {
+  id?: string;  // Firestore document ID
   date: string;
   title: string;
   excerpt: string;
-  link: string;
+  link?: string;  // Optional link/URL
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
+  order?: number;  // For sorting
 }
 
 // Image Carousel Item type
@@ -132,5 +176,58 @@ export interface ImportantLink {
   title: string;
   url: string;
   icon: string;
+}
+
+// Faculty Member type
+export interface FacultyMember {
+  id: string;  // Firestore document ID
+  name: string;
+  position: string;
+  order: number;
+  createdAt?: any;  // Firestore Timestamp
+  updatedAt?: any;  // Firestore Timestamp
+}
+
+// Mission Vision type
+export interface MissionVision {
+  mission: string;
+  vision: string;
+  updatedAt?: any;  // Firestore Timestamp
+  updatedBy?: string;
+}
+
+// Publication type
+export interface Publication {
+  id?: string; // Firestore document ID
+  title: string;
+  year: number;
+  category: string;
+  journal?: string;
+  description?: string;
+  pdfUrl?: string;
+  pdfPublicId?: string; // Cloudinary public ID for deletion
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
+  order?: number; // For sorting
+}
+
+// Slider Image type
+export interface SliderImage {
+  id?: string; // Firestore document ID
+  url: string; // Cloudinary secure URL
+  publicId: string; // Cloudinary public ID for deletion
+  order: number; // Display order
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
+}
+
+// Gallery Image type
+export interface GalleryImage {
+  id?: string; // Firestore document ID
+  url: string; // Cloudinary secure URL
+  publicId: string; // Cloudinary public ID for deletion
+  order: number; // Display order
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
