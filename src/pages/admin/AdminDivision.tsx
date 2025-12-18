@@ -13,6 +13,11 @@ import {
   updateResearchCenter,
   deleteResearchCenter
 } from '../../services/firebase/researchCenterService';
+import {
+  subscribeToDivisionGalleryImages,
+  addGalleryImage,
+  deleteGalleryImage
+} from '../../services/firebase/galleryImageService';
 // TODO: Enable when making content blocks live
 // import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
 import CustomFieldEditor, { CustomField } from '../../components/admin/CustomFieldEditor';
@@ -23,7 +28,7 @@ import Modal from '../../components/admin/Modal';
 import { useToast, ToastContainer } from '../../components/admin/Toast';
 import { useConfirmation } from '../../hooks/useConfirmation';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog';
-import type { ResearchCenter, Coordinates, Division } from '../../types';
+import type { ResearchCenter, Coordinates, Division, GalleryImage } from '../../types';
 
 const AdminDivision: React.FC = () => {
   const { divisionSlug } = useParams<{ divisionSlug: string }>();
@@ -32,11 +37,14 @@ const AdminDivision: React.FC = () => {
   const { toasts, showToast, removeToast } = useToast();
   const confirmation = useConfirmation();
   const [deletingCenterId, setDeletingCenterId] = useState<string | null>(null);
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   
   const [division, setDivision] = useState<Division | null>(null);
   const [researchCenters, setResearchCenters] = useState<ResearchCenter[]>([]);
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingCenters, setIsLoadingCenters] = useState(true);
+  const [isLoadingGalleryImages, setIsLoadingGalleryImages] = useState(true);
   
   const [divisionHeading, setDivisionHeading] = useState('');
   // TODO: Enable when making content blocks live
@@ -83,6 +91,29 @@ const AdminDivision: React.FC = () => {
         console.error('Error loading division:', error);
         showToast('Failed to load division', 'error');
         setIsLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [divisionSlug]);
+
+  // Subscribe to division gallery images
+  useEffect(() => {
+    if (!divisionSlug) {
+      setIsLoadingGalleryImages(false);
+      return;
+    }
+
+    setIsLoadingGalleryImages(true);
+    const unsubscribe = subscribeToDivisionGalleryImages(
+      divisionSlug,
+      (images) => {
+        setGalleryImages(images);
+        setIsLoadingGalleryImages(false);
+      },
+      (error) => {
+        console.error('Error in division gallery images subscription:', error);
+        setIsLoadingGalleryImages(false);
       }
     );
 
@@ -331,6 +362,56 @@ const AdminDivision: React.FC = () => {
       console.error('Error updating toll-free number:', error);
       showToast('Failed to update toll-free number', 'error');
     }
+  };
+
+  // Gallery Images handlers
+  const handleGalleryImageAdd = async (imagePath: string, publicId?: string) => {
+    if (imagePath && publicId && divisionSlug) {
+      try {
+        await addGalleryImage({
+          url: imagePath,
+          publicId: publicId,
+          order: galleryImages.length,
+          scope: 'division',
+          divisionSlug: divisionSlug
+        });
+        showToast('Gallery image added successfully', 'success');
+      } catch (error) {
+        console.error('Error adding gallery image:', error);
+        showToast('Failed to add gallery image', 'error');
+      }
+    }
+  };
+
+  const handleGalleryImageRemove = (image: GalleryImage) => {
+    if (!image.id || !image.publicId) return;
+    
+    confirmation.confirm(
+      {
+        title: 'Delete Gallery Image',
+        message: 'Are you sure you want to delete this image? This action cannot be undone.',
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger'
+      },
+      async () => {
+        try {
+          setDeletingImageId(image.id!);
+          const result = await deleteGalleryImage(image.id!, image.publicId);
+          
+          if (result.cloudinaryDeleted) {
+            showToast('Gallery image deleted successfully', 'success');
+          } else {
+            showToast(`Failed to delete from Cloudinary: ${result.error || 'Unknown error'}. Image kept in database.`, 'error');
+          }
+        } catch (error: any) {
+          console.error('Error deleting gallery image:', error);
+          showToast('Failed to delete gallery image', 'error');
+        } finally {
+          setDeletingImageId(null);
+        }
+      }
+    );
   };
 
   if (isLoading) {
@@ -619,6 +700,50 @@ const AdminDivision: React.FC = () => {
                   <p>No research centers yet. Click "Add Research Center" to create one.</p>
                 </div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* Gallery */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-green-900">Gallery Images</h2>
+            <div className="text-sm text-gray-600">
+              {isLoadingGalleryImages ? 'Loading...' : `${galleryImages.length} images`}
+            </div>
+          </div>
+          
+          <div className="mb-4">
+            <ImageUploader
+              onImageChange={(url, publicId) => handleGalleryImageAdd(url, publicId)}
+              directory="tn-forest/images/gallery"
+              label="Add New Gallery Image"
+            />
+          </div>
+          {isLoadingGalleryImages ? (
+            <div className="text-center py-8 text-gray-500">Loading images...</div>
+          ) : galleryImages.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">No gallery images yet. Upload your first image above.</div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
+              {galleryImages.map((image, index) => (
+                <div key={image.id || index} className="relative group">
+                  <img
+                    src={image.url}
+                    alt={`Gallery ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                    <button
+                      onClick={() => handleGalleryImageRemove(image)}
+                      disabled={deletingImageId === image.id}
+                      className="p-2 bg-red-500 text-white rounded-lg disabled:opacity-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

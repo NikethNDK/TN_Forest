@@ -227,6 +227,8 @@ export interface GalleryImage {
   url: string; // Cloudinary secure URL
   publicId: string; // Cloudinary public ID for deletion
   order: number; // Display order
+  scope?: 'global' | 'division'; // Scope of the image: global or division-specific
+  divisionSlug?: string; // Division slug if scope is 'division'
   createdAt?: any; // Firestore Timestamp
   updatedAt?: any; // Firestore Timestamp
 }

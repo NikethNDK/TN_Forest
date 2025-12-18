@@ -27,6 +27,7 @@ import StateForestResearchDivision from './pages/StateForestResearchDivision';
 import ForestGeneticsDivision from './pages/ForestGeneticsDivision';
 import IndustrialWoodResearchDivision from './pages/IndustrialWoodResearchDivision';
 import AgroForestryResearchDivision from './pages/AgroForestryResearchDivision';
+import Gallery from './pages/Gallery';
 
 const App: React.FC = () => {
   return (
@@ -60,7 +61,9 @@ const App: React.FC = () => {
                 {/* <Route path="/information" element={<Information />} /> */}
                 <Route path="/publication" element={<Publication />} />
                 <Route path="/contact" element={<ContactUs />} />
+                <Route path="/gallery" element={<Gallery />} />
                 <Route path="/divisions" element={<Divisions />} />
+                <Route path="/divisions/:divisionSlug/gallery" element={<Gallery />} />
                 <Route path="/divisions/modern-nursery" element={<ModernNurseryDivision />} />
                 <Route path="/divisions/state-forest-research" element={<StateForestResearchDivision />} />
                 <Route path="/divisions/forest-genetics" element={<ForestGeneticsDivision />} />

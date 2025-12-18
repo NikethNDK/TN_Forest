@@ -41,7 +41,7 @@ const Home: React.FC = () => {
       <WelcomeModal latestNews={latestNews} events={events} />
       <RotatingImageStrip />
       <NewsAndInfoSection />
-      <ImageCarousel />
+      <ImageCarousel scope="global" />
       <LinksCarousel />
     </div>
   );
