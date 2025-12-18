@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { subscribeToSliderImages } from '../../services/firebase/sliderImageService';
+import { getOptimizedImageUrl } from '../../utils/imageOptimization';
 
 const RotatingImageStrip: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [images, setImages] = useState<string[]>([]);
 
   // Subscribe to slider images from Firebase
+  // Fixed: Removed currentIndex from dependencies to prevent re-subscription on every image change
   useEffect(() => {
     const unsubscribe = subscribeToSliderImages(
       (sliderImages) => {
@@ -17,9 +19,12 @@ const RotatingImageStrip: React.FC = () => {
         setImages(imageUrls);
         
         // Reset to first image if current index is out of bounds
-        if (imageUrls.length > 0 && currentIndex >= imageUrls.length) {
-          setCurrentIndex(0);
-        }
+        setCurrentIndex((prev) => {
+          if (imageUrls.length > 0 && prev >= imageUrls.length) {
+            return 0;
+          }
+          return prev;
+        });
       },
       (error) => {
         console.error('Error loading slider images:', error);
@@ -27,7 +32,7 @@ const RotatingImageStrip: React.FC = () => {
     );
 
     return () => unsubscribe();
-  }, [currentIndex]);
+  }, []); // Empty deps - only subscribe once on mount
 
   const nextImage = useCallback(() => {
     if (images.length > 0) {
@@ -64,17 +69,19 @@ const RotatingImageStrip: React.FC = () => {
       <div className="relative w-full h-full">
         <div className="absolute inset-0 w-full h-full">
           <img
-            src={images[currentIndex]}
+            src={getOptimizedImageUrl(images[currentIndex], 1920)}
             alt={`Nursery Image Background ${currentIndex + 1}`}
             className="w-full h-full object-cover scale-110 blur-md transition-opacity duration-500 ease-in-out"
+            decoding="async"
           />
         </div>
 
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <img
-            src={images[currentIndex]}
+            src={getOptimizedImageUrl(images[currentIndex], 1200)}
             alt={`Nursery Image ${currentIndex + 1}`}
             className="w-[70%] h-auto max-h-full object-contain transition-opacity duration-500 ease-in-out"
+            decoding="async"
           />
         </div>
 

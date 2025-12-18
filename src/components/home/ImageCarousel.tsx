@@ -3,6 +3,7 @@ import {
   subscribeToGlobalGalleryImages,
   subscribeToDivisionGalleryImages 
 } from '../../services/firebase/galleryImageService';
+import { getOptimizedImageUrl } from '../../utils/imageOptimization';
 
 interface ImageCarouselProps {
   scope: 'global' | 'division';
@@ -47,20 +48,54 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
 
   const [featuredIndex, setFeaturedIndex] = useState<number>(0);
   const [gridIndices, setGridIndices] = useState<number[]>([]);
+  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
   const featuredIndexRef = useRef<number>(0);
+  const preloadedImagesRef = useRef<Set<number>>(new Set());
+
+  // Preload image function - uses optimized Cloudinary URL
+  // Defined early so it can be used in other hooks
+  const preloadImage = useCallback((index: number) => {
+    if (images.length === 0 || index < 0 || index >= images.length) return;
+    if (preloadedImagesRef.current.has(index)) return; // Already preloaded
+
+    const optimizedUrl = getOptimizedImageUrl(images[index], 600);
+    const img = new Image();
+    img.src = optimizedUrl;
+    preloadedImagesRef.current.add(index);
+  }, [images]);
 
   // Initialize grid indices when images are loaded
+  // Only recalculate when images.length changes, not on every render
   useEffect(() => {
     if (images.length > 0) {
       // Initialize grid with 9 random images (excluding index 0 which is featured)
       const availableIndices = Array.from({ length: images.length - 1 }, (_, i) => i + 1);
       setGridIndices(availableIndices.sort(() => Math.random() - 0.5).slice(0, 9));
+      // Preload the initial featured image
+      preloadImage(0);
     }
-  }, [images.length]);
+  }, [images.length, preloadImage]);
 
   useEffect(() => {
     featuredIndexRef.current = featuredIndex;
+    // Reset loaded state when featured index changes
+    setIsImageLoaded(false);
   }, [featuredIndex]);
+
+  // Preload next featured image before switching
+  useEffect(() => {
+    if (images.length === 0) return;
+
+    // Preload the current featured image
+    preloadImage(featuredIndex);
+
+    // Preload potential next images (for automatic rotation)
+    const allIndices = Array.from({ length: images.length }, (_, i) => i);
+    const availableForFeatured = allIndices.filter(idx => idx !== featuredIndex);
+    // Preload a few potential next images
+    const nextCandidates = availableForFeatured.slice(0, 3);
+    nextCandidates.forEach(index => preloadImage(index));
+  }, [featuredIndex, images, preloadImage]);
 
   const rotateFeatured = useCallback(() => {
     setGridIndices((prevGrid) => {
@@ -68,6 +103,9 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
       const allIndices = Array.from({ length: images.length }, (_, i) => i);
       const availableForFeatured = allIndices.filter(idx => idx !== featuredIndexRef.current);
       const newFeaturedIndex = availableForFeatured[Math.floor(Math.random() * availableForFeatured.length)];
+      
+      // Preload the new featured image before switching
+      preloadImage(newFeaturedIndex);
       
       // Replace a random grid position with the old featured image
       const randomGridPosition = Math.floor(Math.random() * prevGrid.length);
@@ -77,9 +115,12 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
       setFeaturedIndex(newFeaturedIndex);
       return newGrid;
     });
-  }, [images.length]);
+  }, [images.length, preloadImage]);
 
   const handleGridImageClick = (gridImageIndex: number, gridPosition: number): void => {
+    // Preload the clicked image before switching
+    preloadImage(gridImageIndex);
+    
     setGridIndices((prevGrid) => {
       const newGrid = [...prevGrid];
       newGrid[gridPosition] = featuredIndex;
@@ -120,11 +161,20 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
         <div className="relative">
           <div className="relative w-full h-64 sm:h-80 md:h-96 shadow-2xl overflow-hidden bg-gray-100">
             <div className="flex h-64 sm:h-80 md:h-96">
-              <div className="w-[40%] flex items-center justify-center bg-white">
+              <div className="w-[40%] flex items-center justify-center bg-white relative">
+                {/* Featured image with smooth fade transition */}
                 <img
-                  src={images[featuredIndex]}
+                  key={featuredIndex} // Force remount on index change for smooth transition
+                  src={getOptimizedImageUrl(images[featuredIndex], 600)}
                   alt={`Featured Nursery Image ${featuredIndex + 1}`}
-                  className="max-w-full max-h-full w-auto h-auto object-contain"
+                  className={`max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-500 ${
+                    isImageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                  onLoad={() => setIsImageLoaded(true)}
+                  onError={() => setIsImageLoaded(true)} // Show even if error to prevent stuck state
                 />
               </div>
 
@@ -138,9 +188,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
                       aria-label={`Select image ${imageIndex + 1}`}
                     >
                       <img
-                        src={images[imageIndex]}
+                        src={getOptimizedImageUrl(images[imageIndex], 300)}
                         alt={`Nursery Image ${imageIndex + 1}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
+                        decoding="async"
                       />
                     </button>
                   ))}
@@ -163,5 +215,6 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
   );
 };
 
-export default ImageCarousel;
+// Memoize component to prevent unnecessary re-renders when parent updates
+export default React.memo(ImageCarousel);
 

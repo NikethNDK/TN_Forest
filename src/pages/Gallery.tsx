@@ -1,17 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { 
   subscribeToGlobalGalleryImages,
   subscribeToDivisionGalleryImages 
 } from '../services/firebase/galleryImageService';
 import { subscribeToDivision } from '../services/firebase/divisionService';
 import type { GalleryImage, Division } from '../types';
+import { getOptimizedImageUrl } from '../utils/imageOptimization';
 
 const Gallery: React.FC = () => {
   const { divisionSlug } = useParams<{ divisionSlug?: string }>();
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [division, setDivision] = useState<Division | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
 
   // Load division data if divisionSlug exists
   useEffect(() => {
@@ -63,6 +66,44 @@ const Gallery: React.FC = () => {
     return () => unsubscribe();
   }, [divisionSlug]);
 
+  // Handle image click to open modal
+  const handleImageClick = useCallback((index: number) => {
+    setSelectedImageIndex(index);
+  }, []);
+
+  // Close modal
+  const closeModal = useCallback(() => {
+    setSelectedImageIndex(null);
+  }, []);
+
+  // Handle keyboard navigation (ESC to close)
+  useEffect(() => {
+    if (selectedImageIndex === null) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedImageIndex, closeModal]);
+
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedImageIndex !== null) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedImageIndex]);
+
+  const selectedImage = selectedImageIndex !== null ? images[selectedImageIndex] : null;
+
   return (
     <div className="min-h-screen bg-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -91,22 +132,55 @@ const Gallery: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {images.map((image) => (
+            {images.map((image, index) => (
               <div
                 key={image.id}
-                className="relative group aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 bg-gray-100"
+                className="relative group aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 bg-gray-100 cursor-pointer"
+                onClick={() => handleImageClick(index)}
               >
                 <img
-                  src={image.url}
+                  src={getOptimizedImageUrl(image.url, 400)}
                   alt={`Gallery Image ${image.order + 1}`}
-                  className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-200"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* Image Modal/Lightbox */}
+      {selectedImageIndex !== null && selectedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          onClick={closeModal}
+        >
+          {/* Close Button */}
+          <button
+            onClick={closeModal}
+            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors"
+            aria-label="Close modal"
+          >
+            <X className="h-6 w-6" />
+          </button>
+
+          {/* Image Container */}
+          <div
+            className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={getOptimizedImageUrl(selectedImage.url, 1920)}
+              alt={`Gallery Image ${selectedImage.order + 1}`}
+              className="max-w-full max-h-full object-contain"
+              loading="eager"
+              fetchPriority="high"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

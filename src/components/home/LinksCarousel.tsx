@@ -214,5 +214,7 @@ const LinksCarousel: React.FC = () => {
   );
 };
 
-export default LinksCarousel;
+// Memoize component to prevent unnecessary re-renders when parent updates
+// Component has no props, so it only re-renders when internal state changes
+export default React.memo(LinksCarousel);
 
