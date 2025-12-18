@@ -275,7 +275,8 @@ const AdminHome: React.FC = () => {
         await addGalleryImage({
           url: imagePath,
           publicId: publicId,
-          order: galleryImages.length
+          order: galleryImages.length,
+          scope: 'global' // Default to global scope for AdminHome uploads
         });
         toast.success('Gallery image added successfully');
       } catch (error) {

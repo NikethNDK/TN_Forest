@@ -1,26 +1,49 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { subscribeToGalleryImages } from '../../services/firebase/galleryImageService';
+import { 
+  subscribeToGlobalGalleryImages,
+  subscribeToDivisionGalleryImages 
+} from '../../services/firebase/galleryImageService';
 
-const ImageCarousel: React.FC = () => {
+interface ImageCarouselProps {
+  scope: 'global' | 'division';
+  divisionSlug?: string;
+}
+
+const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) => {
   const [images, setImages] = useState<string[]>([]);
 
-  // Subscribe to gallery images from Firebase
+  // Subscribe to gallery images from Firebase based on scope
   useEffect(() => {
-    const unsubscribe = subscribeToGalleryImages(
-      (galleryImages) => {
-        // Extract URLs and sort by order
-        const imageUrls = galleryImages
-          .sort((a, b) => (a.order || 0) - (b.order || 0))
-          .map(img => img.url);
-        setImages(imageUrls);
-      },
-      (error) => {
-        console.error('Error loading gallery images:', error);
-      }
-    );
+    if (scope === 'division' && !divisionSlug) {
+      console.error('divisionSlug is required when scope is "division"');
+      return;
+    }
+
+    const unsubscribe = scope === 'global'
+      ? subscribeToGlobalGalleryImages(
+          (galleryImages) => {
+            // Extract URLs - images are already sorted by order from the query
+            const imageUrls = galleryImages.map(img => img.url);
+            setImages(imageUrls);
+          },
+          (error) => {
+            console.error('Error loading global gallery images:', error);
+          }
+        )
+      : subscribeToDivisionGalleryImages(
+          divisionSlug!,
+          (galleryImages) => {
+            // Extract URLs - images are already sorted by order from the query
+            const imageUrls = galleryImages.map(img => img.url);
+            setImages(imageUrls);
+          },
+          (error) => {
+            console.error('Error loading division gallery images:', error);
+          }
+        );
 
     return () => unsubscribe();
-  }, []);
+  }, [scope, divisionSlug]);
 
   const [featuredIndex, setFeaturedIndex] = useState<number>(0);
   const [gridIndices, setGridIndices] = useState<number[]>([]);

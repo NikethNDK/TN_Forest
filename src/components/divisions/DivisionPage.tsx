@@ -610,7 +610,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
 
         {/* Image Gallery Carousel */}
         <div className="mt-16">
-          <ImageCarousel />
+          <ImageCarousel scope="division" divisionSlug={config.divisionSlug} />
         </div>
 
         {/* Toll Free Number Box */}
