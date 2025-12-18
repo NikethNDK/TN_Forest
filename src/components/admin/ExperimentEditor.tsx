@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, FileText } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import type { Experiment } from '../../types';
 import ImageUploader from './ImageUploader';
 import { uploadPDFFile } from '../../services/admin/fileUploadService';
@@ -36,6 +36,9 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
   });
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const confirmation = useConfirmation();
 
   // Subscribe to experiments
@@ -73,6 +76,9 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
       pdfPublicId: undefined
     });
     setEditingId(null);
+    setIsUploading(false);
+    setUploadProgress(0);
+    setUploadError(null);
     setShowForm(true);
   };
 
@@ -87,6 +93,9 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
       pdfPublicId: experiment.pdfPublicId
     });
     setEditingId(experiment.id?.toString() || null);
+    setIsUploading(false);
+    setUploadProgress(0);
+    setUploadError(null);
     setShowForm(true);
   };
 
@@ -98,6 +107,11 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
 
     if (!divisionId || !centerId) {
       alert('Division or center ID missing');
+      return;
+    }
+
+    if (isUploading) {
+      alert('Please wait for PDF upload to complete');
       return;
     }
 
@@ -136,6 +150,9 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
       pdfPublicId: undefined
     });
     setEditingId(null);
+    setIsUploading(false);
+    setUploadProgress(0);
+    setUploadError(null);
     setShowForm(false);
   };
 
@@ -172,20 +189,38 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
   const handlePDFUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setIsUploading(true);
+      setUploadProgress(0);
+      setUploadError(null);
+
       try {
-        const result = await uploadPDFFile(file, 'tn-forest/documents/experiments');
+        const result = await uploadPDFFile(
+          file, 
+          'tn-forest/documents/experiments',
+          (progress) => {
+            setUploadProgress(progress);
+          }
+        );
+        
         if (result.success && result.path && result.publicId) {
           setFormData({ 
             ...formData, 
             pdfUrl: result.path,
             pdfPublicId: result.publicId
           });
+          setUploadProgress(100);
         } else {
-          alert(result.error || 'Failed to upload PDF');
+          const errorMsg = result.error || 'Failed to upload PDF';
+          setUploadError(errorMsg);
+          alert(errorMsg);
         }
       } catch (error) {
         console.error('Error uploading PDF:', error);
+        const errorMsg = error instanceof Error ? error.message : 'Failed to upload PDF';
+        setUploadError(errorMsg);
         alert('Failed to upload PDF');
+      } finally {
+        setIsUploading(false);
       }
     }
   };
@@ -274,7 +309,7 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               PDF (Upload file)
             </label>
-            {formData.pdfUrl && (
+            {formData.pdfUrl && !isUploading && (
               <div className="mb-2 p-2 bg-green-50 rounded-lg">
                 <a
                   href={formData.pdfUrl}
@@ -291,19 +326,69 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
               type="file"
               accept="application/pdf"
               onChange={handlePDFUpload}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              disabled={isUploading}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed mb-2"
             />
+            
+            {/* Upload Progress/Status */}
+            {isUploading && (
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  <span className="text-sm text-blue-700 font-medium">
+                    Uploading PDF... {uploadProgress}%
+                  </span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            
+            {!isUploading && formData.pdfUrl && !uploadError && (
+              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <span className="text-sm text-green-700 font-medium">
+                    PDF uploaded successfully
+                  </span>
+                </div>
+              </div>
+            )}
+            
+            {uploadError && !isUploading && (
+              <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm text-red-700 font-medium">
+                    {uploadError}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
           <div className="flex gap-2 pt-4">
             <button
               onClick={handleSave}
-              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold"
+              disabled={isUploading}
+              className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:bg-gray-400 disabled:cursor-not-allowed disabled:hover:bg-gray-400"
             >
-              Save
+              {isUploading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Uploading...
+                </span>
+              ) : (
+                'Save'
+              )}
             </button>
             <button
               onClick={handleCancel}
-              className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold"
+              disabled={isUploading}
+              className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold disabled:bg-gray-200 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
