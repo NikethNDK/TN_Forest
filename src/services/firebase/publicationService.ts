@@ -256,13 +256,14 @@ export const addPublication = async (
 ): Promise<string> => {
   try {
     const publicationsRef = collection(db, PUBLICATIONS_COLLECTION);
+    const trimmedPdfUrl = publication.pdfUrl?.trim();
     const newPublication = {
       title: publication.title.trim(),
       year: publication.year,
       category: publication.category.trim(),
       journal: publication.journal?.trim() || '',
       description: publication.description?.trim() || '',
-      pdfUrl: publication.pdfUrl?.trim() || '',
+      pdfUrl: trimmedPdfUrl || undefined,
       pdfPublicId: publication.pdfPublicId?.trim() || '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
@@ -311,7 +312,8 @@ export const updatePublication = async (
       updateData.description = updates.description.trim() || '';
     }
     if (updates.pdfUrl !== undefined) {
-      updateData.pdfUrl = updates.pdfUrl.trim() || '';
+      const trimmedPdfUrl = updates.pdfUrl.trim();
+      updateData.pdfUrl = trimmedPdfUrl || undefined;
     }
     if (updates.pdfPublicId !== undefined) {
       updateData.pdfPublicId = updates.pdfPublicId.trim() || '';

@@ -239,11 +239,12 @@ export const addExperiment = async (
       centerId,
       EXPERIMENTS_SUBCOLLECTION
     );
+    const trimmedPdfUrl = experiment.pdfUrl?.trim();
     const newExperiment = {
       title: experiment.title.trim(),
       year: experiment.year || new Date().getFullYear(),
       description: experiment.description?.trim() || '',
-      pdfUrl: experiment.pdfUrl?.trim() || '',
+      pdfUrl: trimmedPdfUrl || undefined,
       pdfPublicId: experiment.pdfPublicId?.trim() || '',
       imageUrl: experiment.imageUrl?.trim() || '',
       imagePublicId: experiment.imagePublicId?.trim() || '',
@@ -303,7 +304,8 @@ export const updateExperiment = async (
       updateData.description = updates.description.trim() || '';
     }
     if (updates.pdfUrl !== undefined) {
-      updateData.pdfUrl = updates.pdfUrl.trim() || '';
+      const trimmedPdfUrl = updates.pdfUrl.trim();
+      updateData.pdfUrl = trimmedPdfUrl || undefined;
     }
     if (updates.pdfPublicId !== undefined) {
       updateData.pdfPublicId = updates.pdfPublicId.trim() || '';
