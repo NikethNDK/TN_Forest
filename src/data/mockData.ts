@@ -12,7 +12,7 @@ const typedExperimentsData = experimentsData as ExperimentsData;
 export const divisions: Division[] = [
   {
     id: 1,
-    name: "State Forest Research Division",
+    name: "State Forestry Research Institute Division",
     slug: "state-forest-research"
   },
   {

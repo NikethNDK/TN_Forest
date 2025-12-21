@@ -75,7 +75,7 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
           </h3>
           <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
             <p className="text-justify">
-              There are <strong>nine Research Centres</strong> functioning under <strong>six Research Ranges</strong> within the State Forest Research Division. Together, these centres support and coordinate all major scientific investigations. The primary goals of the Division are to conduct advanced studies and research on:
+              There are <strong>nine Research Centres</strong> functioning under <strong>six Research Ranges</strong> within the State Forestry Research Institute Division. Together, these centres support and coordinate all major scientific investigations. The primary goals of the Division are to conduct advanced studies and research on:
             </p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>Conservation and sustainable management of forests, biodiversity, and ecosystem services;</li>
@@ -193,7 +193,7 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
           </h3>
           <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
             <p className="text-justify">
-              To focus on various applied research programs, evaluation of implementation of various schemes, policies, and up-gradation of skills of the personnel of the forest department in order to realize the vision of State Forest Research Division and Sustainable Development Goals (SDGs) of the sector.
+              To focus on various applied research programs, evaluation of implementation of various schemes, policies, and up-gradation of skills of the personnel of the forest department in order to realize the vision of State Forestry Research Institute Division and Sustainable Development Goals (SDGs) of the sector.
             </p>
           </div>
         </div>

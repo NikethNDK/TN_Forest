@@ -217,7 +217,7 @@ let adminData: {
       },
       {
         id: 2,
-        name: "State Forest Research Division",
+        name: "State Forestry Research Institute Division",
         location: "State Forest Research Institute Campus, Anna Nagar, Vandalur (via), Kolapakkam, Chennai - 600127",
         phone: "0442-275297",
         email: "dcfsfri@gmail.com",
