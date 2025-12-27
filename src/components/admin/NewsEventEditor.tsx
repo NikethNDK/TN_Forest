@@ -165,6 +165,7 @@ const NewsEventEditor = <T extends NewsItem | Event>({
         onClose={handleCancel}
         title={editingId !== null ? `Edit ${itemType === 'news' ? 'News' : 'Event'}` : `Add ${itemType === 'news' ? 'News' : 'Event'}`}
         size="md"
+        closeOnOutsideClick={false}
       >
         <div className="space-y-4">
           <div>

@@ -334,6 +334,7 @@ const AdminPublications: React.FC = () => {
             onClose={() => setCategoryForm({ name: '', showForm: false })}
             title="Add Category"
             size="sm"
+            closeOnOutsideClick={false}
           >
             <div className="space-y-4">
               <FormField label="Category Name" required>
@@ -432,6 +433,7 @@ const AdminPublications: React.FC = () => {
             onClose={handleCancelPublication}
             title={editingId !== null ? 'Edit Publication' : 'Add Publication'}
             size="lg"
+            closeOnOutsideClick={false}
           >
             <div className="space-y-4">
                 <FormField label="Title" required>

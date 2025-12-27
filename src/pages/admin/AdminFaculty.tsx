@@ -195,6 +195,7 @@ const AdminFaculty: React.FC = () => {
           onClose={handleCancelMember}
           title={editingId !== null ? 'Edit Faculty Member' : 'Add Faculty Member'}
           size="md"
+          closeOnOutsideClick={false}
         >
           <div className="space-y-4">
             <FormField label="Name" required>
