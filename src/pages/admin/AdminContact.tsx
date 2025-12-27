@@ -283,6 +283,7 @@ const AdminContact: React.FC = () => {
             onClose={handleCancel}
             title={editingId !== null ? 'Edit Location' : 'Add Location'}
             size="md"
+            closeOnOutsideClick={false}
           >
             <div className="space-y-4">
               <FormField label="Title" required>
@@ -368,6 +369,7 @@ const AdminContact: React.FC = () => {
             onClose={handleCancelOverride}
             title="Override Footer Location?"
             size="sm"
+            closeOnOutsideClick={false}
           >
             <div className="space-y-4">
               <p className="text-gray-700">

@@ -507,6 +507,7 @@ const AdminDivision: React.FC = () => {
             onClose={handleCancelCenter}
             title={editingCenter ? 'Edit Research Center' : 'Add Research Center'}
             size="xl"
+            closeOnOutsideClick={false}
           >
             <div className="space-y-4">
               <div>
