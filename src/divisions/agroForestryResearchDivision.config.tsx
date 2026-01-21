@@ -84,20 +84,20 @@ export const agroForestryResearchDivisionConfig: AgroForestryResearchDivisionCon
         </div>
 
         {/* Focus Areas Image Section */}
-        {/* <div className="mb-8 border-t border-gray-200 pt-8">
+        <div className="mb-8 border-t border-gray-200 pt-8">
           <div className="flex justify-center">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
               <img
-                src="/placeholder-focus-areas.png"
+                src="/AFRD.png"
                 alt="Agro Forestry Research Division Focus Areas"
                 className="w-full h-auto rounded-lg"
               />
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Major Focusing Areas Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
+        {/* <div className="mb-8 border-t border-gray-200 pt-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
             Major Focusing Areas of the Agro Forestry Research Division
           </h3>
@@ -181,11 +181,11 @@ export const agroForestryResearchDivisionConfig: AgroForestryResearchDivisionCon
               </ul>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   ),
-  focusAreasImageSrc: '/placeholder-focus-areas.png',
+  focusAreasImageSrc: '/AFRD.png',
   stats: [
     { value: '7', label: 'Research Centers' },
     { value: '40+', label: 'Agroforestry Models' },

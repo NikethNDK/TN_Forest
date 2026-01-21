@@ -102,20 +102,20 @@ export const industrialWoodResearchDivisionConfig: IndustrialWoodResearchDivisio
         </div>
 
         {/* Focus Areas Image Section */}
-        {/* <div className="mb-8 border-t border-gray-200 pt-8">
+        <div className="mb-8 border-t border-gray-200 pt-8">
           <div className="flex justify-center">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
               <img
-                src="/placeholder-focus-areas.png"
+                src="/IWRD.png"
                 alt="Industrial Wood Research Division Focus Areas"
                 className="w-full h-auto rounded-lg"
               />
             </div>
           </div>
-        </div> */}
+        </div>
 
         {/* Focus Areas Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
+        {/* <div className="mb-8 border-t border-gray-200 pt-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
             Focus Areas of the Division
           </h3>
@@ -190,11 +190,11 @@ export const industrialWoodResearchDivisionConfig: IndustrialWoodResearchDivisio
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   ),
-  focusAreasImageSrc: '/placeholder-focus-areas.png',
+  focusAreasImageSrc: '/IWRD.png',
   stats: [
     { value: '4', label: 'Research Centers' },
     { value: '30+', label: 'Active Projects' },
