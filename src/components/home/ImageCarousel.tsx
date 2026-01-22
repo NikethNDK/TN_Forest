@@ -204,7 +204,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
 
         <div className="text-center mt-6 sm:mt-8">
           <a
-            href="/gallery"
+            href={scope === 'division' && divisionSlug ? `/divisions/${divisionSlug}/gallery` : '/gallery'}
             className="inline-block bg-green-700 hover:bg-green-800 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md transition-colors text-sm sm:text-base"
           >
             See More Photos
