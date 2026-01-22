@@ -1,4 +1,7 @@
 import React from 'react';
+import { LaboratoryFacilities } from './SFRI/laboratoryFacilities';
+import { OtherFacilities } from './SFRI/otherFacilities';
+import { NotableWorkAndServices } from './SFRI/notableWorkAndServices';
 
 export type DivisionStatItem = {
   value: string;
@@ -14,6 +17,12 @@ export type DivisionContactFallbacks = {
   emailDomain: string;
 };
 
+export type FacilityCategory = {
+  id: string;
+  title: string;
+  content: React.ComponentType;
+};
+
 export type StateForestResearchDivisionConfig = {
   divisionSlug: string;
   overview: React.ReactNode;
@@ -25,6 +34,7 @@ export type StateForestResearchDivisionConfig = {
     tel: string;
   };
   contactFallbacks: DivisionContactFallbacks;
+  facilityCategories?: FacilityCategory[];
 };
 
 export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfig = {
@@ -174,6 +184,9 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
           </div>
         </div>
 
+        {/* Facility Categories Placeholder - Will be replaced with clickable cards */}
+        <div id="facility-categories-placeholder" className="mb-8 border-t border-gray-200 pt-8"></div>
+
         {/* Vision Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
@@ -219,4 +232,21 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
     phone: '+91 44 1234 5681',
     emailDomain: 'tnfrd.gov.in',
   },
+  facilityCategories: [
+    {
+      id: 'laboratory-facilities',
+      title: 'Laboratory facilities at SFRD',
+      content: LaboratoryFacilities,
+    },
+    {
+      id: 'other-facilities',
+      title: 'Other facilities available',
+      content: OtherFacilities,
+    },
+    {
+      id: 'notable-work-and-services',
+      title: 'Notable work and services',
+      content: NotableWorkAndServices,
+    },
+  ],
 };

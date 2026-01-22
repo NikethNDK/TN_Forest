@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { Leaf, MapPin, Phone, Mail, ChevronLeft, ChevronRight, X, TreePine } from 'lucide-react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Leaf, MapPin, Phone, Mail, ChevronLeft, ChevronRight, X, TreePine, ExternalLink } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import type { ResearchCenter, Experiment, Coordinates, Division } from '../../types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import ImageCarousel from '../home/ImageCarousel';
+import ContentModal from './ContentModal';
 import { subscribeToDivision } from '../../services/firebase/divisionService';
 import { subscribeToResearchCenters } from '../../services/firebase/researchCenterService';
 import { subscribeToExperiments } from '../../services/firebase/experimentService';
@@ -12,6 +13,12 @@ import { subscribeToExperiments } from '../../services/firebase/experimentServic
 export type DivisionStatItem = {
   value: string;
   label: string;
+};
+
+export type FacilityCategory = {
+  id: string;
+  title: string;
+  content: React.ComponentType;
 };
 
 export type DivisionPageConfig = {
@@ -28,6 +35,7 @@ export type DivisionPageConfig = {
     phone: string;
     emailDomain: string;
   };
+  facilityCategories?: FacilityCategory[];
 };
 
 interface DivisionPageProps {
@@ -73,6 +81,77 @@ function MapClickHandler({ destinationLat, destinationLng }: MapClickHandlerProp
   return null;
 }
 
+// Component to inject facility category cards into overview
+interface OverviewWithFacilitiesProps {
+  overview: React.ReactNode;
+  facilityCategories?: FacilityCategory[];
+  onCategoryClick: (categoryId: string) => void;
+}
+
+const OverviewWithFacilities: React.FC<OverviewWithFacilitiesProps> = ({ 
+  overview, 
+  facilityCategories, 
+  onCategoryClick 
+}) => {
+  const processedOverview = useMemo(() => {
+    if (!facilityCategories || facilityCategories.length === 0) {
+      return overview;
+    }
+
+    // Create facility category cards component
+    const facilityCards = (
+      <div key="facility-categories" className="mb-8 border-t border-gray-200 pt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {facilityCategories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => onCategoryClick(category.id)}
+              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200 text-left border-2 border-gray-200 hover:border-green-500 group"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-green-700 group-hover:text-green-800">
+                  {category.title}
+                </h3>
+                <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-green-600 transition-colors" />
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Click to view details</p>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+
+    // Try to inject into overview by processing React elements
+    const processElement = (element: any): any => {
+      if (!React.isValidElement(element)) {
+        return element;
+      }
+
+      // Check if this element has the placeholder
+      if (element.props?.id === 'facility-categories-placeholder') {
+        return facilityCards;
+      }
+
+      // Process children recursively
+      if (element.props?.children) {
+        const processedChildren = React.Children.map(element.props.children, (child: any) => {
+          return processElement(child);
+        });
+
+        return React.cloneElement(element, {
+          children: processedChildren,
+        });
+      }
+
+      return element;
+    };
+
+    return processElement(overview);
+  }, [overview, facilityCategories, onCategoryClick]);
+
+  return <>{processedOverview}</>;
+};
+
 const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
   const [selectedCenter, setSelectedCenter] = useState<ResearchCenter | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -80,8 +159,15 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
   const [researchCenters, setResearchCenters] = useState<ResearchCenter[]>([]);
   const [centerExperiments, setCenterExperiments] = useState<Map<string, Experiment[]>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
+  const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
   
   const EXPERIMENTS_PER_PAGE = 8;
+
+  // Get the currently open category
+  const openCategory = useMemo(() => {
+    if (!openCategoryId || !config.facilityCategories) return null;
+    return config.facilityCategories.find(cat => cat.id === openCategoryId) || null;
+  }, [openCategoryId, config.facilityCategories]);
 
   // Subscribe to division data
   useEffect(() => {
@@ -603,10 +689,25 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                 </div>
               </div>
             ) : (
-              config.overview
+              <OverviewWithFacilities 
+                overview={config.overview}
+                facilityCategories={config.facilityCategories}
+                onCategoryClick={setOpenCategoryId}
+              />
             )}
           </div>
         </div>
+
+        {/* Facility Category Modal */}
+        {openCategory && (
+          <ContentModal
+            isOpen={openCategoryId !== null}
+            onClose={() => setOpenCategoryId(null)}
+            title={openCategory.title}
+          >
+            {React.createElement(openCategory.content)}
+          </ContentModal>
+        )}
 
         {/* Image Gallery Carousel */}
         <div className="mt-16">
