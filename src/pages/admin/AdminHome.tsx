@@ -37,6 +37,7 @@ import {
   deleteGalleryImage
 } from '../../services/firebase/galleryImageService';
 import ImageUploader from '../../components/admin/ImageUploader';
+import BulkImageUploader from '../../components/admin/BulkImageUploader';
 import NewsEventEditor from '../../components/admin/NewsEventEditor';
 import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
 import LinkEditor from '../../components/admin/LinkEditor';
@@ -480,11 +481,18 @@ const AdminHome: React.FC = () => {
             </div>
             
             <div className="bg-white rounded-lg shadow-lg p-6">
+              <div className="mb-6 pb-6 border-b border-gray-200">
+                <BulkImageUploader
+                  onImageUploaded={handleGalleryImageAdd}
+                  directory="tn-forest/images/gallery"
+                  label="Bulk Upload Gallery Images"
+                />
+              </div>
               <div className="mb-4">
                 <ImageUploader
                   onImageChange={(url, publicId) => handleGalleryImageAdd(url, publicId)}
                   directory="tn-forest/images/gallery"
-                  label="Add New Gallery Image"
+                  label="Add Single Image"
                 />
               </div>
               {isLoadingGalleryImages ? (

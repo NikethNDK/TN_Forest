@@ -22,6 +22,7 @@ import {
 // import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
 import CustomFieldEditor, { CustomField } from '../../components/admin/CustomFieldEditor';
 import ImageUploader from '../../components/admin/ImageUploader';
+import BulkImageUploader from '../../components/admin/BulkImageUploader';
 // Image upload is handled by ImageUploader component
 // import { uploadImageFile } from '../../services/admin/fileUploadService';
 import Modal from '../../components/admin/Modal';
@@ -714,11 +715,18 @@ const AdminDivision: React.FC = () => {
             </div>
           </div>
           
+          <div className="mb-6 pb-6 border-b border-gray-200">
+            <BulkImageUploader
+              onImageUploaded={handleGalleryImageAdd}
+              directory="tn-forest/images/gallery"
+              label="Bulk Upload Gallery Images"
+            />
+          </div>
           <div className="mb-4">
             <ImageUploader
               onImageChange={(url, publicId) => handleGalleryImageAdd(url, publicId)}
               directory="tn-forest/images/gallery"
-              label="Add New Gallery Image"
+              label="Add Single Image"
             />
           </div>
           {isLoadingGalleryImages ? (
