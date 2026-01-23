@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { uploadImageFile, validateImageFile } from '../../services/admin/fileUploadService';
+import GalleryUploadModal, { ImageWithTitle, ExistingImageForEdit } from './GalleryUploadModal';
 
 interface UploadingFile {
   id: string;
   file: File;
   preview: string;
+  title: string;
   progress: number;
   status: 'pending' | 'uploading' | 'success' | 'error';
   error?: string;
@@ -14,7 +16,7 @@ interface UploadingFile {
 }
 
 interface BulkImageUploaderProps {
-  onImageUploaded: (url: string, publicId: string) => Promise<void>;
+  onImageUploaded: (url: string, publicId: string, title: string) => Promise<void>;
   directory?: string;
   label?: string;
   accept?: string;
@@ -28,47 +30,59 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
 }) => {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingImages, setPendingImages] = useState<ImageWithTitle[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    // Create upload items with previews
-    const newFiles: UploadingFile[] = await Promise.all(
+    // Clear file input immediately
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    // Create preview items and validate
+    const validFiles: ImageWithTitle[] = [];
+    const invalidFiles: UploadingFile[] = [];
+
+    await Promise.all(
       files.map(async (file, index) => {
         const preview = await createPreview(file);
-        return {
-          id: `${Date.now()}-${index}`,
-          file,
-          preview,
-          progress: 0,
-          status: 'pending' as const
-        };
+        const id = `${Date.now()}-${index}`;
+        
+        const validation = validateImageFile(file);
+        if (!validation.valid) {
+          invalidFiles.push({
+            id,
+            file,
+            preview,
+            title: '',
+            progress: 0,
+            status: 'error',
+            error: validation.error
+          });
+        } else {
+          validFiles.push({
+            id,
+            file,
+            preview,
+            title: ''
+          });
+        }
       })
     );
 
-    // Validate files
-    const validFiles = newFiles.filter(item => {
-      const validation = validateImageFile(item.file);
-      if (!validation.valid) {
-        item.status = 'error';
-        item.error = validation.error;
-        return false;
-      }
-      return true;
-    });
-
-    setUploadingFiles(prev => [...prev, ...newFiles]);
-
-    // Start uploading valid files
-    if (validFiles.length > 0) {
-      uploadFiles(validFiles);
+    // Show invalid files in the upload queue
+    if (invalidFiles.length > 0) {
+      setUploadingFiles(prev => [...prev, ...invalidFiles]);
     }
 
-    // Clear file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    // Open modal for valid files
+    if (validFiles.length > 0) {
+      setPendingImages(validFiles);
+      setIsModalOpen(true);
     }
   };
 
@@ -79,6 +93,31 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
       reader.onerror = () => resolve('');
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleModalConfirm = (imagesWithTitles: ImageWithTitle[] | ExistingImageForEdit[]) => {
+    // Type guard: in upload mode, we always receive ImageWithTitle[]
+    const uploadImages = imagesWithTitles as ImageWithTitle[];
+    setIsModalOpen(false);
+    setPendingImages([]);
+
+    // Convert to uploading files and start upload
+    const newFiles: UploadingFile[] = uploadImages.map(img => ({
+      id: img.id,
+      file: img.file,
+      preview: img.preview,
+      title: img.title,
+      progress: 0,
+      status: 'pending' as const
+    }));
+
+    setUploadingFiles(prev => [...prev, ...newFiles]);
+    uploadFiles(newFiles);
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+    setPendingImages([]);
   };
 
   const uploadFiles = async (files: UploadingFile[]) => {
@@ -113,8 +152,8 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
             } : f)
           );
 
-          // Notify parent of successful upload
-          await onImageUploaded(result.path, result.publicId);
+          // Notify parent of successful upload with title
+          await onImageUploaded(result.path, result.publicId, item.title);
         } else {
           setUploadingFiles(prev =>
             prev.map(f => f.id === item.id ? {
@@ -136,6 +175,11 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
     }
 
     setIsUploading(false);
+    
+    // Auto-clear successful uploads after 2 seconds
+    setTimeout(() => {
+      setUploadingFiles(prev => prev.filter(f => f.status !== 'success'));
+    }, 2000);
   };
 
   const removeFile = (id: string) => {
@@ -172,7 +216,7 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
         <button
           type="button"
           onClick={handleClick}
-          disabled={isUploading}
+          disabled={isUploading || isModalOpen}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           <Upload className="h-4 w-4" />
@@ -229,9 +273,16 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
             >
               <img
                 src={item.preview}
-                alt="Preview"
+                alt={item.title || 'Preview'}
                 className="w-full h-24 object-cover"
               />
+
+              {/* Title overlay for successful uploads */}
+              {item.status === 'success' && item.title && (
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1">
+                  <span className="text-xs text-white truncate block">{item.title}</span>
+                </div>
+              )}
 
               {/* Progress overlay */}
               {item.status === 'uploading' && (
@@ -274,6 +325,15 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
           ))}
         </div>
       )}
+
+      {/* Gallery Upload Modal */}
+      <GalleryUploadModal
+        isOpen={isModalOpen}
+        mode="upload"
+        images={pendingImages}
+        onConfirm={handleModalConfirm}
+        onCancel={handleModalCancel}
+      />
     </div>
   );
 };

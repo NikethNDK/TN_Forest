@@ -36,6 +36,7 @@ const transformDocumentToGalleryImage = (docId: string, data: any): GalleryImage
     id: docId,
     url: data.url || '',
     publicId: data.publicId || '',
+    title: data.title || undefined, // Optional title for the image
     order: data.order || 0,
     scope: data.scope || 'global', // Default to 'global' for existing images
     divisionSlug: data.divisionSlug || undefined,
@@ -156,6 +157,11 @@ export const addGalleryImage = async (
       updatedAt: Timestamp.now()
     };
     
+    // Add title if provided
+    if (image.title && image.title.trim()) {
+      newImage.title = image.title.trim();
+    }
+    
     // Only add divisionSlug if scope is division
     if (image.scope === 'division' && image.divisionSlug) {
       newImage.divisionSlug = image.divisionSlug.trim();
@@ -194,6 +200,26 @@ export const updateGalleryImage = async (
   } catch (error) {
     console.error('Error updating gallery image:', error);
     throw new Error('Failed to update gallery image');
+  }
+};
+
+/**
+ * Update the title of a gallery image
+ * Convenience function for quick title updates
+ */
+export const updateGalleryImageTitle = async (
+  id: string,
+  title: string
+): Promise<void> => {
+  try {
+    const imageRef = doc(db, GALLERY_IMAGES_COLLECTION, id);
+    await updateDoc(imageRef, {
+      title: title.trim(),
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error updating gallery image title:', error);
+    throw new Error('Failed to update gallery image title');
   }
 };
 

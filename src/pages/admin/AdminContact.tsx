@@ -454,7 +454,7 @@ const AdminContact: React.FC = () => {
             ))}
 
             {locations.length === 0 && !loading && (
-              <EmptyState message='No locations yet. Click "Add Location" to create one.' icon={MapPin} />
+              <EmptyState message='No locations yet. Click "Add Location" to create one.' icon={<MapPin className="h-8 w-8" />} />
             )}
           </div>
         </div>

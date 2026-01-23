@@ -1,13 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { uploadImageFile, createImagePreview, validateImageFile } from '../../services/admin/fileUploadService';
+import GalleryUploadModal, { ImageWithTitle, ExistingImageForEdit } from './GalleryUploadModal';
 
 interface ImageUploaderProps {
   currentImage?: string;
-  onImageChange: (imagePath: string, publicId?: string) => void;
+  onImageChange: (imagePath: string, publicId?: string, title?: string) => void;
   directory?: string;
   label?: string;
   accept?: string;
+  requireTitle?: boolean;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
@@ -15,17 +17,25 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   onImageChange,
   directory = 'images',
   label = 'Upload Image',
-  accept = 'image/jpeg,image/jpg,image/png,image/webp'
+  accept = 'image/jpeg,image/jpg,image/png,image/webp',
+  requireTitle = false
 }) => {
   const [preview, setPreview] = useState<string | null>(currentImage || null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [pendingImage, setPendingImage] = useState<ImageWithTitle | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Clear file input immediately
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
 
     setError(null);
     setUploadProgress(0);
@@ -37,13 +47,33 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       return;
     }
 
-    setUploading(true);
-
     try {
       // Create preview
       const previewUrl = await createImagePreview(file);
-      setPreview(previewUrl);
 
+      if (requireTitle) {
+        // Open modal for title input
+        setPendingImage({
+          id: `${Date.now()}`,
+          file,
+          preview: previewUrl,
+          title: ''
+        });
+        setIsModalOpen(true);
+      } else {
+        // Upload directly without title (legacy behavior)
+        await uploadFile(file, previewUrl);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to process image');
+    }
+  };
+
+  const uploadFile = async (file: File, previewUrl: string, title?: string) => {
+    setUploading(true);
+    setPreview(previewUrl);
+
+    try {
       // Upload file to Cloudinary with progress tracking
       const result = await uploadImageFile(
         file,
@@ -56,8 +86,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       if (result.success && result.path) {
         // Ensure progress reaches 100% on success
         setUploadProgress(100);
-        // Call the parent callback (async, but we don't need to wait)
-        onImageChange(result.path, result.publicId);
+        // Call the parent callback with title
+        onImageChange(result.path, result.publicId, title);
         // Clear preview and file input after successful upload
         setTimeout(() => {
           setPreview(null);
@@ -78,6 +108,24 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleModalConfirm = async (images: ImageWithTitle[] | ExistingImageForEdit[]) => {
+    setIsModalOpen(false);
+    
+    // Type guard: in upload mode, we always receive ImageWithTitle[]
+    const uploadImages = images as ImageWithTitle[];
+    if (uploadImages.length > 0) {
+      const image = uploadImages[0];
+      await uploadFile(image.file, image.preview, image.title);
+    }
+    
+    setPendingImage(null);
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+    setPendingImage(null);
   };
 
   const handleRemove = () => {
@@ -106,13 +154,15 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               alt="Preview"
               className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300"
             />
-            <button
-              type="button"
-              onClick={handleRemove}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            {!uploading && (
+              <button
+                type="button"
+                onClick={handleRemove}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
         ) : (
           <div
@@ -134,7 +184,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <button
             type="button"
             onClick={handleClick}
-            disabled={uploading}
+            disabled={uploading || isModalOpen}
             className="relative flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors overflow-hidden"
             style={{ minWidth: '140px' }}
           >
@@ -151,7 +201,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             )}
             <span className="relative z-10 flex items-center gap-2">
               <Upload className="h-4 w-4" />
-              {uploading ? 'Uploading...' : preview ? 'Change Image' : 'Upload Image'}
+              {uploading ? `Uploading... ${uploadProgress}%` : preview ? 'Change Image' : 'Upload Image'}
             </span>
           </button>
           {error && (
@@ -159,9 +209,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           )}
         </div>
       </div>
+
+      {/* Gallery Upload Modal */}
+      <GalleryUploadModal
+        isOpen={isModalOpen}
+        mode="upload"
+        images={pendingImage ? [pendingImage] : []}
+        onConfirm={handleModalConfirm}
+        onCancel={handleModalCancel}
+      />
     </div>
   );
 };
 
 export default ImageUploader;
-

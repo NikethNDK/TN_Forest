@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { Plus, Edit, Trash2, Phone } from 'lucide-react';
+import { Plus, Edit, Trash2, Phone, Pencil } from 'lucide-react';
 import {
   subscribeToDivision,
   updateDivision,
@@ -16,13 +16,15 @@ import {
 import {
   subscribeToDivisionGalleryImages,
   addGalleryImage,
-  deleteGalleryImage
+  deleteGalleryImage,
+  updateGalleryImageTitle
 } from '../../services/firebase/galleryImageService';
 // TODO: Enable when making content blocks live
 // import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
 import CustomFieldEditor, { CustomField } from '../../components/admin/CustomFieldEditor';
 import ImageUploader from '../../components/admin/ImageUploader';
 import BulkImageUploader from '../../components/admin/BulkImageUploader';
+import GalleryUploadModal, { ExistingImageForEdit } from '../../components/admin/GalleryUploadModal';
 // Image upload is handled by ImageUploader component
 // import { uploadImageFile } from '../../services/admin/fileUploadService';
 import Modal from '../../components/admin/Modal';
@@ -30,6 +32,7 @@ import { useToast, ToastContainer } from '../../components/admin/Toast';
 import { useConfirmation } from '../../hooks/useConfirmation';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog';
 import type { ResearchCenter, Coordinates, Division, GalleryImage } from '../../types';
+import { getOptimizedImageUrl } from '../../utils/imageOptimization';
 
 const AdminDivision: React.FC = () => {
   const { divisionSlug } = useParams<{ divisionSlug: string }>();
@@ -39,6 +42,8 @@ const AdminDivision: React.FC = () => {
   const confirmation = useConfirmation();
   const [deletingCenterId, setDeletingCenterId] = useState<string | null>(null);
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState<ExistingImageForEdit | null>(null);
   
   const [division, setDivision] = useState<Division | null>(null);
   const [researchCenters, setResearchCenters] = useState<ResearchCenter[]>([]);
@@ -366,12 +371,13 @@ const AdminDivision: React.FC = () => {
   };
 
   // Gallery Images handlers
-  const handleGalleryImageAdd = async (imagePath: string, publicId?: string) => {
+  const handleGalleryImageAdd = async (imagePath: string, publicId?: string, title?: string) => {
     if (imagePath && publicId && divisionSlug) {
       try {
         await addGalleryImage({
           url: imagePath,
           publicId: publicId,
+          title: title || undefined,
           order: galleryImages.length,
           scope: 'division',
           divisionSlug: divisionSlug
@@ -413,6 +419,36 @@ const AdminDivision: React.FC = () => {
         }
       }
     );
+  };
+
+  const handleGalleryImageEdit = (image: GalleryImage) => {
+    if (!image.id) return;
+    setEditingImage({
+      id: image.id,
+      url: image.url,
+      title: image.title || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalConfirm = async (images: ExistingImageForEdit[]) => {
+    if (images.length > 0) {
+      const image = images[0];
+      try {
+        await updateGalleryImageTitle(image.id, image.title);
+        showToast('Image title updated successfully', 'success');
+      } catch (error) {
+        console.error('Error updating image title:', error);
+        showToast('Failed to update image title', 'error');
+      }
+    }
+    setIsEditModalOpen(false);
+    setEditingImage(null);
+  };
+
+  const handleEditModalCancel = () => {
+    setIsEditModalOpen(false);
+    setEditingImage(null);
   };
 
   if (isLoading) {
@@ -724,9 +760,10 @@ const AdminDivision: React.FC = () => {
           </div>
           <div className="mb-4">
             <ImageUploader
-              onImageChange={(url, publicId) => handleGalleryImageAdd(url, publicId)}
+              onImageChange={(url, publicId, title) => handleGalleryImageAdd(url, publicId, title)}
               directory="tn-forest/images/gallery"
               label="Add Single Image"
+              requireTitle={true}
             />
           </div>
           {isLoadingGalleryImages ? (
@@ -738,15 +775,31 @@ const AdminDivision: React.FC = () => {
               {galleryImages.map((image, index) => (
                 <div key={image.id || index} className="relative group">
                   <img
-                    src={image.url}
-                    alt={`Gallery ${index + 1}`}
+                    src={getOptimizedImageUrl(image.url, 200)}
+                    alt={image.title || `Gallery ${index + 1}`}
                     className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                    loading="lazy"
+                    decoding="async"
                   />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                  {/* Title overlay */}
+                  {image.title && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 rounded-b-lg">
+                      <span className="text-xs text-white truncate block">{image.title}</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => handleGalleryImageEdit(image)}
+                      className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                      title="Edit title"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => handleGalleryImageRemove(image)}
                       disabled={deletingImageId === image.id}
-                      className="p-2 bg-red-500 text-white rounded-lg disabled:opacity-50"
+                      className="p-2 bg-red-500 text-white rounded-lg disabled:opacity-50 hover:bg-red-600"
+                      title="Delete image"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -781,6 +834,16 @@ const AdminDivision: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Gallery Image Edit Modal */}
+      <GalleryUploadModal
+        isOpen={isEditModalOpen}
+        mode="edit"
+        images={[]}
+        existingImages={editingImage ? [editingImage] : []}
+        onConfirm={handleEditModalConfirm}
+        onCancel={handleEditModalCancel}
+      />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import {
   Calendar, 
   Link as LinkIcon,
   Trash2,
+  Pencil,
   ArrowUp,
   ArrowDown
 } from 'lucide-react';
@@ -34,10 +35,13 @@ import {
 import {
   subscribeToGalleryImages,
   addGalleryImage,
-  deleteGalleryImage
+  deleteGalleryImage,
+  updateGalleryImageTitle
 } from '../../services/firebase/galleryImageService';
 import ImageUploader from '../../components/admin/ImageUploader';
+import { getOptimizedImageUrl } from '../../utils/imageOptimization';
 import BulkImageUploader from '../../components/admin/BulkImageUploader';
+import GalleryUploadModal, { ExistingImageForEdit } from '../../components/admin/GalleryUploadModal';
 import NewsEventEditor from '../../components/admin/NewsEventEditor';
 import ContentBlockEditor, { ContentBlock } from '../../components/admin/ContentBlockEditor';
 import LinkEditor from '../../components/admin/LinkEditor';
@@ -58,6 +62,8 @@ const AdminHome: React.FC = () => {
   const [isLoadingSliderImages, setIsLoadingSliderImages] = useState(true);
   const [isLoadingGalleryImages, setIsLoadingGalleryImages] = useState(true);
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingImage, setEditingImage] = useState<ExistingImageForEdit | null>(null);
   const confirmation = useConfirmation();
 
   // Slider Images
@@ -270,12 +276,13 @@ const AdminHome: React.FC = () => {
 
 
   // Gallery Images
-  const handleGalleryImageAdd = async (imagePath: string, publicId?: string) => {
+  const handleGalleryImageAdd = async (imagePath: string, publicId?: string, title?: string) => {
     if (imagePath && publicId) {
       try {
         await addGalleryImage({
           url: imagePath,
           publicId: publicId,
+          title: title || undefined,
           order: galleryImages.length,
           scope: 'global' // Default to global scope for AdminHome uploads
         });
@@ -320,6 +327,36 @@ const AdminHome: React.FC = () => {
     );
   };
 
+  const handleGalleryImageEdit = (image: GalleryImage) => {
+    if (!image.id) return;
+    setEditingImage({
+      id: image.id,
+      url: image.url,
+      title: image.title || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditModalConfirm = async (images: ExistingImageForEdit[]) => {
+    if (images.length > 0) {
+      const image = images[0];
+      try {
+        await updateGalleryImageTitle(image.id, image.title);
+        toast.success('Image title updated successfully');
+      } catch (error) {
+        console.error('Error updating image title:', error);
+        toast.error('Failed to update image title');
+      }
+    }
+    setIsEditModalOpen(false);
+    setEditingImage(null);
+  };
+
+  const handleEditModalCancel = () => {
+    setIsEditModalOpen(false);
+    setEditingImage(null);
+  };
+
   // Useful Links
   const handleLinksChange = (links: ImportantLink[]) => {
     setHomeContent({ ...homeContent, usefulLinks: links });
@@ -362,9 +399,11 @@ const AdminHome: React.FC = () => {
                   {sliderImages.map((image, index) => (
                     <div key={image.id || index} className="relative group">
                       <img
-                        src={image.url}
+                        src={getOptimizedImageUrl(image.url, 200)}
                         alt={`Slider ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                        loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
                         <button
@@ -490,9 +529,10 @@ const AdminHome: React.FC = () => {
               </div>
               <div className="mb-4">
                 <ImageUploader
-                  onImageChange={(url, publicId) => handleGalleryImageAdd(url, publicId)}
+                  onImageChange={(url, publicId, title) => handleGalleryImageAdd(url, publicId, title)}
                   directory="tn-forest/images/gallery"
                   label="Add Single Image"
+                  requireTitle={true}
                 />
               </div>
               {isLoadingGalleryImages ? (
@@ -504,15 +544,31 @@ const AdminHome: React.FC = () => {
                   {galleryImages.map((image, index) => (
                     <div key={image.id || index} className="relative group">
                       <img
-                        src={image.url}
-                        alt={`Gallery ${index + 1}`}
+                        src={getOptimizedImageUrl(image.url, 200)}
+                        alt={image.title || `Gallery ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
+                        loading="lazy"
+                        decoding="async"
                       />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                      {/* Title overlay */}
+                      {image.title && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 rounded-b-lg">
+                          <span className="text-xs text-white truncate block">{image.title}</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleGalleryImageEdit(image)}
+                          className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                          title="Edit title"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() => handleGalleryImageRemove(image)}
                           disabled={deletingImageId === image.id}
-                          className="p-2 bg-red-500 text-white rounded-lg disabled:opacity-50"
+                          className="p-2 bg-red-500 text-white rounded-lg disabled:opacity-50 hover:bg-red-600"
+                          title="Delete image"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -531,6 +587,14 @@ const AdminHome: React.FC = () => {
               confirmText={confirmation.confirmText}
               cancelText={confirmation.cancelText}
               variant={confirmation.variant}
+            />
+            <GalleryUploadModal
+              isOpen={isEditModalOpen}
+              mode="edit"
+              images={[]}
+              existingImages={editingImage ? [editingImage] : []}
+              onConfirm={handleEditModalConfirm}
+              onCancel={handleEditModalCancel}
             />
           </div>
         );
