@@ -140,11 +140,19 @@ const Gallery: React.FC = () => {
               >
                 <img
                   src={getOptimizedImageUrl(image.url, 400)}
-                  alt={`Gallery Image ${image.order + 1}`}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                  alt={image.title || `Gallery Image ${image.order + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                   loading="lazy"
                   decoding="async"
                 />
+                {/* Title overlay */}
+                {image.title && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2 pt-6">
+                    <p className="text-white text-sm font-medium truncate">
+                      {image.title}
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -166,18 +174,26 @@ const Gallery: React.FC = () => {
             <X className="h-6 w-6" />
           </button>
 
-          {/* Image Container */}
+          {/* Image Container with Title */}
           <div
-            className="relative max-w-7xl max-h-[90vh] w-full h-full flex items-center justify-center"
+            className="relative max-w-7xl max-h-[90vh] w-full h-full flex flex-col items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             <img
               src={getOptimizedImageUrl(selectedImage.url, 1920)}
-              alt={`Gallery Image ${selectedImage.order + 1}`}
-              className="max-w-full max-h-full object-contain"
+              alt={selectedImage.title || `Gallery Image ${selectedImage.order + 1}`}
+              className="max-w-full max-h-[calc(90vh-4rem)] object-contain"
               loading="eager"
               fetchPriority="high"
             />
+            {/* Full title display */}
+            {selectedImage.title && (
+              <div className="mt-4 px-4 text-center">
+                <p className="text-white text-lg font-medium">
+                  {selectedImage.title}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
