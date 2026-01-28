@@ -1,129 +1,123 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ShoppingCart, Search, Plus, Minus, Trash2, Sprout, Leaf, Star, FlaskConical, Mail, MapPin, Truck, X, CheckCircle, User, Phone, Package, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { ShopProduct, CartItem } from '../types';
+/**
+ * Shop Page
+ * 
+ * Displays products (Seeds & Bio Fertilizers) with search, filtering,
+ * cart functionality, and fertilizer order form.
+ */
+
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  ShoppingCart,
+  Search,
+  Sprout,
+  Leaf,
+  Star,
+  FlaskConical,
+  Loader2,
+} from 'lucide-react';
+import type { ShopProduct } from '../types';
 import ProductCard from '../components/shop/ProductCard';
+import CartSidebar from '../components/shop/CartSidebar';
+import Pagination from '../components/shop/Pagination';
+import BioFertilizerOrderForm from '../components/shop/BioFertilizerOrderForm';
+import { subscribeToShopProducts, isProductInStock } from '../services/firebase/shopProductService';
+import { useCart } from '../hooks/useCart';
+import { useFertilizerOrderForm, FertilizerCheckoutData } from '../hooks/useFertilizerOrderForm';
 
 const ITEMS_PER_PAGE = 12;
 
-// --- MOCK DATA (Self-contained for canvas runnability) ---
-const mockShopProducts: ShopProduct[] = [
-  // Seeds (8 items)
-  { id: 1, name: 'Acacia Nilotica ', description: 'Vachellia nilotica seeds, commonly known as Babul or Indian Gum Arabic tree. Medium-sized thorny tree valued for traditional medicine, tannin extraction, and animal fodder. Drought-tolerant and suitable for arid regions.', price: 40, category: 'Seeds', inStock: true, imageIcon: '🌾', stock: '55.60 kg' },
-  { id: 2, name: 'Anthocephalus cadamba   ', description: 'Kadamba or Burflower tree seeds. Fast-growing tropical evergreen tree reaching 30-45 meters. Produces fragrant bright yellow-orange flowers in spherical clusters during monsoon. Excellent for reforestation and ornamental planting.', price: 60, category: 'Seeds', inStock: true, imageIcon: '🌳', stock: '0.70 kg' },
-  { id: 3, name: 'Buchanania Lanzan   ', description: 'Chironji seeds from the Buchanania lanzan tree, native to India. Medium-sized deciduous tree producing edible seeds used in Indian cuisine. Valued for its medicinal properties and quality timber.', price: 80, category: 'Seeds', inStock: true, imageIcon: '🌰', stock: '10.00 kg' },
-  { id: 4, name: 'Butea monosperma  ', description: 'Flame of the Forest seeds, also known as Palash. Medium-sized deciduous tree renowned for vibrant orange-red flowers that bloom in clusters, creating a flame-like appearance. Drought-resistant and ideal for dry regions.', price: 50, category: 'Seeds', inStock: true, imageIcon: '🌺', stock: '6.42 kg' },
-  { id: 5, name: 'Cassia fistula  ', description: 'Golden Shower tree seeds, also known as Amaltas. Medium-sized deciduous tree famous for cascading clusters of bright yellow flowers. Has significant medicinal value and is widely used as an ornamental tree.', price: 55, category: 'Seeds', inStock: true, imageIcon: '🌼', stock: '16.45 kg' },
-  { id: 6, name: 'Casuarina equisetifolia   ', description: 'Coastal She-Oak seeds, native to Southeast Asia and Australia. Fast-growing evergreen tree with needle-like foliage. Excellent for coastal afforestation, windbreaks, and erosion control due to salt tolerance.', price: 45, category: 'Seeds', inStock: true, imageIcon: '🌲', stock: '2.08 kg' },
-  { id: 7, name: 'Dalbergia Latifolia   ', description: 'Indian Rosewood seeds, also known as Sissoo. Large deciduous tree native to the Indian subcontinent. Premium hardwood valued for furniture, musical instruments, and construction. Produces durable and attractive timber.', price: 120, category: 'Seeds', inStock: true, imageIcon: '🌳', stock: '2.00 kg' },
-  { id: 8, name: 'Delonix regia   ', description: 'Gulmohar or Royal Poinciana seeds. Fast-growing deciduous tree native to Madagascar but widely cultivated in tropical regions. Famous for flamboyant display of bright red-orange flowers and fern-like leaves. Perfect ornamental tree for landscaping.', price: 65, category: 'Seeds', inStock: false, imageIcon: '🌺', stock: '0.00 kg' },
-
-  // Bio Fertilizers (6 items)
-  { id: 13, name: 'Vermicompost ', description: 'High-quality organic vermicompost produced using earthworms. Enhances soil structure, fertility, and microbial activity for optimal plant growth.', price: 15, category: 'Bio Fertilizers', inStock: true, imageIcon: '🐛', stock: 10 },
-  { id: 14, name: 'Vesicular Arbuscular Mycorrhizae', description: 'Beneficial mycorrhizal fungi that form symbiotic relationships with plant roots, improving nutrient and water absorption.', price: 22, category: 'Bio Fertilizers', inStock: true, imageIcon: '🍄', stock: 15 },
-  { id: 15, name: 'Azospirillum ', description: 'Premium nitrogen-fixing bacteria that enhance soil nitrogen levels naturally, reducing the need for chemical fertilizers.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🦠', stock: 10 },
-  { id: 16, name: 'Phosphobacteria ', description: 'Phosphate-solubilizing bacteria that convert insoluble phosphates into plant-available forms, promoting root development.', price: 34, category: 'Bio Fertilizers', inStock: true, imageIcon: '🔬', stock: 10 },
-  { id: 17, name: 'Pseudomonas sp. ', description: 'Beneficial bacteria that suppress soil-borne pathogens and root rot diseases, protecting plant health naturally.', price: 120, category: 'Bio', inStock: true, imageIcon: '🛡️', stock: 12 },
-  { id: 18, name: 'Trichoderma viride ', description: 'Beneficial fungus that acts as a biocontrol agent against harmful pathogens while promoting plant growth and root health.', price: 120, category: 'Bio', inStock: false, imageIcon: '🌱', stock: 13 },
-];
-// --- END MOCK DATA ---
-
-interface Location {
-  name: string;
-  address: string;
-  distance: string;
-}
-
-interface FormData {
-  name: string;
-  email: string;
-  phone: string;
-  selectedFertilizer: string;
-  quantity: string;
-  transportation: string;
-  address: string;
-}
-
 const Shop: React.FC = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const navigate = useNavigate();
+
+  // Products state from Firebase
+  const [products, setProducts] = useState<ShopProduct[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // UI state
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [showCart, setShowCart] = useState<boolean>(false);
-  
-  // Tab and pagination state
   const [activeTab, setActiveTab] = useState<'Seeds' | 'Bio Fertilizers'>('Seeds');
+
+  // Pagination state
   const [seedsPage, setSeedsPage] = useState<number>(1);
   const [bioFertilizersPage, setBioFertilizersPage] = useState<number>(1);
   const [searchPage, setSearchPage] = useState<number>(1);
 
-  // Form state for on-demand fertilizers
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    phone: '',
-    selectedFertilizer: '',
-    quantity: '',
-    transportation: '',
-    address: ''
-  });
-  const [showToast, setShowToast] = useState<boolean>(false);
-  const [nearestLocation, setNearestLocation] = useState<Location | null>(null);
-
-  // Mock locations (research centers)
-  const locations: Location[] = [
-    { name: 'Thoppur Modern Nursery Centre', address: 'Thoppur RF, Dharmapuri', distance: '5 km' },
-    { name: 'Harur Modern Nursery Centre', address: 'Harur RF, Dharmapuri', distance: '8 km' },
-    { name: 'Kalamavoor Modern Nursery Centre', address: 'Kalamavoor Patthai RF, Pudukottai', distance: '12 km' },
-    { name: 'Valkaradu Modern Nursery Centre', address: 'Valkaradu RF, Theni', distance: '15 km' },
-    { name: 'Alwarmalai Modern Nursery Centre', address: 'Alwarmalai RF, Villupuram', distance: '20 km' },
-  ];
-
-  // Refs for cart and cart button to detect outside clicks
-  const cartRef = useRef<HTMLDivElement>(null);
+  // Refs
   const cartButtonRef = useRef<HTMLButtonElement>(null);
 
-  // --- NEW: Outside Click Handler ---
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (showCart && 
-          cartRef.current && 
-          !cartRef.current.contains(event.target as Node) &&
-          cartButtonRef.current &&
-          !cartButtonRef.current.contains(event.target as Node)
-      ) {
-        setShowCart(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showCart]);
-  // --- END NEW: Outside Click Handler ---
+  // Custom hooks
+  const {
+    cart,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    getTotalPrice,
+    getCartItemCount,
+  } = useCart();
 
-  const filteredProducts = mockShopProducts.filter(product => {
-    const term = searchTerm.toLowerCase();
-    const matchesSearch = product.name.toLowerCase().includes(term) ||
-                          product.description.toLowerCase().includes(term);
-    return matchesSearch;
+  // Get available fertilizers (needs to be before hook call)
+  const availableFertilizers = products.filter(
+    (p) => p.category === 'Bio Fertilizers' && isProductInStock(p)
+  );
+
+  /**
+   * Handle fertilizer form checkout - adds to cart and navigates to checkout
+   */
+  const handleFertilizerCheckout = useCallback((data: FertilizerCheckoutData) => {
+    // Clear existing cart and add the fertilizer order
+    clearCart();
+    
+    // Add product to cart with specified quantity
+    // We need to add it multiple times or modify the cart item directly
+    const cartItem = {
+      ...data.product,
+      quantity: data.quantity,
+    };
+    
+    // Store the cart item directly in localStorage for checkout
+    localStorage.setItem('tnforest_shop_cart', JSON.stringify([cartItem]));
+    
+    // Navigate to checkout with pre-filled delivery details
+    navigate('/checkout', {
+      state: {
+        prefillData: {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          address: data.address,
+        },
+        fromFertilizerForm: true,
+      },
+    });
+  }, [clearCart, navigate]);
+
+  const fertilizerForm = useFertilizerOrderForm({
+    onCheckout: handleFertilizerCheckout,
+    availableFertilizers,
   });
 
-  const seedsSaplings = filteredProducts.filter(p => p.category === 'Seeds');
-  const bioFertilizers = filteredProducts.filter(p => p.category === 'Bio Fertilizers');
-  
-  // Combined search results
-  const combinedSearchResults = searchTerm ? [...seedsSaplings, ...bioFertilizers] : [];
-  
-  // Get available bio-fertilizers for the dropdown
-  const availableFertilizers = filteredProducts.filter(p => p.category === 'Bio');
+  // Subscribe to products from Firebase
+  useEffect(() => {
+    setIsLoading(true);
+    const unsubscribe = subscribeToShopProducts(
+      (fetchedProducts) => {
+        setProducts(fetchedProducts);
+        setIsLoading(false);
+        setError(null);
+      },
+      (err) => {
+        console.error('Error fetching products:', err);
+        setError('Failed to load products. Please try again later.');
+        setIsLoading(false);
+      }
+    );
 
-  // Pagination calculations
-  const getPaginatedProducts = (products: ShopProduct[], page: number): ShopProduct[] => {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return products.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  };
-
-  const getTotalPages = (products: ShopProduct[]): number => {
-    return Math.ceil(products.length / ITEMS_PER_PAGE);
-  };
+    return () => unsubscribe();
+  }, []);
 
   // Reset pagination when tab or search changes
   useEffect(() => {
@@ -132,102 +126,46 @@ const Shop: React.FC = () => {
     setSearchPage(1);
   }, [activeTab, searchTerm]);
 
-  const addToCart = (product: ShopProduct): void => {
-    const existingItem = cart.find(item => item.id === product.id);
-    if (existingItem) {
-      setCart(cart.map(item =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ));
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
-    }
+  // Filter products based on search term
+  const filteredProducts = products.filter((product) => {
+    const term = searchTerm.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(term) ||
+      product.description.toLowerCase().includes(term)
+    );
+  });
+
+  const seedsSaplings = filteredProducts.filter((p) => p.category === 'Seeds');
+  const bioFertilizers = filteredProducts.filter((p) => p.category === 'Bio Fertilizers');
+  const combinedSearchResults = searchTerm ? [...seedsSaplings, ...bioFertilizers] : [];
+
+  // Pagination helpers
+  const getPaginatedProducts = (productList: ShopProduct[], page: number): ShopProduct[] => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    return productList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   };
 
-  const removeFromCart = (productId: number): void => {
-    setCart(cart.filter(item => item.id !== productId));
-  };
-
-  const updateQuantity = (productId: number, newQuantity: number): void => {
-    if (newQuantity <= 0) {
-      removeFromCart(productId);
-    } else {
-      setCart(cart.map(item =>
-        item.id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
-      ));
-    }
-  };
-
-  const getTotalPrice = (): number => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-  };
-
-  const getCartItemCount = (): number => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
-  };
-
-  // Handle transportation option change
-  const handleTransportationChange = (value: string): void => {
-    setFormData({ ...formData, transportation: value, address: '' });
-    setNearestLocation(null);
-    
-    if (value === 'no') {
-      // Find nearest location (mock - just use first location)
-      setNearestLocation(locations[0]);
-    }
-  };
-
-  // Handle form submission
-  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    
-    // Validate form
-    if (!formData.name || !formData.email || !formData.phone || !formData.selectedFertilizer || !formData.quantity || !formData.transportation || !formData.address) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    // Show toast message
-    setShowToast(true);
-    
-    // Reset form after 5 seconds
-    setTimeout(() => {
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        selectedFertilizer: '',
-        quantity: '',
-        transportation: '',
-        address: ''
-      });
-      setNearestLocation(null);
-    }, 5000);
-    
-    // Hide toast after 5 seconds
-    setTimeout(() => {
-      setShowToast(false);
-    }, 5000);
+  const getTotalPages = (productList: ShopProduct[]): number => {
+    return Math.ceil(productList.length / ITEMS_PER_PAGE);
   };
 
   return (
     <div className="py-16 bg-gray-50 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+        {/* Header */}
         <div className="text-center mb-12">
-            <Leaf className="h-10 w-10 text-lime-600 mx-auto mb-3" />
-            <h1 className="text-4xl md:text-5xl font-extrabold text-green-900 mb-4">
-                Forest Products Research Supply
-            </h1>
-            <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                Discover high-quality saplings, seeds, and bio-fertilizers, genetically verified by our research centers, 
-                for sustainable cultivation and afforestation projects in India.
-            </p>
+          <Leaf className="h-10 w-10 text-lime-600 mx-auto mb-3" />
+          <h1 className="text-4xl md:text-5xl font-extrabold text-green-900 mb-4">
+            Forest Products Research Supply
+          </h1>
+          <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+            Discover high-quality saplings, seeds, and bio-fertilizers, genetically
+            verified by our research centers, for sustainable cultivation and
+            afforestation projects in India.
+          </p>
         </div>
 
+        {/* Search Bar */}
         <div className="bg-white rounded-xl shadow-xl p-5 mb-12 sticky top-20 z-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex-1 relative w-full md:w-auto">
@@ -240,556 +178,255 @@ const Shop: React.FC = () => {
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700"
               />
             </div>
-            
+
             <button
-                ref={cartButtonRef}
-                onClick={() => setShowCart(!showCart)}
-                className="relative bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow-lg w-full md:w-auto flex-shrink-0"
+              ref={cartButtonRef}
+              onClick={() => setShowCart(!showCart)}
+              className="relative bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow-lg w-full md:w-auto flex-shrink-0"
             >
-                <ShoppingCart className="h-5 w-5 mr-2" />
-                {showCart ? 'Hide Order' : 'View Order'}
-                {getCartItemCount() > 0 && (
-                    <span className="absolute -top-3 -right-3 bg-red-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold ring-2 ring-white">
-                    {getCartItemCount()}
-                    </span>
-                )}
+              <ShoppingCart className="h-5 w-5 mr-2" />
+              {showCart ? 'Hide Order' : 'View Order'}
+              {getCartItemCount() > 0 && (
+                <span className="absolute -top-3 -right-3 bg-red-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold ring-2 ring-white">
+                  {getCartItemCount()}
+                </span>
+              )}
             </button>
           </div>
         </div>
 
-        <div>
-          {searchTerm ? (
-            // Search Results View
-            combinedSearchResults.length > 0 ? (
-              <div>
-                <div className="mb-6">
-                  <h2 className="text-3xl font-bold text-green-900 mb-2 flex items-center">
-                    <Search className="h-7 w-7 mr-3 text-lime-600" />
-                    Search Results
-                  </h2>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-xl">
+            <Loader2 className="h-12 w-12 text-lime-600 animate-spin mb-4" />
+            <p className="text-gray-600 font-medium">Loading products...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <div className="text-center py-16 bg-white rounded-xl shadow-xl">
+            <div className="text-6xl mb-4">😕</div>
+            <h3 className="text-2xl font-bold text-red-600 mb-2">
+              Unable to Load Products
+            </h3>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-2 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {/* Products Display */}
+        {!isLoading && !error && (
+          <div>
+            {searchTerm ? (
+              // Search Results View
+              combinedSearchResults.length > 0 ? (
+                <div>
+                  <div className="mb-6">
+                    <h2 className="text-3xl font-bold text-green-900 mb-2 flex items-center">
+                      <Search className="h-7 w-7 mr-3 text-lime-600" />
+                      Search Results
+                    </h2>
+                    <p className="text-gray-600">
+                      Found {combinedSearchResults.length} product
+                      {combinedSearchResults.length !== 1 ? 's' : ''} matching "
+                      {searchTerm}"
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                    {getPaginatedProducts(combinedSearchResults, searchPage).map(
+                      (product) => (
+                        <ProductCard
+                          key={product.id}
+                          product={product}
+                          addToCart={addToCart}
+                        />
+                      )
+                    )}
+                  </div>
+
+                  <Pagination
+                    currentPage={searchPage}
+                    totalPages={getTotalPages(combinedSearchResults)}
+                    onPageChange={setSearchPage}
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-16 bg-white rounded-xl shadow-xl">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-2xl font-bold text-green-900 mb-2">
+                    No Products Match Your Search
+                  </h3>
                   <p className="text-gray-600">
-                    Found {combinedSearchResults.length} product{combinedSearchResults.length !== 1 ? 's' : ''} matching "{searchTerm}"
+                    Try a broader search term (e.g., 'tree', 'fertilizer') or check
+                    the Seeds and Bio Fertilizers sections.
                   </p>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                  {getPaginatedProducts(combinedSearchResults, searchPage).map((product) => (
-                    <ProductCard key={product.id} product={product} addToCart={addToCart} />
-                  ))}
+              )
+            ) : (
+              // Tabbed View
+              <div>
+                {/* Category Tabs */}
+                <div className="bg-white rounded-t-xl border-b border-gray-200 mb-0 flex">
+                  <button
+                    onClick={() => setActiveTab('Seeds')}
+                    className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
+                      activeTab === 'Seeds'
+                        ? 'text-green-700 bg-white'
+                        : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center">
+                      <Sprout
+                        className={`h-5 w-5 mr-2 ${
+                          activeTab === 'Seeds' ? 'text-lime-600' : 'text-gray-400'
+                        }`}
+                      />
+                      Seeds
+                      {seedsSaplings.length > 0 && (
+                        <span
+                          className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
+                            activeTab === 'Seeds'
+                              ? 'bg-lime-100 text-lime-800'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          {seedsSaplings.length}
+                        </span>
+                      )}
+                    </div>
+                    {activeTab === 'Seeds' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('Bio Fertilizers')}
+                    className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
+                      activeTab === 'Bio Fertilizers'
+                        ? 'text-green-700 bg-white'
+                        : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center">
+                      <FlaskConical
+                        className={`h-5 w-5 mr-2 ${
+                          activeTab === 'Bio Fertilizers'
+                            ? 'text-lime-600'
+                            : 'text-gray-400'
+                        }`}
+                      />
+                      Bio Fertilizers
+                      {bioFertilizers.length > 0 && (
+                        <span
+                          className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
+                            activeTab === 'Bio Fertilizers'
+                              ? 'bg-lime-100 text-lime-800'
+                              : 'bg-gray-200 text-gray-600'
+                          }`}
+                        >
+                          {bioFertilizers.length}
+                        </span>
+                      )}
+                    </div>
+                    {activeTab === 'Bio Fertilizers' && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
+                    )}
+                  </button>
                 </div>
 
-                {/* Search Results Pagination */}
-                {getTotalPages(combinedSearchResults) > 1 && (
-                  <div className="flex items-center justify-center gap-4 mt-8">
-                    <button
-                      onClick={() => setSearchPage(prev => Math.max(1, prev - 1))}
-                      disabled={searchPage === 1}
-                      className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
-                    >
-                      <ChevronLeft className="h-5 w-5 mr-1" />
-                      Previous
-                    </button>
-                    <span className="text-gray-700 font-medium">
-                      Page {searchPage} of {getTotalPages(combinedSearchResults)}
-                    </span>
-                    <button
-                      onClick={() => setSearchPage(prev => Math.min(getTotalPages(combinedSearchResults), prev + 1))}
-                      disabled={searchPage === getTotalPages(combinedSearchResults)}
-                      className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
-                    >
-                      Next
-                      <ChevronRight className="h-5 w-5 ml-1" />
-                    </button>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="text-center py-16 bg-white rounded-xl shadow-xl">
-                <div className="text-6xl mb-4">🔍</div>
-                <h3 className="text-2xl font-bold text-green-900 mb-2">
-                  No Products Match Your Search
-                </h3>
-                <p className="text-gray-600">
-                  Try a broader search term (e.g., 'tree', 'fertilizer') or check the Seeds and Bio Fertilizers sections.
-                </p>
-              </div>
-            )
-          ) : (
-            // Tabbed View
-            <div>
-              {/* Chrome-style Tabs */}
-              <div className="bg-white rounded-t-xl border-b border-gray-200 mb-0 flex">
-                <button
-                  onClick={() => setActiveTab('Seeds')}
-                  className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
-                    activeTab === 'Seeds'
-                      ? 'text-green-700 bg-white'
-                      : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center justify-center">
-                    <Sprout className={`h-5 w-5 mr-2 ${activeTab === 'Seeds' ? 'text-lime-600' : 'text-gray-400'}`} />
-                    Seeds
-                    {seedsSaplings.length > 0 && (
-                      <span className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
-                        activeTab === 'Seeds' ? 'bg-lime-100 text-lime-800' : 'bg-gray-200 text-gray-600'
-                      }`}>
-                        {seedsSaplings.length}
-                      </span>
-                    )}
-                  </div>
-                  {activeTab === 'Seeds' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('Bio Fertilizers')}
-                  className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
-                    activeTab === 'Bio Fertilizers'
-                      ? 'text-green-700 bg-white'
-                      : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-center justify-center">
-                    <FlaskConical className={`h-5 w-5 mr-2 ${activeTab === 'Bio Fertilizers' ? 'text-lime-600' : 'text-gray-400'}`} />
-                    Bio Fertilizers
-                    {bioFertilizers.length > 0 && (
-                      <span className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
-                        activeTab === 'Bio Fertilizers' ? 'bg-lime-100 text-lime-800' : 'bg-gray-200 text-gray-600'
-                      }`}>
-                        {bioFertilizers.length}
-                      </span>
-                    )}
-                  </div>
-                  {activeTab === 'Bio Fertilizers' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
-                  )}
-                </button>
-              </div>
-
-              {/* Tab Content */}
-              <div className="bg-white rounded-b-xl shadow-xl p-6 border-t-0">
-                {activeTab === 'Seeds' ? (
-                  seedsSaplings.length > 0 ? (
+                {/* Tab Content */}
+                <div className="bg-white rounded-b-xl shadow-xl p-6 border-t-0">
+                  {activeTab === 'Seeds' ? (
+                    seedsSaplings.length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+                          {getPaginatedProducts(seedsSaplings, seedsPage).map(
+                            (product) => (
+                              <ProductCard
+                                key={product.id}
+                                product={product}
+                                addToCart={addToCart}
+                              />
+                            )
+                          )}
+                        </div>
+                        <Pagination
+                          currentPage={seedsPage}
+                          totalPages={getTotalPages(seedsSaplings)}
+                          onPageChange={setSeedsPage}
+                        />
+                      </>
+                    ) : (
+                      <div className="text-center py-16">
+                        <Sprout className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-600">No seeds available at the moment.</p>
+                      </div>
+                    )
+                  ) : bioFertilizers.length > 0 ? (
                     <>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                        {getPaginatedProducts(seedsSaplings, seedsPage).map((product) => (
-                          <ProductCard key={product.id} product={product} addToCart={addToCart} />
-                        ))}
+                        {getPaginatedProducts(bioFertilizers, bioFertilizersPage).map(
+                          (product) => (
+                            <ProductCard
+                              key={product.id}
+                              product={product}
+                              addToCart={addToCart}
+                            />
+                          )
+                        )}
                       </div>
-                      {/* Seeds Pagination */}
-                      {getTotalPages(seedsSaplings) > 1 && (
-                        <div className="flex items-center justify-center gap-4 mt-8">
-                          <button
-                            onClick={() => setSeedsPage(prev => Math.max(1, prev - 1))}
-                            disabled={seedsPage === 1}
-                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
-                          >
-                            <ChevronLeft className="h-5 w-5 mr-1" />
-                            Previous
-                          </button>
-                          <span className="text-gray-700 font-medium">
-                            Page {seedsPage} of {getTotalPages(seedsSaplings)}
-                          </span>
-                          <button
-                            onClick={() => setSeedsPage(prev => Math.min(getTotalPages(seedsSaplings), prev + 1))}
-                            disabled={seedsPage === getTotalPages(seedsSaplings)}
-                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
-                          >
-                            Next
-                            <ChevronRight className="h-5 w-5 ml-1" />
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-16">
-                      <Sprout className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">No seeds available at the moment.</p>
-                    </div>
-                  )
-                ) : (
-                  bioFertilizers.length > 0 ? (
-                    <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                        {getPaginatedProducts(bioFertilizers, bioFertilizersPage).map((product) => (
-                          <ProductCard key={product.id} product={product} addToCart={addToCart} />
-                        ))}
-                      </div>
-                      {/* Bio Fertilizers Pagination */}
-                      {getTotalPages(bioFertilizers) > 1 && (
-                        <div className="flex items-center justify-center gap-4 mt-8">
-                          <button
-                            onClick={() => setBioFertilizersPage(prev => Math.max(1, prev - 1))}
-                            disabled={bioFertilizersPage === 1}
-                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
-                          >
-                            <ChevronLeft className="h-5 w-5 mr-1" />
-                            Previous
-                          </button>
-                          <span className="text-gray-700 font-medium">
-                            Page {bioFertilizersPage} of {getTotalPages(bioFertilizers)}
-                          </span>
-                          <button
-                            onClick={() => setBioFertilizersPage(prev => Math.min(getTotalPages(bioFertilizers), prev + 1))}
-                            disabled={bioFertilizersPage === getTotalPages(bioFertilizers)}
-                            className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
-                          >
-                            Next
-                            <ChevronRight className="h-5 w-5 ml-1" />
-                          </button>
-                        </div>
-                      )}
+                      <Pagination
+                        currentPage={bioFertilizersPage}
+                        totalPages={getTotalPages(bioFertilizers)}
+                        onPageChange={setBioFertilizersPage}
+                      />
                     </>
                   ) : (
                     <div className="text-center py-16">
                       <FlaskConical className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">No bio fertilizers available at the moment.</p>
+                      <p className="text-gray-600">
+                        No bio fertilizers available at the moment.
+                      </p>
                     </div>
-                  )
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {showCart && (
-          <div 
-            ref={cartRef}
-            className="fixed top-20 right-4 w-96 max-w-[calc(100vw-2rem)] z-50 animate-slideIn"
-          >
-            <div className="bg-white rounded-xl shadow-2xl p-6 border-t-4 border-lime-500 max-h-[calc(100vh-6rem)] overflow-hidden flex flex-col">
-              <h2 className="text-2xl font-bold text-green-900 mb-6 flex items-center border-b pb-4 border-gray-100">
-                <ShoppingCart className="h-6 w-6 mr-3 text-lime-600" />
-                Your Order ({getCartItemCount()})
-              </h2>
-
-              {cart.length === 0 ? (
-                <div className="text-center py-10 bg-green-50 rounded-lg">
-                  <Sprout className="h-10 w-10 text-green-500 mx-auto mb-4" />
-                  <p className="text-green-700 font-medium">Start your green journey by adding items!</p>
-                </div>
-              ) : (
-                <div className="space-y-4 flex-1 flex flex-col">
-                  <div className="flex-1 overflow-y-auto pr-2 space-y-3">
-                      {cart.map((item) => (
-                          <div key={item.id} className="border-b border-gray-100 pb-3 last:border-b-0">
-                              <div className="flex items-start justify-between mb-2">
-                                  <h4 className="font-semibold text-green-800 text-sm flex-1 pr-2 line-clamp-2">
-                                      {item.name}
-                                  </h4>
-                                  <button
-                                      onClick={() => removeFromCart(item.id)}
-                                      className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors flex-shrink-0"
-                                  >
-                                      <Trash2 className="h-4 w-4" />
-                                  </button>
-                              </div>
-                              <div className="flex items-center justify-between">
-                                  <div className="flex items-center space-x-2 bg-gray-100 p-1 rounded-lg">
-                                      <button
-                                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                                          className="w-6 h-6 rounded-md bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors disabled:opacity-50"
-                                          disabled={item.quantity === 1}
-                                      >
-                                          <Minus className="h-3 w-3 text-gray-700" />
-                                      </button>
-                                      <span className="text-sm font-bold text-green-900 w-4 text-center">{item.quantity}</span>
-                                      <button
-                                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                                          className="w-6 h-6 rounded-md bg-lime-500 flex items-center justify-center hover:bg-lime-600 transition-colors"
-                                      >
-                                          <Plus className="h-3 w-3 text-green-900" />
-                                      </button>
-                                  </div>
-                                  <span className="text-lg font-extrabold text-green-700">
-                                      ₹{item.price * item.quantity}
-                                  </span>
-                              </div>
-                          </div>
-                      ))}
-                  </div>
-
-                  <div className="border-t border-gray-200 pt-5 mt-5">
-                    <div className="flex justify-between items-center mb-5">
-                      <span className="text-xl font-semibold text-green-900">
-                        Order Total:
-                      </span>
-                      <span className="text-3xl font-extrabold text-lime-600">
-                        ₹{getTotalPrice()}
-                      </span>
-                    </div>
-                    <button className="w-full bg-lime-500 hover:bg-lime-600 text-green-900 py-3 rounded-lg font-bold transition-colors duration-300 shadow-md text-lg">
-                      Proceed to Checkout
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* On-Demand Fertilizer Order Form */}
-        <div className="mt-20 bg-white rounded-xl p-8 shadow-2xl border-t-4 border-lime-500">
-          <div className="text-center mb-8">
-            <FlaskConical className="h-12 w-12 text-lime-600 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold text-green-900 mb-2">
-              Order Bio-Fertilizers
-            </h2>
-            <p className="text-gray-600">
-              Place your order below for biofertilizers.
-            </p>
-          </div>
-
-          <form onSubmit={handleFormSubmit} className="space-y-6">
-            {/* Name Field */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-green-900 mb-2">
-                Full Name <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  id="name"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700"
-                  placeholder="Enter your full name"
-                />
-              </div>
-            </div>
-
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-green-900 mb-2">
-                Email Address <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700"
-                  placeholder="your.email@example.com"
-                />
-              </div>
-            </div>
-
-            {/* Phone Field */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-green-900 mb-2">
-                Phone Number <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="tel"
-                  id="phone"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700"
-                  placeholder="+91 9876543210"
-                />
-              </div>
-            </div>
-
-            {/* Fertilizer Selection */}
-            <div>
-              <label htmlFor="fertilizer" className="block text-sm font-semibold text-green-900 mb-2">
-                Select Bio-Fertilizer <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <FlaskConical className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
-                <select
-                  id="fertilizer"
-                  required
-                  value={formData.selectedFertilizer}
-                  onChange={(e) => setFormData({ ...formData, selectedFertilizer: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700 appearance-none bg-white"
-                >
-                  <option value="">-- Select a Bio-Fertilizer --</option>
-                  {availableFertilizers.map((fertilizer) => (
-                    <option key={fertilizer.id} value={fertilizer.id}>
-                      {fertilizer.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              {formData.selectedFertilizer && (
-                <p className="mt-2 text-sm text-gray-600">
-                  {availableFertilizers.find(f => f.id.toString() === formData.selectedFertilizer)?.description}
-                </p>
-              )}
-            </div>
-
-            {/* Quantity Field */}
-            <div>
-              <label htmlFor="quantity" className="block text-sm font-semibold text-green-900 mb-2">
-                Quantity <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  id="quantity"
-                  required
-                  value={formData.quantity}
-                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700"
-                  placeholder="Enter quantity (e.g., 50 kgs, 100 liters)"
-                />
-              </div>
-              <p className="mt-1 text-xs text-gray-500">Please specify the quantity you need (in kgs or liters)</p>
-            </div>
-
-            {/* Transportation Radio Buttons */}
-            <div>
-              <label className="block text-sm font-semibold text-green-900 mb-3">
-                Do you need transportation? <span className="text-red-500">*</span>
-              </label>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-green-50 border-gray-200 hover:border-lime-500">
-                  <input
-                    type="radio"
-                    name="transportation"
-                    value="yes"
-                    checked={formData.transportation === 'yes'}
-                    onChange={(e) => handleTransportationChange(e.target.value)}
-                    className="mr-3 h-5 w-5 text-lime-600 focus:ring-lime-500"
-                    required
-                  />
-                  <Truck className="h-5 w-5 mr-2 text-green-700" />
-                  <span className="font-medium text-green-900">Yes, deliver to my address</span>
-                </label>
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:bg-green-50 border-gray-200 hover:border-lime-500">
-                  <input
-                    type="radio"
-                    name="transportation"
-                    value="no"
-                    checked={formData.transportation === 'no'}
-                    onChange={(e) => handleTransportationChange(e.target.value)}
-                    className="mr-3 h-5 w-5 text-lime-600 focus:ring-lime-500"
-                    required
-                  />
-                  <MapPin className="h-5 w-5 mr-2 text-green-700" />
-                  <span className="font-medium text-green-900">No, I'll pick it up</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Address Field */}
-            {formData.transportation && (
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="address" className="block text-sm font-semibold text-green-900 mb-2">
-                    {formData.transportation === 'yes' ? 'Delivery Address' : 'Your Address (for finding nearest location)'} <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    id="address"
-                    required
-                    value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700 resize-none"
-                    rows={3}
-                    placeholder={formData.transportation === 'yes' ? 'Enter your complete delivery address' : 'Enter your address to find the nearest pickup location'}
-                  />
-                </div>
-
-                {/* Nearest Location for Pickup */}
-                {formData.address && formData.transportation === 'no' && nearestLocation && (
-                  <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                    <div className="flex items-center mb-2">
-                      <MapPin className="h-5 w-5 text-blue-600 mr-2" />
-                      <span className="font-semibold text-green-900">Nearest Pickup Location:</span>
-                    </div>
-                    <p className="text-lg font-bold text-blue-800 mb-1">{nearestLocation?.name}</p>
-                    <p className="text-sm text-gray-600 mb-2">{nearestLocation?.address}</p>
-                    <p className="text-sm text-gray-600">Distance: Approximately {nearestLocation?.distance}</p>
-                  </div>
-                )}
-                
-                {/* Delivery Confirmation */}
-                {formData.address && formData.transportation === 'yes' && (
-                  <div className="p-4 rounded-lg bg-lime-50 border border-lime-200">
-                    <p className="text-sm text-gray-700">
-                      <strong className="text-green-900">Delivery will be arranged</strong> upon order confirmation. Our team will contact you to finalize delivery details and pricing.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Order Summary */}
-            {formData.selectedFertilizer && formData.quantity && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-900 mb-3">Order Summary</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Product:</span>
-                    <span className="font-medium text-green-900">
-                      {availableFertilizers.find(f => f.id.toString() === formData.selectedFertilizer)?.name}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">Quantity:</span>
-                    <span className="font-medium text-green-900">{formData.quantity}</span>
-                  </div>
-                  <div className="pt-2 mt-2 border-t border-green-200">
-                    <p className="text-xs text-gray-600 italic">
-                      Pricing will be provided by our team after reviewing your order requirements.
-                    </p>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
-
-            {/* Submit Button */}
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={!formData.name || !formData.email || !formData.phone || !formData.selectedFertilizer || !formData.quantity || !formData.transportation || !formData.address}
-                className={`w-full py-4 px-6 rounded-lg font-bold text-lg transition-colors duration-300 shadow-lg ${
-                  formData.name && formData.email && formData.phone && formData.selectedFertilizer && formData.quantity && formData.transportation && formData.address
-                    ? 'bg-lime-500 hover:bg-lime-600 text-green-900'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                Place Order
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Toast Notification */}
-        {showToast && (
-          <div className="fixed bottom-6 right-6 bg-green-600 text-white p-6 rounded-xl shadow-2xl z-50 max-w-md animate-slideUp border-l-4 border-lime-400">
-            <div className="flex items-start">
-              <CheckCircle className="h-6 w-6 mr-3 flex-shrink-0 mt-1" />
-              <div className="flex-1">
-                <h3 className="font-bold text-lg mb-1">Order Received Successfully!</h3>
-                <p className="text-green-50 mb-2">
-                  Thank you for your order. Our team has received your request and will be contacting you soon to discuss pricing and delivery details.
-                </p>
-                <p className="text-green-50 text-sm">
-                  We'll reach out to you at <strong>{formData.email}</strong> or <strong>{formData.phone}</strong> within 2-3 business days.
-                </p>
-              </div>
-              <button
-                onClick={() => setShowToast(false)}
-                className="ml-4 text-white hover:text-green-200 transition-colors"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
           </div>
         )}
 
+        {/* Cart Sidebar */}
+        <CartSidebar
+          cart={cart}
+          isOpen={showCart}
+          onClose={() => setShowCart(false)}
+          cartButtonRef={cartButtonRef}
+          removeFromCart={removeFromCart}
+          updateQuantity={updateQuantity}
+          getTotalPrice={getTotalPrice}
+          getCartItemCount={getCartItemCount}
+        />
+
+        {/* Bio Fertilizer Order Form */}
+        <BioFertilizerOrderForm
+          formData={fertilizerForm.formData}
+          showToast={fertilizerForm.showToast}
+          nearestLocation={fertilizerForm.nearestLocation}
+          availableFertilizers={availableFertilizers}
+          updateFormField={fertilizerForm.updateFormField}
+          handleTransportationChange={fertilizerForm.handleTransportationChange}
+          handleSubmit={fertilizerForm.handleSubmit}
+          closeToast={fertilizerForm.closeToast}
+          isFormValid={fertilizerForm.isFormValid}
+        />
+
+        {/* Quality Commitment Section */}
         <div className="mt-20 bg-green-900 rounded-xl p-10 shadow-2xl">
           <h2 className="text-3xl font-bold text-lime-400 mb-8 text-center">
             Our Commitment to Quality
@@ -799,33 +436,30 @@ const Shop: React.FC = () => {
               <div className="w-16 h-16 bg-lime-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
                 <Star className="h-8 w-8 text-green-900" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">
-                Genetic Purity
-              </h3>
+              <h3 className="text-xl font-semibold mb-2">Genetic Purity</h3>
               <p className="text-green-200 text-sm">
-                All seeds, saplings, and bio-fertilizers are verified for superior quality and traceability by our accredited labs.
+                All seeds, saplings, and bio-fertilizers are verified for superior
+                quality and traceability by our accredited labs.
               </p>
             </div>
             <div className="text-center p-4 rounded-lg bg-green-800 border border-green-700">
               <div className="w-16 h-16 bg-lime-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
                 <ShoppingCart className="h-8 w-8 text-green-900" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">
-                Direct from Research
-              </h3>
+              <h3 className="text-xl font-semibold mb-2">Direct from Research</h3>
               <p className="text-green-200 text-sm">
-                Purchases directly fund ongoing forestry research, conservation efforts, and climate mitigation studies.
+                Purchases directly fund ongoing forestry research, conservation
+                efforts, and climate mitigation studies.
               </p>
             </div>
             <div className="text-center p-4 rounded-lg bg-green-800 border border-green-700">
               <div className="w-16 h-16 bg-lime-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
                 <Leaf className="h-8 w-8 text-green-900" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">
-                Expert Guidance
-              </h3>
+              <h3 className="text-xl font-semibold mb-2">Expert Guidance</h3>
               <p className="text-green-200 text-sm">
-                Gain exclusive access to planting protocols and long-term support from our experienced forestry scientists.
+                Gain exclusive access to planting protocols and long-term support
+                from our experienced forestry scientists.
               </p>
             </div>
           </div>
@@ -836,4 +470,3 @@ const Shop: React.FC = () => {
 };
 
 export default Shop;
-

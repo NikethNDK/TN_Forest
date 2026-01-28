@@ -1,6 +1,6 @@
 // Mock data for the Tamil Nadu Forest Department Research Wing
 import experimentsData from './experimentsData.json';
-import type { Division, ShopProduct, Experiment } from '../types';
+import type { Division, Experiment } from '../types';
 
 // Type the experiments data
 interface ExperimentsData {
@@ -148,61 +148,3 @@ export const divisions: Division[] = [
     slug: "agro-forestry"
   }
 ];
-
-export const shopProducts: ShopProduct[] = [
-  {
-    id: 1,
-    name: "Forest Tree Saplings",
-    price: 25,
-    image: "/images/teak-sapling.jpg",
-    description: "High-quality teak saplings for reforestation",
-    category: "Saplings",
-    inStock: true
-  },
-  {
-    id: 2,
-    name: "Medicinal Plant Seeds",
-    price: 15,
-    image: "/images/medicinal-seeds.jpg",
-    description: "Collection of traditional medicinal plant seeds",
-    category: "Seeds",
-    inStock: true
-  },
-  {
-    id: 3,
-    name: "Forest Honey",
-    price: 45,
-    image: "/images/forest-honey.jpg",
-    description: "Pure forest honey from wild bees",
-    category: "Products",
-    inStock: true
-  },
-  {
-    id: 4,
-    name: "Bamboo Products",
-    price: 35,
-    image: "/images/bamboo-products.jpg",
-    description: "Eco-friendly bamboo crafts and products",
-    category: "Crafts",
-    inStock: true
-  },
-  {
-    id: 5,
-    name: "Forest Research Publications",
-    price: 20,
-    image: "/images/publications.jpg",
-    description: "Research papers and publications on forest science",
-    category: "Publications",
-    inStock: true
-  },
-  {
-    id: 6,
-    name: "Conservation Tools Kit",
-    price: 85,
-    image: "/images/conservation-kit.jpg",
-    description: "Essential tools for forest conservation work",
-    category: "Tools",
-    inStock: false
-  }
-];
-

@@ -12,6 +12,7 @@ import ContactUs from './pages/ContactUs';
 import Divisions from './pages/Divisions';
 import ModernNurseryDivision from './pages/ModernNurseryDivision';
 import Shop from './pages/Shop';
+import Checkout from './pages/Checkout';
 import AdminLayout from './pages/admin/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminHome from './pages/admin/AdminHome';
@@ -70,6 +71,7 @@ const App: React.FC = () => {
                 <Route path="/divisions/industrial-wood" element={<IndustrialWoodResearchDivision />} />
                 <Route path="/divisions/agro-forestry" element={<AgroForestryResearchDivision />} />
                 <Route path="/shop" element={<Shop />} />
+                <Route path="/checkout" element={<Checkout />} />
               </Routes>
             </Layout>
           } />

@@ -73,19 +73,23 @@ export interface Division {
 
 // Shop Product type
 export interface ShopProduct {
-  id: number;
+  id?: string; // Firestore document ID
   name: string;
-  price: number;
-  image?: string;
   description: string;
-  category: string;
-  inStock: boolean;
-  imageIcon?: string;
-  stock?: string | number;
+  price: number;
+  category: 'Seeds' | 'Bio Fertilizers';
+  stock: number; // Quantity available (0 = out of stock)
+  unit: string; // "packets", "kg", "liters", etc.
+  imageUrl?: string; // Cloudinary URL
+  imagePublicId?: string; // Cloudinary public ID for deletion
+  imageIcon?: string; // Emoji fallback
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
 }
 
 // Cart Item type (extends ShopProduct with quantity)
 export interface CartItem extends ShopProduct {
+  id: string; // Required for cart items (Firestore document ID)
   quantity: number;
 }
 
@@ -234,3 +238,43 @@ export interface GalleryImage {
   updatedAt?: any; // Firestore Timestamp
 }
 
+// Pickup Location type for Shop
+export interface PickupLocation {
+  name: string;
+  address: string;
+  distance: string;
+}
+
+// Fertilizer Order Form type
+export interface FertilizerOrderFormData {
+  name: string;
+  email: string;
+  phone: string;
+  selectedFertilizer: string;
+  quantity: string;
+  transportation: string;
+  address: string;
+}
+
+// Checkout Delivery Details type
+export interface CheckoutDeliveryDetails {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
+// Checkout Order type (for storing in Firebase)
+export interface CheckoutOrder {
+  id?: string;
+  items: CartItem[];
+  totalAmount: number;
+  deliveryDetails: CheckoutDeliveryDetails;
+  transactionId: string;
+  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  createdAt?: any;
+  updatedAt?: any;
+}
