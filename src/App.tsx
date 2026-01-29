@@ -24,6 +24,7 @@ import AdminContact from './pages/admin/AdminContact';
 import AdminDivision from './pages/admin/AdminDivision';
 import AdminResearchCenter from './pages/admin/AdminResearchCenter';
 import AdminLogin from './pages/admin/AdminLogin';
+import AdminOrderDetail from './pages/admin/AdminOrderDetail';
 import StateForestResearchDivision from './pages/StateForestResearchDivision';
 import ForestGeneticsDivision from './pages/ForestGeneticsDivision';
 import IndustrialWoodResearchDivision from './pages/IndustrialWoodResearchDivision';
@@ -50,6 +51,7 @@ const App: React.FC = () => {
             <Route path="contact" element={<AdminContact />} />
             <Route path="divisions/:divisionSlug" element={<AdminDivision />} />
             <Route path="divisions/:divisionSlug/centers/:centerId" element={<AdminResearchCenter />} />
+            <Route path="orders/:orderId" element={<AdminOrderDetail />} />
           </Route>
           
           {/* Public Routes */}

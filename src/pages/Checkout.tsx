@@ -22,6 +22,7 @@ import {
 import type { CheckoutDeliveryDetails } from '../types';
 import { useCart } from '../hooks/useCart';
 import { sendOrderEmailToAdmin } from '../services/emailService';
+import { createOrder } from '../services/firebase/orderService';
 
 // ============ VALIDATION & SANITIZATION UTILITIES ============
 
@@ -342,6 +343,19 @@ const Checkout: React.FC = () => {
       };
 
       const sanitizedTransactionId = transactionId.replace(/[^a-zA-Z0-9\-]/g, '').slice(0, 30);
+
+      // Save order to Firestore
+      try {
+        await createOrder(newOrderId, {
+          items: cart,
+          totalAmount,
+          deliveryDetails: sanitizedDeliveryDetails,
+          transactionId: sanitizedTransactionId,
+        });
+      } catch (orderError) {
+        console.warn('Failed to save order to database:', orderError);
+        // Continue with email even if database save fails
+      }
 
       // Send email notification to admin
       const emailResult = await sendOrderEmailToAdmin({

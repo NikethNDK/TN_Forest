@@ -274,7 +274,7 @@ export interface CheckoutOrder {
   totalAmount: number;
   deliveryDetails: CheckoutDeliveryDetails;
   transactionId: string;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'accepted' | 'declined' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   createdAt?: any;
   updatedAt?: any;
 }
