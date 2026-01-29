@@ -38,7 +38,6 @@ const GalleryUploadModal: React.FC<GalleryUploadModalProps> = ({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [titles, setTitles] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
-  const [attempted, setAttempted] = useState(false);
 
   // Determine which image list to use based on mode
   const imageList = mode === 'edit' ? existingImages : images;
@@ -53,7 +52,6 @@ const GalleryUploadModal: React.FC<GalleryUploadModalProps> = ({
       setTitles(initialTitles);
       setCurrentIndex(0);
       setError(null);
-      setAttempted(false);
     }
   }, [isOpen, imageList]);
 
@@ -95,13 +93,7 @@ const GalleryUploadModal: React.FC<GalleryUploadModalProps> = ({
     }
   };
 
-  const validateTitle = (title: string): boolean => {
-    return title.trim().length > 0;
-  };
-
-  const getMissingTitlesCount = (): number => {
-    return imageList.filter(img => !validateTitle(titles[img.id] || '')).length;
-  };
+  // Title is now optional - no validation required
 
   const handlePrevious = () => {
     setCurrentIndex(prev => (prev > 0 ? prev - 1 : imageList.length - 1));
@@ -112,30 +104,17 @@ const GalleryUploadModal: React.FC<GalleryUploadModalProps> = ({
   };
 
   const handleSubmit = () => {
-    setAttempted(true);
-    const missingCount = getMissingTitlesCount();
-    
-    if (missingCount > 0) {
-      const action = mode === 'edit' ? 'saving' : 'uploading';
-      setError(
-        missingCount === 1
-          ? `Please add a title to the image before ${action}`
-          : `Please add titles to all ${missingCount} images before ${action}`
-      );
-      return;
-    }
-
-    // All titles valid, prepare images with titles
+    // Title is optional - prepare images with titles (empty string if not provided)
     if (mode === 'edit') {
       const updatedImages = existingImages.map(img => ({
         ...img,
-        title: titles[img.id].trim()
+        title: (titles[img.id] || '').trim()
       }));
       onConfirm(updatedImages);
     } else {
       const imagesWithTitles = images.map(img => ({
         ...img,
-        title: titles[img.id].trim()
+        title: (titles[img.id] || '').trim()
       }));
       onConfirm(imagesWithTitles);
     }
@@ -146,8 +125,6 @@ const GalleryUploadModal: React.FC<GalleryUploadModalProps> = ({
   };
 
   const currentTitle = titles[currentImage.id] || '';
-  const isCurrentTitleEmpty = !validateTitle(currentTitle);
-  const showFieldError = attempted && isCurrentTitleEmpty;
 
   // Dynamic text based on mode
   const modalTitle = mode === 'edit'
@@ -228,27 +205,18 @@ const GalleryUploadModal: React.FC<GalleryUploadModalProps> = ({
           {/* Title Input */}
           <div className="space-y-2">
             <label htmlFor="image-title" className="block text-sm font-medium text-gray-700">
-              Image Title <span className="text-red-500">*</span>
+              Image Title <span className="text-gray-400 text-xs">(optional)</span>
             </label>
             <input
               id="image-title"
               type="text"
               value={currentTitle}
               onChange={(e) => handleTitleChange(e.target.value)}
-              placeholder="Enter a title for this image"
+              placeholder="Enter a title for this image (optional)"
               maxLength={MAX_TITLE_LENGTH}
-              className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-colors ${
-                showFieldError
-                  ? 'border-red-400 focus:ring-red-200 focus:border-red-500'
-                  : 'border-gray-300 focus:ring-green-200 focus:border-green-500'
-              }`}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-500 transition-colors"
             />
-            <div className="flex justify-between text-xs text-gray-500">
-              <span>
-                {showFieldError && (
-                  <span className="text-red-500">Title is required</span>
-                )}
-              </span>
+            <div className="flex justify-end text-xs text-gray-500">
               <span>{currentTitle.length}/{MAX_TITLE_LENGTH}</span>
             </div>
           </div>

@@ -32,9 +32,9 @@ export const validateImageFile = (file: File): { valid: boolean; error?: string 
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
     return { valid: false, error: 'Invalid file type. Please upload JPG, PNG, or WebP images.' };
   }
-  if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, error: 'File size too large. Maximum size is 10MB.' };
-  }
+  // if (file.size > MAX_FILE_SIZE) {
+  //   return { valid: false, error: 'File size too large. Maximum size is 10MB.' };
+  // }
   return { valid: true };
 };
 
@@ -42,9 +42,9 @@ export const validatePDFFile = (file: File): { valid: boolean; error?: string } 
   if (!ALLOWED_PDF_TYPES.includes(file.type)) {
     return { valid: false, error: 'Invalid file type. Please upload PDF files only.' };
   }
-  if (file.size > MAX_FILE_SIZE) {
-    return { valid: false, error: 'File size too large. Maximum size is 10MB.' };
-  }
+  // if (file.size > MAX_FILE_SIZE) {
+  //   return { valid: false, error: 'File size too large. Maximum size is 10MB.' };
+  // }
   return { valid: true };
 };
 

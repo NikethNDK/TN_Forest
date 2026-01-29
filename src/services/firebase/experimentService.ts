@@ -240,21 +240,27 @@ export const addExperiment = async (
       EXPERIMENTS_SUBCOLLECTION
     );
     const trimmedPdfUrl = experiment.pdfUrl?.trim();
-    const newExperiment = {
+    const newExperiment: Record<string, unknown> = {
       title: experiment.title.trim(),
       year: experiment.year || new Date().getFullYear(),
       description: experiment.description?.trim() || '',
-      pdfUrl: trimmedPdfUrl || undefined,
       pdfPublicId: experiment.pdfPublicId?.trim() || '',
       imageUrl: experiment.imageUrl?.trim() || '',
       imagePublicId: experiment.imagePublicId?.trim() || '',
-      type: experiment.type || undefined,
       startDate: experiment.startDate || '',
       endDate: experiment.endDate || '',
       status: experiment.status || '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     };
+    
+    // Only add optional fields if they have values (Firestore doesn't accept undefined)
+    if (trimmedPdfUrl) {
+      newExperiment.pdfUrl = trimmedPdfUrl;
+    }
+    if (experiment.type) {
+      newExperiment.type = experiment.type;
+    }
     
     const docRef = await addDoc(experimentsRef, newExperiment);
     return docRef.id;
@@ -305,7 +311,8 @@ export const updateExperiment = async (
     }
     if (updates.pdfUrl !== undefined) {
       const trimmedPdfUrl = updates.pdfUrl.trim();
-      updateData.pdfUrl = trimmedPdfUrl || undefined;
+      // Only set pdfUrl if it has a value, use empty string to clear it
+      updateData.pdfUrl = trimmedPdfUrl || '';
     }
     if (updates.pdfPublicId !== undefined) {
       updateData.pdfPublicId = updates.pdfPublicId.trim() || '';
