@@ -21,7 +21,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import type { SliderImage } from '../../types';
-import { deleteImageFromCloudinary } from '../admin/fileUploadService';
+import { deleteFileFromStorage } from './storageService';
 
 const SLIDER_IMAGES_COLLECTION = 'sliderImages';
 
@@ -141,24 +141,34 @@ export const updateSliderImage = async (
 
 /**
  * Delete a slider image
- * Also attempts to delete from Cloudinary, but keeps in Firestore if Cloudinary delete fails
- * Returns result indicating if Cloudinary deletion succeeded
+ * Automatically detects storage provider (Cloudinary or Firebase Storage) from URL
+ * Keeps in Firestore if storage delete fails
+ * Returns result indicating if storage deletion succeeded
  */
-export const deleteSliderImage = async (id: string, publicId: string): Promise<{ cloudinaryDeleted: boolean; error?: string }> => {
+export const deleteSliderImage = async (id: string, publicId: string, url?: string): Promise<{ storageDeleted: boolean; error?: string }> => {
   try {
-    // Try to delete from Cloudinary first
-    const cloudinaryResult = await deleteImageFromCloudinary(publicId);
-    
-    if (!cloudinaryResult.success) {
-      console.warn('Failed to delete image from Cloudinary:', cloudinaryResult.error);
-      // Per user preference: keep in Firestore if Cloudinary delete fails
-      return {
-        cloudinaryDeleted: false,
-        error: cloudinaryResult.error
-      };
+    // Get URL if not provided
+    let imageUrl = url;
+    if (!imageUrl) {
+      const image = await getSliderImageById(id);
+      imageUrl = image?.url;
     }
     
-    // Delete from Firestore only if Cloudinary deletion succeeded
+    // Try to delete from storage (automatically detects Cloudinary vs Firebase Storage)
+    if (imageUrl) {
+      const deleteResult = await deleteFileFromStorage(imageUrl, publicId);
+      
+      if (!deleteResult.success) {
+        console.warn('Failed to delete image from storage:', deleteResult.error);
+        // Per user preference: keep in Firestore if storage delete fails
+        return {
+          storageDeleted: false,
+          error: deleteResult.error
+        };
+      }
+    }
+    
+    // Delete from Firestore only if storage deletion succeeded
     const imageRef = doc(db, SLIDER_IMAGES_COLLECTION, id);
     await deleteDoc(imageRef);
     
@@ -168,7 +178,7 @@ export const deleteSliderImage = async (id: string, publicId: string): Promise<{
       await reorderSliderImages(remainingImages);
     }
     
-    return { cloudinaryDeleted: true };
+    return { storageDeleted: true };
   } catch (error) {
     console.error('Error deleting slider image:', error);
     throw new Error('Failed to delete slider image');

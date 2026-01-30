@@ -21,7 +21,7 @@ import {
   FirestoreError
 } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { deleteCloudinaryImage } from '../../config/firebase';
+import { deleteFileFromStorage } from './storageService';
 import type { Experiment } from '../../types';
 
 const DIVISIONS_COLLECTION = 'divisions';
@@ -352,14 +352,16 @@ export const updateExperiment = async (
 
 /**
  * Delete an experiment
- * Optionally deletes the associated PDF and/or image from Cloudinary
+ * Automatically detects storage provider from URLs and deletes files accordingly
  */
 export const deleteExperiment = async (
   divisionId: string,
   centerId: string,
   experimentId: string,
   pdfPublicId?: string,
-  imagePublicId?: string
+  imagePublicId?: string,
+  pdfUrl?: string,
+  imageUrl?: string
 ): Promise<void> => {
   try {
     const experimentRef = doc(
@@ -372,22 +374,30 @@ export const deleteExperiment = async (
       experimentId
     );
     
-    // Delete PDF from Cloudinary if publicId is provided
-    if (pdfPublicId) {
+    // Get experiment to get URLs if not provided
+    let experiment: Experiment | null = null;
+    if (!pdfUrl || !imageUrl) {
+      experiment = await getExperiment(divisionId, centerId, experimentId);
+    }
+    
+    // Delete PDF from storage if URL is available
+    const pdfUrlToDelete = pdfUrl || experiment?.pdfUrl;
+    if (pdfUrlToDelete) {
       try {
-        await deleteCloudinaryImage({ publicId: pdfPublicId });
+        await deleteFileFromStorage(pdfUrlToDelete, pdfPublicId);
       } catch (pdfError) {
-        console.warn('Failed to delete PDF from Cloudinary:', pdfError);
+        console.warn('Failed to delete PDF from storage:', pdfError);
         // Continue with document deletion even if PDF deletion fails
       }
     }
     
-    // Delete image from Cloudinary if publicId is provided
-    if (imagePublicId) {
+    // Delete image from storage if URL is available
+    const imageUrlToDelete = imageUrl || experiment?.imageUrl;
+    if (imageUrlToDelete) {
       try {
-        await deleteCloudinaryImage({ publicId: imagePublicId });
+        await deleteFileFromStorage(imageUrlToDelete, imagePublicId);
       } catch (imageError) {
-        console.warn('Failed to delete image from Cloudinary:', imageError);
+        console.warn('Failed to delete image from storage:', imageError);
         // Continue with document deletion even if image deletion fails
       }
     }

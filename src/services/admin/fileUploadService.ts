@@ -1,27 +1,31 @@
 /**
  * File Upload Service
  * 
- * Handles secure file uploads to Cloudinary using Firebase Cloud Functions
- * for signature generation. This ensures the API secret is never exposed
- * to the client.
+ * Handles secure file uploads to Firebase Storage.
+ * Legacy support for Cloudinary deletions is maintained for existing files.
  * 
- * Supports both signed (via Firebase Functions) and unsigned (direct) uploads
- * based on the VITE_USE_UNSIGNED_UPLOAD environment variable.
+ * NEW UPLOADS: Go to Firebase Storage
+ * DELETIONS: Supports both Firebase Storage and Cloudinary (based on URL)
  */
 
-import { generateUploadSignature } from '../../config/firebase';
-import { cloudinaryConfig, CLOUDINARY_UPLOAD_URL } from '../../config/cloudinary';
+import { cloudinaryConfig } from '../../config/cloudinary';
 import { getIdToken } from '../firebase/authService';
 import { compressImage, shouldCompress, formatFileSize, CompressionResult } from '../imageCompressionService';
+import { 
+  uploadImageToFirebaseStorage, 
+  uploadPdfToFirebaseStorage,
+  UploadProgress 
+} from '../firebase/storageService';
 
-// Feature flag: Use unsigned uploads (direct to Cloudinary) when true
+// Feature flag for Cloudinary deletion method (keep for legacy file deletion)
 const USE_UNSIGNED_UPLOAD = import.meta.env.VITE_USE_UNSIGNED_UPLOAD === 'true';
-const UNSIGNED_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UNSIGNED_PRESET as string;
 
 export interface UploadResult {
   success: boolean;
-  path?: string; // Cloudinary secure URL
-  publicId?: string; // Cloudinary public ID for future reference
+  path?: string; // Download URL (Firebase Storage or Cloudinary)
+  publicId?: string; // Cloudinary public ID (legacy) or Firebase Storage path
+  storagePath?: string; // Firebase Storage full path for deletion
+  storageProvider?: 'firebase' | 'cloudinary'; // Which storage was used
   error?: string;
   // Compression info (for images)
   originalSize?: number;
@@ -59,96 +63,6 @@ export const validatePDFFile = (file: File): { valid: boolean; error?: string } 
 };
 
 /**
- * Helper: Upload file to Cloudinary via XHR with progress tracking
- */
-const uploadToCloudinary = (
-  uploadUrl: string,
-  formData: FormData,
-  onProgress?: (progress: number) => void
-): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    if (onProgress) {
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          onProgress(progress);
-        }
-      };
-    }
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const response = JSON.parse(xhr.responseText);
-          resolve(response);
-        } catch (error) {
-          reject(new Error('Failed to parse upload response'));
-        }
-      } else {
-        try {
-          const errorData = JSON.parse(xhr.responseText);
-          reject(new Error(errorData.error?.message || 'Failed to upload file to Cloudinary.'));
-        } catch {
-          reject(new Error('Failed to upload file to Cloudinary.'));
-        }
-      }
-    };
-
-    xhr.onerror = () => {
-      reject(new Error('Network error during upload'));
-    };
-
-    xhr.open('POST', uploadUrl);
-    xhr.send(formData);
-  });
-};
-
-/**
- * Helper: Prepare FormData for signed upload
- */
-const prepareSignedFormData = (
-  file: File,
-  signature: string,
-  timestamp: number,
-  folder?: string
-): FormData => {
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('api_key', cloudinaryConfig.apiKey);
-  formData.append('timestamp', timestamp.toString());
-  formData.append('signature', signature);
-  
-  if (folder) {
-    formData.append('folder', folder);
-  }
-  
-  return formData;
-};
-
-/**
- * Helper: Prepare FormData for unsigned upload
- */
-const prepareUnsignedFormData = (
-  file: File,
-  folder?: string
-): FormData => {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  if (UNSIGNED_UPLOAD_PRESET) {
-    formData.append('upload_preset', UNSIGNED_UPLOAD_PRESET);
-  }
-  
-  if (folder) {
-    formData.append('folder', folder);
-  }
-  
-  return formData;
-};
-
-/**
  * Helper: Generate Cloudinary signature for API calls
  * TEMPORARY: Used for direct deletion when Firebase Functions are disabled
  * Uses SHA-1 hashing as required by Cloudinary
@@ -177,11 +91,10 @@ const generateCloudinarySignature = async (
 };
 
 /**
- * Upload image file to Cloudinary with automatic compression
- * Supports both signed (Firebase Functions) and unsigned (direct) uploads
+ * Upload image file to Firebase Storage with automatic compression
  * 
  * @param file - The image file to upload
- * @param directory - Cloudinary folder path
+ * @param directory - Storage folder path
  * @param onProgress - Simple progress callback (0-100) - legacy support
  * @param onProgressWithPhase - Detailed progress callback with phase info
  */
@@ -231,49 +144,17 @@ export const uploadImageFile = async (
     }
   }
 
-  // Step 2: Upload to Cloudinary
-  const handleUploadProgress = (progress: number) => {
-    onProgressWithPhase?.({ phase: 'uploading', progress });
-    // For legacy callback, upload is 50-100% of total progress
-    if (compressionResult) {
-      onProgress?.(50 + Math.round(progress * 0.5));
-    } else {
-      onProgress?.(progress);
-    }
-  };
-
-  // Unsigned upload path
-  if (USE_UNSIGNED_UPLOAD) {
-    if (!UNSIGNED_UPLOAD_PRESET) {
-      return {
-        success: false,
-        error: 'Unsigned upload preset not configured. Please set VITE_CLOUDINARY_UNSIGNED_PRESET.'
-      };
-    }
-
-    try {
-      const formData = prepareUnsignedFormData(fileToUpload, directory);
-      const uploadData = await uploadToCloudinary(CLOUDINARY_UPLOAD_URL, formData, handleUploadProgress);
-
-      return {
-        success: true,
-        path: uploadData.secure_url,
-        publicId: uploadData.public_id,
-        originalSize: compressionResult?.originalSize,
-        compressedSize: compressionResult?.compressedSize,
-        compressionRatio: compressionResult?.compressionRatio,
-      };
-    } catch (uploadError: any) {
-      return {
-        success: false,
-        error: uploadError.message || 'Failed to upload file to Cloudinary.'
-      };
-    }
+  // Check if compressed image exceeds 10MB limit
+  if (fileToUpload.size > MAX_FILE_SIZE) {
+    return {
+      success: false,
+      error: `Image size (${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB) exceeds maximum allowed size of 10MB after compression.`
+    };
   }
 
-  // Signed upload path (default)
+  // Step 2: Upload to Firebase Storage
   try {
-    // Step 1: Get authentication token
+    // Verify authentication
     const authToken = await getIdToken();
     if (!authToken) {
       return {
@@ -282,83 +163,50 @@ export const uploadImageFile = async (
       };
     }
 
-    // Step 2: Request upload signature from Firebase Cloud Function
-    const signatureResponse = await generateUploadSignature({
-      fileType: file.type,
-      fileSize: file.size,
-      folder: directory,
-    });
+    // Upload to Firebase Storage with progress tracking
+    const result = await uploadImageToFirebaseStorage(
+      fileToUpload,
+      directory,
+      (progress: UploadProgress) => {
+        onProgressWithPhase?.({ phase: 'uploading', progress: progress.progress });
+        // For legacy callback, upload is 50-100% of total progress
+        if (compressionResult) {
+          onProgress?.(50 + Math.round(progress.progress * 0.5));
+        } else {
+          onProgress?.(progress.progress);
+        }
+      }
+    );
 
-    const { signature, timestamp, folder } = signatureResponse.data;
-
-    if (!signature || !timestamp) {
-      return {
-        success: false,
-        error: 'Failed to generate upload signature. Please try again.'
-      };
-    }
-
-    // Step 3: Prepare FormData for Cloudinary upload
-    const formData = prepareSignedFormData(fileToUpload, signature, timestamp, folder);
-
-    // Step 4: Upload file to Cloudinary
-    try {
-      const uploadData = await uploadToCloudinary(CLOUDINARY_UPLOAD_URL, formData, handleUploadProgress);
-
-      // Step 5: Return secure URL with compression info
+    if (result.success) {
       return {
         success: true,
-        path: uploadData.secure_url, // Cloudinary secure URL
-        publicId: uploadData.public_id, // For future reference/updates
+        path: result.downloadUrl,
+        publicId: result.storagePath, // Use storagePath as publicId for backward compatibility
+        storagePath: result.storagePath,
+        storageProvider: 'firebase',
         originalSize: compressionResult?.originalSize,
         compressedSize: compressionResult?.compressedSize,
         compressionRatio: compressionResult?.compressionRatio,
       };
-    } catch (uploadError: any) {
-      // Handle upload-specific errors
+    } else {
       return {
         success: false,
-        error: uploadError.message || 'Failed to upload file to Cloudinary.'
+        error: result.error || 'Failed to upload file.'
       };
     }
   } catch (error: any) {
-    // Handle Firebase Functions errors
-    if (error.code === 'unauthenticated') {
-      return {
-        success: false,
-        error: 'Authentication required. Please log in to upload files.'
-      };
-    }
-    if (error.code === 'permission-denied') {
-      return {
-        success: false,
-        error: 'Permission denied. Admin access required to upload files.'
-      };
-    }
-    if (error.code === 'invalid-argument') {
-      return {
-        success: false,
-        error: error.message || 'Invalid file. Please check file type and size.'
-      };
-    }
-    if (error.code === 'functions/internal') {
-      // Include the full error message for internal errors to help debug
-      return {
-        success: false,
-        error: error.message || error.details || 'Cloudinary configuration error. Please check server logs.'
-      };
-    }
-
+    console.error('Upload error:', error);
     return {
       success: false,
-      error: error.message || error.details || 'Failed to upload file. Please try again.'
+      error: error.message || 'Failed to upload file. Please try again.'
     };
   }
 };
 
 /**
- * Upload PDF file to Cloudinary
- * Supports both signed (Firebase Functions) and unsigned (direct) uploads
+ * Upload PDF file to Firebase Storage
+ * No size limit for PDFs
  */
 export const uploadPDFFile = async (
   file: File,
@@ -370,38 +218,8 @@ export const uploadPDFFile = async (
     return { success: false, error: validation.error };
   }
 
-  // Note: For PDFs, we use the raw upload endpoint
-  const uploadUrl = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/raw/upload`;
-
-  // Unsigned upload path
-  if (USE_UNSIGNED_UPLOAD) {
-    if (!UNSIGNED_UPLOAD_PRESET) {
-      return {
-        success: false,
-        error: 'Unsigned upload preset not configured. Please set VITE_CLOUDINARY_UNSIGNED_PRESET.'
-      };
-    }
-
-    try {
-      const formData = prepareUnsignedFormData(file, directory);
-      const uploadData = await uploadToCloudinary(uploadUrl, formData, onProgress);
-
-      return {
-        success: true,
-        path: uploadData.secure_url,
-        publicId: uploadData.public_id,
-      };
-    } catch (uploadError: any) {
-      return {
-        success: false,
-        error: uploadError.message || 'Failed to upload file to Cloudinary.'
-      };
-    }
-  }
-
-  // Signed upload path (default)
   try {
-    // Step 1: Get authentication token
+    // Verify authentication
     const authToken = await getIdToken();
     if (!authToken) {
       return {
@@ -410,63 +228,31 @@ export const uploadPDFFile = async (
       };
     }
 
-    // Step 2: Request upload signature from Firebase Cloud Function
-    const signatureResponse = await generateUploadSignature({
-      fileType: file.type,
-      fileSize: file.size,
-      folder: directory,
-    });
+    // Upload to Firebase Storage with progress tracking
+    const result = await uploadPdfToFirebaseStorage(
+      file,
+      directory,
+      (progress: UploadProgress) => {
+        onProgress?.(progress.progress);
+      }
+    );
 
-    const { signature, timestamp, folder } = signatureResponse.data;
-
-    if (!signature || !timestamp) {
-      return {
-        success: false,
-        error: 'Failed to generate upload signature. Please try again.'
-      };
-    }
-
-    // Step 3: Prepare FormData for Cloudinary upload
-    const formData = prepareSignedFormData(file, signature, timestamp, folder);
-
-    // Step 4: Upload file to Cloudinary
-    try {
-      const uploadData = await uploadToCloudinary(uploadUrl, formData, onProgress);
-
-      // Step 5: Return secure URL
+    if (result.success) {
       return {
         success: true,
-        path: uploadData.secure_url, // Cloudinary secure URL
-        publicId: uploadData.public_id, // For future reference/updates
+        path: result.downloadUrl,
+        publicId: result.storagePath, // Use storagePath as publicId for backward compatibility
+        storagePath: result.storagePath,
+        storageProvider: 'firebase',
       };
-    } catch (uploadError: any) {
-      // Handle upload-specific errors
+    } else {
       return {
         success: false,
-        error: uploadError.message || 'Failed to upload file to Cloudinary.'
+        error: result.error || 'Failed to upload file.'
       };
     }
   } catch (error: any) {
-    // Handle Firebase Functions errors
-    if (error.code === 'unauthenticated') {
-      return {
-        success: false,
-        error: 'Authentication required. Please log in to upload files.'
-      };
-    }
-    if (error.code === 'permission-denied') {
-      return {
-        success: false,
-        error: 'Permission denied. Admin access required to upload files.'
-      };
-    }
-    if (error.code === 'invalid-argument') {
-      return {
-        success: false,
-        error: error.message || 'Invalid file. Please check file type and size.'
-      };
-    }
-
+    console.error('PDF upload error:', error);
     return {
       success: false,
       error: error.message || 'Failed to upload file. Please try again.'

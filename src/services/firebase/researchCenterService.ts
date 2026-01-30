@@ -272,24 +272,31 @@ export const updateResearchCenter = async (
 
 /**
  * Delete a research center
- * Optionally deletes the associated image from Cloudinary
+ * Automatically detects storage provider from image URL and deletes accordingly
  */
 export const deleteResearchCenter = async (
   divisionId: string,
   centerId: string,
-  imagePublicId?: string
+  imagePublicId?: string,
+  imageUrl?: string
 ): Promise<void> => {
   try {
     const centerRef = doc(db, DIVISIONS_COLLECTION, divisionId, RESEARCH_CENTERS_SUBCOLLECTION, centerId);
     
-    // Delete image from Cloudinary if publicId is provided
-    if (imagePublicId) {
+    // Get center to get URL if not provided
+    let imageUrlToDelete = imageUrl;
+    if (!imageUrlToDelete && imagePublicId) {
+      const center = await getResearchCenter(divisionId, centerId);
+      imageUrlToDelete = center?.imageUrl;
+    }
+    
+    // Delete image from storage if URL is available
+    if (imageUrlToDelete) {
       try {
-        // Call Cloudinary deletion API via Firebase Cloud Function
-        const { deleteCloudinaryImage } = await import('../../config/firebase');
-        await deleteCloudinaryImage({ publicId: imagePublicId });
+        const { deleteFileFromStorage } = await import('./storageService');
+        await deleteFileFromStorage(imageUrlToDelete, imagePublicId);
       } catch (imageError) {
-        console.warn('Failed to delete image from Cloudinary:', imageError);
+        console.warn('Failed to delete image from storage:', imageError);
         // Continue with document deletion even if image deletion fails
       }
     }

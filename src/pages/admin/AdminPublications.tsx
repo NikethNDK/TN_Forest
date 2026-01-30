@@ -12,7 +12,7 @@ import {
   deleteCategory
 } from '../../services/firebase/publicationCategoryService';
 import { uploadPDFFile } from '../../services/admin/fileUploadService';
-import { deleteCloudinaryImage } from '../../config/firebase';
+import { deleteFileFromStorage } from '../../services/firebase/storageService';
 import Modal from '../../components/admin/Modal';
 import { useToast, ToastContainer } from '../../components/admin/Toast';
 import { useConfirmation } from '../../hooks/useConfirmation';
@@ -230,16 +230,16 @@ const AdminPublications: React.FC = () => {
       async () => {
         setDeletingPublicationId(id);
         try {
-          // Find publication to get pdfPublicId
+          // Find publication to get pdfUrl and pdfPublicId
           const pub = publications.find((p: Publication) => p.id === id);
           
-          // Delete PDF from Cloudinary if it exists
-          if (pub?.pdfPublicId) {
+          // Delete PDF from storage if it exists (auto-detects Cloudinary vs Firebase Storage)
+          if (pub?.pdfUrl) {
             try {
-              await deleteCloudinaryImage({ publicId: pub.pdfPublicId });
-            } catch (cloudinaryError) {
+              await deleteFileFromStorage(pub.pdfUrl, pub.pdfPublicId);
+            } catch (storageError) {
               // Log but continue with Firestore deletion
-              console.error('Error deleting PDF from Cloudinary:', cloudinaryError);
+              console.error('Error deleting PDF from storage:', storageError);
             }
           }
           

@@ -22,7 +22,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import type { ShopProduct } from '../../types';
-import { deleteImageFromCloudinary } from '../admin/fileUploadService';
+import { deleteFileFromStorage } from './storageService';
 
 const SHOP_PRODUCTS_COLLECTION = 'shopProducts';
 
@@ -242,16 +242,23 @@ export const updateProductStock = async (id: string, stock: number): Promise<voi
 
 /**
  * Delete a shop product
- * Also attempts to delete image from Cloudinary if it exists
+ * Automatically detects storage provider from image URL
  */
-export const deleteShopProduct = async (id: string, imagePublicId?: string): Promise<{ cloudinaryDeleted: boolean; error?: string }> => {
+export const deleteShopProduct = async (id: string, imagePublicId?: string, imageUrl?: string): Promise<{ storageDeleted: boolean; error?: string }> => {
   try {
-    // Try to delete image from Cloudinary first if it exists
-    if (imagePublicId) {
-      const cloudinaryResult = await deleteImageFromCloudinary(imagePublicId);
+    // Get product details if URL not provided
+    let productImageUrl = imageUrl;
+    if (!productImageUrl && imagePublicId) {
+      const product = await getShopProductById(id);
+      productImageUrl = product?.imageUrl;
+    }
+    
+    // Try to delete image from storage if it exists
+    if (productImageUrl) {
+      const deleteResult = await deleteFileFromStorage(productImageUrl, imagePublicId);
       
-      if (!cloudinaryResult.success) {
-        console.warn('Failed to delete image from Cloudinary:', cloudinaryResult.error);
+      if (!deleteResult.success) {
+        console.warn('Failed to delete image from storage:', deleteResult.error);
         // Continue with Firestore deletion anyway
       }
     }
@@ -260,7 +267,7 @@ export const deleteShopProduct = async (id: string, imagePublicId?: string): Pro
     const productRef = doc(db, SHOP_PRODUCTS_COLLECTION, id);
     await deleteDoc(productRef);
     
-    return { cloudinaryDeleted: !imagePublicId || true };
+    return { storageDeleted: true };
   } catch (error) {
     console.error('Error deleting shop product:', error);
     throw new Error('Failed to delete shop product');

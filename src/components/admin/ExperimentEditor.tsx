@@ -163,7 +163,7 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
     confirmation.confirm(
       {
         title: 'Delete Experiment',
-        message: 'Are you sure you want to delete this experiment? The PDF and image will also be deleted from Cloudinary.',
+        message: 'Are you sure you want to delete this experiment? The PDF and image will also be deleted from storage.',
         variant: 'danger'
       },
       async () => {
@@ -174,7 +174,9 @@ const ExperimentEditor: React.FC<ExperimentEditorProps> = ({
             centerId,
             experimentId,
             experiment.pdfPublicId,
-            experiment.imagePublicId
+            experiment.imagePublicId,
+            experiment.pdfUrl,
+            experiment.imageUrl
           );
         } catch (error) {
           console.error('Error deleting experiment:', error);

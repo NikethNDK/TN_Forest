@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage, connectStorageEmulator } from 'firebase/storage';
 import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
 
 const firebaseConfig = {
@@ -26,6 +27,7 @@ const app = initializeApp(firebaseConfig);
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 // Explicitly set region for Functions to match emulator
 export const functions = getFunctions(app, 'us-central1');
 
@@ -34,10 +36,11 @@ const isDevelopment = import.meta.env.DEV || import.meta.env.MODE === 'developme
 const useEmulator = import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true';
 
 if (isDevelopment && useEmulator) {
-  // Connect to Functions Emulator only (required for Cloudinary uploads)
+  // Connect to Functions and Storage Emulators
   // Note: Auth and Firestore will use production, which is fine for this use case
   try {
     connectFunctionsEmulator(functions, 'localhost', 5001);
+    connectStorageEmulator(storage, 'localhost', 9199);
   } catch (error: any) {
     // Emulators already connected - this is fine
     if (!error?.message?.includes('already been initialized')) {

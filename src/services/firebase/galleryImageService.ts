@@ -23,7 +23,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../config/firebase';
 import type { GalleryImage } from '../../types';
-import { deleteImageFromCloudinary } from '../admin/fileUploadService';
+import { deleteFileFromStorage } from './storageService';
 
 const GALLERY_IMAGES_COLLECTION = 'galleryImages';
 
@@ -225,27 +225,31 @@ export const updateGalleryImageTitle = async (
 
 /**
  * Delete a gallery image
- * Also attempts to delete from Cloudinary, but keeps in Firestore if Cloudinary delete fails
- * Returns result indicating if Cloudinary deletion succeeded
+ * Automatically detects storage provider (Cloudinary or Firebase Storage) from URL
+ * Keeps in Firestore if storage delete fails
+ * Returns result indicating if storage deletion succeeded
  */
-export const deleteGalleryImage = async (id: string, publicId: string): Promise<{ cloudinaryDeleted: boolean; error?: string }> => {
+export const deleteGalleryImage = async (id: string, publicId: string, url?: string): Promise<{ storageDeleted: boolean; error?: string }> => {
   try {
-    // Get the image to determine its scope for reordering
+    // Get the image to determine its scope for reordering and get URL if not provided
     const image = await getGalleryImageById(id);
+    const imageUrl = url || image?.url;
     
-    // Try to delete from Cloudinary first
-    const cloudinaryResult = await deleteImageFromCloudinary(publicId);
-    
-    if (!cloudinaryResult.success) {
-      console.warn('Failed to delete image from Cloudinary:', cloudinaryResult.error);
-      // Per user preference: keep in Firestore if Cloudinary delete fails
-      return {
-        cloudinaryDeleted: false,
-        error: cloudinaryResult.error
-      };
+    // Try to delete from storage (automatically detects Cloudinary vs Firebase Storage)
+    if (imageUrl) {
+      const deleteResult = await deleteFileFromStorage(imageUrl, publicId);
+      
+      if (!deleteResult.success) {
+        console.warn('Failed to delete image from storage:', deleteResult.error);
+        // Per user preference: keep in Firestore if storage delete fails
+        return {
+          storageDeleted: false,
+          error: deleteResult.error
+        };
+      }
     }
     
-    // Delete from Firestore only if Cloudinary deletion succeeded
+    // Delete from Firestore only if storage deletion succeeded (or no URL/publicId)
     const imageRef = doc(db, GALLERY_IMAGES_COLLECTION, id);
     await deleteDoc(imageRef);
     
@@ -263,7 +267,7 @@ export const deleteGalleryImage = async (id: string, publicId: string): Promise<
       }
     }
     
-    return { cloudinaryDeleted: true };
+    return { storageDeleted: true };
   } catch (error) {
     console.error('Error deleting gallery image:', error);
     throw new Error('Failed to delete gallery image');
