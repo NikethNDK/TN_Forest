@@ -32,12 +32,13 @@ const Footer: React.FC = () => {
     return () => clearInterval(timerId);
   }, []);
 
-  // Track visitor count on component mount
+  // Track visitor count once per session (skip on refresh)
   useEffect(() => {
-    // Increment visitor count when footer loads
+    const SESSION_KEY = 'tnfrd_visitor_counted';
+    if (sessionStorage.getItem(SESSION_KEY)) return;
+    sessionStorage.setItem(SESSION_KEY, '1');
     incrementVisitorCount().catch((error) => {
       console.error('Error incrementing visitor count:', error);
-      // Don't show error to user, just log it
     });
   }, []);
 
