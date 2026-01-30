@@ -4,6 +4,7 @@ import {
   subscribeToDivisionGalleryImages 
 } from '../../services/firebase/galleryImageService';
 import { getOptimizedImageUrl } from '../../utils/imageOptimization';
+import type { GalleryImage } from '../../types';
 
 interface ImageCarouselProps {
   scope: 'global' | 'division';
@@ -11,7 +12,7 @@ interface ImageCarouselProps {
 }
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) => {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<GalleryImage[]>([]);
 
   // Subscribe to gallery images from Firebase based on scope
   useEffect(() => {
@@ -23,9 +24,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
     const unsubscribe = scope === 'global'
       ? subscribeToGlobalGalleryImages(
           (galleryImages) => {
-            // Extract URLs - images are already sorted by order from the query
-            const imageUrls = galleryImages.map(img => img.url);
-            setImages(imageUrls);
+            // Store full image objects - already sorted by order from the query
+            setImages(galleryImages);
           },
           (error) => {
             console.error('Error loading global gallery images:', error);
@@ -34,9 +34,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
       : subscribeToDivisionGalleryImages(
           divisionSlug!,
           (galleryImages) => {
-            // Extract URLs - images are already sorted by order from the query
-            const imageUrls = galleryImages.map(img => img.url);
-            setImages(imageUrls);
+            // Store full image objects - already sorted by order from the query
+            setImages(galleryImages);
           },
           (error) => {
             console.error('Error loading division gallery images:', error);
@@ -58,7 +57,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
     if (images.length === 0 || index < 0 || index >= images.length) return;
     if (preloadedImagesRef.current.has(index)) return; // Already preloaded
 
-    const optimizedUrl = getOptimizedImageUrl(images[index], 600);
+    const optimizedUrl = getOptimizedImageUrl(images[index].url, 600);
     const img = new Image();
     img.src = optimizedUrl;
     preloadedImagesRef.current.add(index);
@@ -165,8 +164,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
                 {/* Featured image with smooth fade transition */}
                 <img
                   key={featuredIndex} // Force remount on index change for smooth transition
-                  src={getOptimizedImageUrl(images[featuredIndex], 600)}
-                  alt={`Featured Nursery Image ${featuredIndex + 1}`}
+                  src={getOptimizedImageUrl(images[featuredIndex].url, 600)}
+                  alt={images[featuredIndex].title || `Featured Nursery Image ${featuredIndex + 1}`}
                   className={`max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-500 ${
                     isImageLoaded ? 'opacity-100' : 'opacity-0'
                   }`}
@@ -176,6 +175,14 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
                   onLoad={() => setIsImageLoaded(true)}
                   onError={() => setIsImageLoaded(true)} // Show even if error to prevent stuck state
                 />
+                {/* Title overlay */}
+                {images[featuredIndex].title && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 sm:p-4">
+                    <p className="text-white text-sm sm:text-base font-medium text-center line-clamp-2">
+                      {images[featuredIndex].title}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="w-[60%] p-2 sm:p-4 bg-gray-50">
@@ -185,11 +192,11 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
                       key={`${imageIndex}-${gridPosition}`}
                       onClick={() => handleGridImageClick(imageIndex, gridPosition)}
                       className="relative aspect-square overflow-hidden rounded-lg hover:opacity-80 transition-opacity duration-200 cursor-pointer bg-white shadow-sm hover:shadow-md"
-                      aria-label={`Select image ${imageIndex + 1}`}
+                      aria-label={images[imageIndex]?.title || `Select image ${imageIndex + 1}`}
                     >
                       <img
-                        src={getOptimizedImageUrl(images[imageIndex], 300)}
-                        alt={`Nursery Image ${imageIndex + 1}`}
+                        src={getOptimizedImageUrl(images[imageIndex]?.url || '', 300)}
+                        alt={images[imageIndex]?.title || `Nursery Image ${imageIndex + 1}`}
                         className="w-full h-full object-cover"
                         loading="lazy"
                         decoding="async"

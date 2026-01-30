@@ -56,7 +56,7 @@ const RotatingImageStrip: React.FC = () => {
   // Show placeholder if no images
   if (images.length === 0) {
     return (
-      <section className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden flex items-center justify-center">
+      <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden rounded-lg shadow-lg flex items-center justify-center">
         <div className="text-white text-center">
           <p className="text-lg">No slider images available</p>
         </div>
@@ -65,22 +65,23 @@ const RotatingImageStrip: React.FC = () => {
   }
 
   return (
-    <section className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[500px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden">
+    <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden rounded-lg shadow-lg">
       <div className="relative w-full h-full">
-        <div className="absolute inset-0 w-full h-full">
+        {/* COMMENTED OUT: Blurred background - uncomment to restore original carousel style */}
+        {/* <div className="absolute inset-0 w-full h-full">
           <img
             src={getOptimizedImageUrl(images[currentIndex], 1920)}
             alt={`Nursery Image Background ${currentIndex + 1}`}
             className="w-full h-full object-cover scale-110 blur-md transition-opacity duration-500 ease-in-out"
             decoding="async"
           />
-        </div>
+        </div> */}
 
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <img
             src={getOptimizedImageUrl(images[currentIndex], 1200)}
             alt={`Nursery Image ${currentIndex + 1}`}
-            className="w-[70%] h-auto max-h-full object-contain transition-opacity duration-500 ease-in-out"
+            className="w-full h-full object-cover transition-opacity duration-500 ease-in-out"
             decoding="async"
           />
         </div>

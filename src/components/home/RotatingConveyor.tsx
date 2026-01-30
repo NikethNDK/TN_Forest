@@ -10,13 +10,12 @@ interface RotatingConveyorProps {
 
 const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, isRightAligned = false }) => {
   const [isPaused, setIsPaused] = useState(false);
-  const [translateY, setTranslateY] = useState(0);
-  const [isHeightMeasured, setIsHeightMeasured] = useState(false);
+  const [singleSetHeight, setSingleSetHeight] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const singleSetHeightRef = useRef<number>(0);
-  const scrollSpeed = 0.75; // pixels per frame (adjust for speed)
+
+  // Animation duration in seconds (adjust for speed - higher = slower)
+  const scrollDuration = 15; // seconds for one complete cycle
 
   // Create seamless loop by duplicating items
   const duplicatedItems = items.length > 0 ? [...items, ...items] : [];
@@ -24,20 +23,16 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
   // Measure single set height for seamless loop
   useEffect(() => {
     if (contentRef.current && items.length > 0) {
-      // Wait for content to be fully rendered
       const measureHeight = () => {
         if (!contentRef.current) return;
         
-        // Get all child elements
         const children = Array.from(contentRef.current.children) as HTMLElement[];
         
         if (children.length >= items.length) {
           let height = 0;
-          // Measure first set of items (space-y-6 adds 24px between items)
           for (let i = 0; i < items.length; i++) {
             if (children[i]) {
               height += children[i].offsetHeight;
-              // Add spacing between items (except for the last one)
               if (i < items.length - 1) {
                 height += 24; // space-y-6 = 1.5rem = 24px
               }
@@ -45,59 +40,19 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
           }
           
           if (height > 0) {
-            singleSetHeightRef.current = height;
-            setIsHeightMeasured(true); // Trigger animation to start
+            setSingleSetHeight(height);
           }
         }
       };
       
       // Measure after a short delay to ensure rendering is complete
       const timeoutId = setTimeout(measureHeight, 100);
-      requestAnimationFrame(measureHeight);
       
       return () => {
         clearTimeout(timeoutId);
-        setIsHeightMeasured(false); // Reset when items change
       };
-    } else {
-      setIsHeightMeasured(false);
     }
   }, [items]);
-
-  // Continuous scroll animation
-  useEffect(() => {
-    if (items.length === 0 || isPaused || !isHeightMeasured || singleSetHeightRef.current === 0) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-        animationFrameRef.current = null;
-      }
-      return;
-    }
-
-    const animate = () => {
-      setTranslateY((prev) => {
-        let newY = prev - scrollSpeed;
-        
-        // When we've scrolled one full set, reset seamlessly
-        // Add back the height to create seamless loop (since newY is negative)
-        if (newY <= -singleSetHeightRef.current) {
-          newY = newY + singleSetHeightRef.current;
-        }
-        
-        return newY;
-      });
-
-      animationFrameRef.current = requestAnimationFrame(animate);
-    };
-
-    animationFrameRef.current = requestAnimationFrame(animate);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [items.length, isPaused, isHeightMeasured, scrollSpeed]);
 
   if (items.length === 0) {
     return (
@@ -107,22 +62,41 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
     );
   }
 
+  // Calculate animation duration based on content height for consistent speed
+  const animationDuration = singleSetHeight > 0 
+    ? (singleSetHeight / 500) * scrollDuration // Normalize to ~500px reference height
+    : scrollDuration;
+
   return (
     <div
       ref={containerRef}
       className="relative overflow-hidden"
       style={{ height: '384px' }} // max-h-96 equivalent
       onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => {
-        setIsPaused(false);
-      }}
+      onMouseLeave={() => setIsPaused(false)}
     >
+      {/* CSS Animation Styles */}
+      <style>
+        {`
+          @keyframes scrollUp {
+            0% {
+              transform: translate3d(0, 0, 0);
+            }
+            100% {
+              transform: translate3d(0, -${singleSetHeight}px, 0);
+            }
+          }
+        `}
+      </style>
       <div
         ref={contentRef}
         className="space-y-6"
         style={{
-          transform: `translateY(${translateY}px)`,
-          willChange: 'transform'
+          animation: singleSetHeight > 0 
+            ? `scrollUp ${animationDuration}s linear infinite`
+            : 'none',
+          animationPlayState: isPaused ? 'paused' : 'running',
+          willChange: 'transform',
         }}
       >
         {duplicatedItems.map((item, index) => {

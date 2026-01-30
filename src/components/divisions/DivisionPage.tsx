@@ -731,7 +731,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
         </div>
 
         {/* Division Statistics */}
-        <div className="mt-8 bg-green-800 rounded-lg p-8">
+        {/* <div className="mt-8 bg-green-800 rounded-lg p-8">
           <h2 className="text-3xl font-bold text-white mb-8 text-center">
             {division?.name || 'Modern Nursery Division'} Statistics
           </h2>
@@ -743,7 +743,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
