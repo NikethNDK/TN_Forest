@@ -367,7 +367,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                         }`}
                       >
                         <div className="font-semibold text-sm mb-1">{center.name}</div>
-                        <div className="text-xs text-gray-500">{center.location}</div>
+                        <div className="text-xs text-gray-500">{center.location || '—'}</div>
                       </button>
                     );
                   })
@@ -402,6 +402,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                         {selectedCenter.name}
                       </h2>
                       <div className="space-y-3">
+                        {(selectedCenter.location || selectedCenter.coordinates) && (
                         <div 
                           onClick={() => handleLocationClick(selectedCenter.coordinates)}
                           className={`flex items-center text-gray-600 ${
@@ -410,11 +411,12 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                           title={selectedCenter.coordinates ? 'Click to get directions on Google Maps' : ''}
                         >
                           <MapPin className="h-5 w-5 mr-2 text-green-600" />
-                          <span className="font-medium">{selectedCenter.location}</span>
+                          <span className="font-medium">{selectedCenter.location || 'Location not specified'}</span>
                           {selectedCenter.coordinates && (
                             <span className="ml-2 text-xs text-green-600 opacity-70">(Click for directions)</span>
                           )}
                         </div>
+                        )}
                         {/* Display all custom fields dynamically */}
                         {selectedCenter.customFields && selectedCenter.customFields.length > 0 ? (
                           selectedCenter.customFields.map((field) => (
@@ -673,7 +675,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                               <div className="text-center">
                                 <strong className="text-green-800">{selectedCenter.name}</strong>
                                 <br />
-                                <span className="text-sm text-gray-600">{selectedCenter.location}</span>
+                                <span className="text-sm text-gray-600">{selectedCenter.location || '—'}</span>
                                 <br />
                                 <span className="text-xs text-gray-500 mt-1 block">Click anywhere on the map to get directions</span>
                               </div>

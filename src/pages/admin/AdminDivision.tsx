@@ -180,7 +180,7 @@ const AdminDivision: React.FC = () => {
 
     setCenterFormData({
       name: center.name,
-      location: center.location,
+      location: center.location ?? '',
       description: center.description || '',
       coordinates: center.coordinates || { lat: 0, lng: 0 },
       imageUrl: center.imageUrl || '',
@@ -249,8 +249,8 @@ const AdminDivision: React.FC = () => {
   // Image upload is handled directly by ImageUploader component
 
   const handleSaveCenter = async () => {
-    if (!centerFormData.name || !centerFormData.location) {
-      showToast('Please fill in all required fields', 'error');
+    if (!centerFormData.name?.trim()) {
+      showToast('Please enter the research center name', 'error');
       return;
     }
 
@@ -263,8 +263,8 @@ const AdminDivision: React.FC = () => {
 
     // Build center data with customFields
     const centerData: Omit<ResearchCenter, 'id' | 'createdAt' | 'updatedAt' | 'experiments'> = {
-      name: centerFormData.name,
-      location: centerFormData.location,
+      name: centerFormData.name.trim(),
+      location: centerFormData.location?.trim() || undefined,
       description: centerFormData.description,
       coordinates: centerFormData.coordinates.lat !== 0 && centerFormData.coordinates.lng !== 0
         ? centerFormData.coordinates
@@ -561,7 +561,7 @@ const AdminDivision: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location *
+                  Location (Optional)
                 </label>
                 <input
                   type="text"
@@ -574,7 +574,7 @@ const AdminDivision: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Latitude *
+                    Latitude (Optional)
                   </label>
                   <input
                     type="number"
@@ -586,12 +586,11 @@ const AdminDivision: React.FC = () => {
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="11.96828"
-                    required
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Longitude *
+                    Longitude (Optional)
                   </label>
                   <input
                     type="number"
@@ -603,7 +602,6 @@ const AdminDivision: React.FC = () => {
                     })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                     placeholder="78.05200"
-                    required
                   />
                 </div>
               </div>
@@ -699,7 +697,7 @@ const AdminDivision: React.FC = () => {
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <h3 className="font-semibold text-green-900 mb-2">{center.name}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{center.location}</p>
+                      <p className="text-sm text-gray-600 mb-2">{center.location || '—'}</p>
                       {center.description && (
                         <p className="text-sm text-gray-500 line-clamp-2">{center.description}</p>
                       )}

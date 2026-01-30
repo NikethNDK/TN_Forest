@@ -66,7 +66,7 @@ const transformDocumentToResearchCenter = (
   return {
     id: docId,
     name: data.name || '',
-    location: data.location || '',
+    location: data.location?.trim() || undefined,
     description: data.description || undefined,
     coordinates: data.coordinates || undefined,
     area: data.area || undefined, // Legacy field, kept for backward compatibility
@@ -172,7 +172,7 @@ export const addResearchCenter = async (
     const centersRef = collection(db, DIVISIONS_COLLECTION, divisionId, RESEARCH_CENTERS_SUBCOLLECTION);
     const newCenter: Record<string, unknown> = {
       name: center.name.trim(),
-      location: center.location.trim(),
+      location: (center.location ?? '').trim() || undefined,
       description: center.description?.trim() || '',
       coordinates: center.coordinates || null,
       area: center.area?.trim() || '',
@@ -223,7 +223,7 @@ export const updateResearchCenter = async (
       updateData.name = updates.name.trim();
     }
     if (updates.location !== undefined) {
-      updateData.location = updates.location.trim();
+      updateData.location = (updates.location ?? '').trim() || undefined;
     }
     if (updates.description !== undefined) {
       updateData.description = updates.description.trim() || '';

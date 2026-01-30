@@ -164,7 +164,7 @@ const AdminResearchCenter: React.FC = () => {
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-4xl font-bold text-green-900 mb-2">{center.name}</h1>
-            <p className="text-gray-600">{center.location}</p>
+            <p className="text-gray-600">{center.location || '—'}</p>
           </div>
           <div className="flex gap-2">
             <button

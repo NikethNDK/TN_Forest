@@ -42,7 +42,7 @@ export interface CustomField {
 export interface ResearchCenter {
   id?: string | number; // Firestore document ID (string) or legacy numeric ID
   name: string;
-  location: string;
+  location?: string;
   area?: string; // Deprecated: use customFields instead, kept for backward compatibility
   district?: string; // Deprecated: use customFields instead, kept for backward compatibility
   range?: string; // Deprecated: use customFields instead, kept for backward compatibility
