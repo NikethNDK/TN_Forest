@@ -8,8 +8,7 @@
     "dev:emulator": "firebase emulators:start & vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "seed:products": "npx tsx scripts/seedShopProducts.ts"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
