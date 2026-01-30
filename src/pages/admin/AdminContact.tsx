@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, MapPin } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, ArrowUp, ArrowDown } from 'lucide-react';
 import {
   subscribeToContactLocations,
   addContactLocation,
   updateContactLocation,
   deleteContactLocation,
   setFooterLocation,
-  unsetFooterLocation
+  unsetFooterLocation,
+  swapContactLocationOrder
 } from '../../services/firebase/contactService';
 import type { ContactLocation } from '../../types';
 import Modal from '../../components/admin/Modal';
@@ -233,6 +234,25 @@ const AdminContact: React.FC = () => {
     );
   };
 
+  const handleMoveLocation = async (index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= locations.length) return;
+
+    try {
+      setError(null);
+      const currentLocation = locations[index];
+      const targetLocation = locations[newIndex];
+      
+      await swapContactLocationOrder(currentLocation.id, targetLocation.id);
+      showToast('Location order updated', 'success');
+      // Real-time listener will update automatically
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to reorder locations';
+      setError(errorMessage);
+      showToast(errorMessage, 'error');
+    }
+  };
+
   const footerLocation = locations.find(l => l.showInFooter);
 
   if (loading) {
@@ -398,38 +418,58 @@ const AdminContact: React.FC = () => {
           </Modal>
 
           <div className="space-y-4">
-            {locations.map((location) => (
+            {locations.map((location, index) => (
               <div
                 key={location.id}
                 className="border border-gray-200 rounded-lg p-6 hover:bg-gray-50 transition-colors"
               >
                 <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <h3 className="text-lg font-bold text-green-900">{location.name}</h3>
-                      {location.showInFooter && (
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
-                          In Footer
-                        </span>
-                      )}
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => handleMoveLocation(index, 'up')}
+                        disabled={index === 0}
+                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        title="Move up"
+                      >
+                        <ArrowUp className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveLocation(index, 'down')}
+                        disabled={index === locations.length - 1}
+                        className="text-gray-400 hover:text-gray-600 disabled:opacity-30"
+                        title="Move down"
+                      >
+                        <ArrowDown className="h-4 w-4" />
+                      </button>
                     </div>
-                    <div className="space-y-2 text-sm text-gray-600">
-                      <div className="flex items-start">
-                        <MapPin className="h-4 w-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
-                        <span>{location.location}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="text-lg font-bold text-green-900">{location.name}</h3>
+                        {location.showInFooter && (
+                          <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-medium">
+                            In Footer
+                          </span>
+                        )}
                       </div>
-                      {location.phone && (
-                        <div className="flex items-center">
-                          <span className="font-medium mr-2">Phone:</span>
-                          <span>{location.phone}</span>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex items-start">
+                          <MapPin className="h-4 w-4 mr-2 mt-0.5 text-green-600 flex-shrink-0" />
+                          <span>{location.location}</span>
                         </div>
-                      )}
-                      {location.email && (
-                        <div className="flex items-center">
-                          <span className="font-medium mr-2">Email:</span>
-                          <span>{location.email}</span>
-                        </div>
-                      )}
+                        {location.phone && (
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">Phone:</span>
+                            <span>{location.phone}</span>
+                          </div>
+                        )}
+                        {location.email && (
+                          <div className="flex items-center">
+                            <span className="font-medium mr-2">Email:</span>
+                            <span>{location.email}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex gap-2 ml-4">

@@ -41,6 +41,8 @@ export const getAllFaculty = async (): Promise<FacultyMember[]> => {
         name: data.name,
         position: data.position,
         order: data.order,
+        imageUrl: data.imageUrl,
+        imagePublicId: data.imagePublicId,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt
       });
@@ -71,6 +73,8 @@ export const getFacultyById = async (id: string): Promise<FacultyMember | null> 
       name: data.name,
       position: data.position,
       order: data.order,
+      imageUrl: data.imageUrl,
+      imagePublicId: data.imagePublicId,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt
     };
@@ -84,7 +88,12 @@ export const getFacultyById = async (id: string): Promise<FacultyMember | null> 
  * Add a new faculty member
  * Automatically assigns the highest order + 1
  */
-export const addFacultyMember = async (member: { name: string; position: string }): Promise<string> => {
+export const addFacultyMember = async (member: { 
+  name: string; 
+  position: string; 
+  imageUrl?: string; 
+  imagePublicId?: string;
+}): Promise<string> => {
   try {
     // Get current max order
     const allFaculty = await getAllFaculty();
@@ -93,13 +102,21 @@ export const addFacultyMember = async (member: { name: string; position: string 
       : -1;
     
     const facultyRef = collection(db, FACULTY_COLLECTION);
-    const newMember = {
+    const newMember: Record<string, any> = {
       name: member.name.trim(),
       position: member.position.trim(),
       order: maxOrder + 1,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     };
+    
+    // Add optional image fields if provided
+    if (member.imageUrl) {
+      newMember.imageUrl = member.imageUrl;
+    }
+    if (member.imagePublicId) {
+      newMember.imagePublicId = member.imagePublicId;
+    }
     
     const docRef = await addDoc(facultyRef, newMember);
     return docRef.id;
@@ -114,7 +131,7 @@ export const addFacultyMember = async (member: { name: string; position: string 
  */
 export const updateFacultyMember = async (
   id: string,
-  updates: Partial<Pick<FacultyMember, 'name' | 'position'>>
+  updates: Partial<Pick<FacultyMember, 'name' | 'position' | 'imageUrl' | 'imagePublicId'>>
 ): Promise<void> => {
   try {
     const facultyRef = doc(db, FACULTY_COLLECTION, id);
@@ -127,6 +144,12 @@ export const updateFacultyMember = async (
     }
     if (updates.position !== undefined) {
       updateData.position = updates.position.trim();
+    }
+    if (updates.imageUrl !== undefined) {
+      updateData.imageUrl = updates.imageUrl || null;
+    }
+    if (updates.imagePublicId !== undefined) {
+      updateData.imagePublicId = updates.imagePublicId || null;
     }
     
     await updateDoc(facultyRef, updateData);
@@ -233,6 +256,8 @@ export const subscribeToFaculty = (
             name: data.name,
             position: data.position,
             order: data.order,
+            imageUrl: data.imageUrl,
+            imagePublicId: data.imagePublicId,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt
           });

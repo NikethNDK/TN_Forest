@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Users, Upload, X, User } from 'lucide-react';
 import {
   subscribeToFaculty,
   addFacultyMember,
@@ -7,12 +7,27 @@ import {
   deleteFacultyMember,
   swapFacultyOrder
 } from '../../services/firebase/facultyService';
+import { uploadImageFile, validateImageFile, createImagePreview, deleteImageFromCloudinary } from '../../services/admin/fileUploadService';
 import type { FacultyMember } from '../../types';
 import Modal from '../../components/admin/Modal';
 import { useToast, ToastContainer } from '../../components/admin/Toast';
 import { useConfirmation } from '../../hooks/useConfirmation';
 import ConfirmationDialog from '../../components/common/ConfirmationDialog';
 import { LoadingSpinner, ErrorMessage, EmptyState, FormField } from '../../components/common';
+
+interface FormData {
+  name: string;
+  position: string;
+  imageUrl: string;
+  imagePublicId: string;
+}
+
+const initialFormData: FormData = {
+  name: '',
+  position: '',
+  imageUrl: '',
+  imagePublicId: ''
+};
 
 const AdminFaculty: React.FC = () => {
   const { toasts, showToast, removeToast } = useToast();
@@ -21,10 +36,14 @@ const AdminFaculty: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: '', position: '' });
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Subscribe to real-time faculty updates
   useEffect(() => {
@@ -52,7 +71,8 @@ const AdminFaculty: React.FC = () => {
   }, []);
 
   const handleAddMember = () => {
-    setFormData({ name: '', position: '' });
+    setFormData(initialFormData);
+    setImagePreview(null);
     setEditingId(null);
     setShowForm(true);
   };
@@ -60,9 +80,86 @@ const AdminFaculty: React.FC = () => {
   const handleEditMember = (id: string) => {
     const member = facultyMembers.find(m => m.id === id);
     if (member) {
-      setFormData({ name: member.name, position: member.position });
+      setFormData({
+        name: member.name,
+        position: member.position,
+        imageUrl: member.imageUrl || '',
+        imagePublicId: member.imagePublicId || ''
+      });
+      setImagePreview(member.imageUrl || null);
       setEditingId(id);
       setShowForm(true);
+    }
+  };
+
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Clear file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    // Validate file
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      showToast(validation.error || 'Invalid file', 'error');
+      return;
+    }
+
+    try {
+      // Create preview
+      const previewUrl = await createImagePreview(file);
+      setImagePreview(previewUrl);
+      setUploadingImage(true);
+      setUploadProgress(0);
+
+      // Upload to Cloudinary
+      const result = await uploadImageFile(file, 'faculty', (progress) => {
+        setUploadProgress(progress);
+      });
+
+      if (result.success && result.path) {
+        setUploadProgress(100);
+        setFormData(prev => ({
+          ...prev,
+          imageUrl: result.path!,
+          imagePublicId: result.publicId || ''
+        }));
+        showToast('Image uploaded successfully', 'success');
+      } else {
+        setImagePreview(null);
+        showToast(result.error || 'Failed to upload image', 'error');
+      }
+    } catch (err) {
+      setImagePreview(null);
+      showToast(err instanceof Error ? err.message : 'Failed to upload image', 'error');
+    } finally {
+      setUploadingImage(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    // Delete from Cloudinary if we have a publicId
+    if (formData.imagePublicId) {
+      try {
+        await deleteImageFromCloudinary(formData.imagePublicId);
+      } catch (err) {
+        console.error('Failed to delete image from Cloudinary:', err);
+        // Continue anyway - the image reference will be removed
+      }
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      imageUrl: '',
+      imagePublicId: ''
+    }));
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -76,11 +173,28 @@ const AdminFaculty: React.FC = () => {
       setSaving(true);
       setError(null);
 
+      const memberData = {
+        name: formData.name,
+        position: formData.position,
+        imageUrl: formData.imageUrl || undefined,
+        imagePublicId: formData.imagePublicId || undefined
+      };
+
       if (editingId) {
-        await updateFacultyMember(editingId, formData);
+        // Check if image was removed during edit
+        const existingMember = facultyMembers.find(m => m.id === editingId);
+        if (existingMember?.imagePublicId && !formData.imagePublicId) {
+          // Image was removed, delete from Cloudinary
+          try {
+            await deleteImageFromCloudinary(existingMember.imagePublicId);
+          } catch (err) {
+            console.error('Failed to delete old image:', err);
+          }
+        }
+        await updateFacultyMember(editingId, memberData);
         showToast('Faculty member updated successfully', 'success');
       } else {
-        await addFacultyMember(formData);
+        await addFacultyMember(memberData);
         showToast('Faculty member added successfully', 'success');
       }
 
@@ -96,13 +210,19 @@ const AdminFaculty: React.FC = () => {
   };
 
   const handleCancelMember = () => {
-    setFormData({ name: '', position: '' });
+    setFormData(initialFormData);
+    setImagePreview(null);
     setEditingId(null);
     setShowForm(false);
     setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleDeleteMember = async (id: string) => {
+    const member = facultyMembers.find(m => m.id === id);
+    
     confirmation.confirm(
       {
         title: 'Delete Faculty Member',
@@ -113,6 +233,17 @@ const AdminFaculty: React.FC = () => {
         setDeletingId(id);
         try {
           setError(null);
+          
+          // Delete image from Cloudinary if exists
+          if (member?.imagePublicId) {
+            try {
+              await deleteImageFromCloudinary(member.imagePublicId);
+            } catch (err) {
+              console.error('Failed to delete image from Cloudinary:', err);
+              // Continue with deletion anyway
+            }
+          }
+          
           await deleteFacultyMember(id);
           showToast('Faculty member deleted successfully', 'success');
           // No need to refresh - real-time listener will update automatically
@@ -198,6 +329,78 @@ const AdminFaculty: React.FC = () => {
           closeOnOutsideClick={false}
         >
           <div className="space-y-4">
+            {/* Image Upload Section */}
+            <FormField label="Photo (Optional)">
+              <div className="flex items-start gap-4">
+                {/* Image Preview */}
+                <div className="relative">
+                  {imagePreview ? (
+                    <div className="relative w-32 h-32">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover rounded-lg border-2 border-gray-300"
+                      />
+                      {!uploadingImage && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          disabled={saving}
+                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 disabled:opacity-50"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => !saving && !uploadingImage && fileInputRef.current?.click()}
+                      className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center cursor-pointer hover:border-green-500 hover:bg-green-50 transition-colors"
+                    >
+                      <User className="h-10 w-10 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload Button */}
+                <div className="flex-1">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/webp"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={saving || uploadingImage}
+                    className="relative flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors overflow-hidden"
+                    style={{ minWidth: '140px' }}
+                  >
+                    {uploadingImage && (
+                      <div
+                        className="absolute inset-0 bg-green-400 transition-all duration-300 ease-out"
+                        style={{
+                          width: `${uploadProgress}%`,
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                        }}
+                      />
+                    )}
+                    <span className="relative z-10 flex items-center gap-2">
+                      <Upload className="h-4 w-4" />
+                      {uploadingImage ? `Uploading... ${uploadProgress}%` : imagePreview ? 'Change Photo' : 'Upload Photo'}
+                    </span>
+                  </button>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Optional. Recommended: Square image, min 200x200px
+                  </p>
+                </div>
+              </div>
+            </FormField>
+
             <FormField label="Name" required>
               <input
                 type="text"
@@ -221,14 +424,14 @@ const AdminFaculty: React.FC = () => {
             <div className="flex gap-2 pt-4">
               <button
                 onClick={handleSaveMember}
-                disabled={saving}
+                disabled={saving || uploadingImage}
                 className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? 'Saving...' : 'Save'}
               </button>
               <button
                 onClick={handleCancelMember}
-                disabled={saving}
+                disabled={saving || uploadingImage}
                 className="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-semibold disabled:opacity-50"
               >
                 Cancel
@@ -263,6 +466,22 @@ const AdminFaculty: React.FC = () => {
                       <ArrowDown className="h-4 w-4" />
                     </button>
                   </div>
+                  
+                  {/* Member Image Thumbnail */}
+                  <div className="flex-shrink-0">
+                    {member.imageUrl ? (
+                      <img
+                        src={member.imageUrl}
+                        alt={member.name}
+                        className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                        <User className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="flex-1">
                     <h3 className="text-lg font-bold text-green-900 mb-2">{member.name}</h3>
                     <p className="text-gray-600">{member.position}</p>

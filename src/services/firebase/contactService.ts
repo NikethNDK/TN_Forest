@@ -382,3 +382,35 @@ export const unsetFooterLocation = async (id: string): Promise<void> => {
   }
 };
 
+/**
+ * Swap the order of two contact locations
+ */
+export const swapContactLocationOrder = async (id1: string, id2: string): Promise<void> => {
+  try {
+    const location1 = await getContactLocationById(id1);
+    const location2 = await getContactLocationById(id2);
+    
+    if (!location1 || !location2) {
+      throw new Error('One or both locations not found');
+    }
+    
+    const batch = writeBatch(db);
+    const location1Ref = doc(db, CONTACT_LOCATIONS_COLLECTION, id1);
+    const location2Ref = doc(db, CONTACT_LOCATIONS_COLLECTION, id2);
+    
+    batch.update(location1Ref, {
+      order: location2.order,
+      updatedAt: Timestamp.now()
+    });
+    batch.update(location2Ref, {
+      order: location1.order,
+      updatedAt: Timestamp.now()
+    });
+    
+    await batch.commit();
+  } catch (error) {
+    console.error('Error swapping contact location order:', error);
+    throw new Error('Failed to reorder contact locations');
+  }
+};
+

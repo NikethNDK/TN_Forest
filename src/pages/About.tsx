@@ -66,7 +66,7 @@ const About: React.FC = () => {
         subtitle="Our Legacy of Science and Stewardship"
         title="About the Research Wing"
         description="The Tamil Nadu Forest Department Research Wing is the scientific foundation for conservation, committed to ecological innovation and sustainable forestry."
-        backgroundImage="https://images.unsplash.com/photo-1549490216-3a137b01d1c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+        backgroundImage="https://png.pngtree.com/thumb_back/fh260/back_our/20200630/ourmid/pngtree-green-small-fresh-forest-banner-image_340874.jpg"
       />
       
       {/* Mission and Vision */}

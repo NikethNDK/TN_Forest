@@ -53,7 +53,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
             <div className="bg-gradient-to-r from-green-700 to-lime-500 p-4 md:p-5 flex items-center justify-between">
               <h2 className="text-lg md:text-xl font-bold text-white flex items-center">
                 <Info className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                <span className="hidden sm:inline">Welcome to Tamil Nadu Forest Research Department</span>
+                <span className="hidden sm:inline">Welcome to TamilNadu Forest Department's Reasearch</span>
                 <span className="sm:hidden">Welcome</span>
               </h2>
               <button
@@ -75,8 +75,8 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                 </div>
                 <p className="text-sm text-gray-700 mb-3 leading-relaxed">
                   Discover high-quality seeds, saplings, and bio-fertilizers directly from our research centers. 
-                  All products are genetically verified and backed by our scientific research, ensuring the best 
-                  quality for your afforestation and cultivation projects.
+                  {/* All products are backed by our scientific research, ensuring the best 
+                  quality for your afforestation and cultivation projects. */}
                 </p>
                 <button
                   onClick={handleShopNavigation}

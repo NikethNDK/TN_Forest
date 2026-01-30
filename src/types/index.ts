@@ -188,6 +188,8 @@ export interface FacultyMember {
   name: string;
   position: string;
   order: number;
+  imageUrl?: string;  // Optional Cloudinary URL
+  imagePublicId?: string;  // Optional Cloudinary public ID for deletion
   createdAt?: any;  // Firestore Timestamp
   updatedAt?: any;  // Firestore Timestamp
 }
