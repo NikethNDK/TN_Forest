@@ -126,7 +126,7 @@ const BulkImageUploader: React.FC<BulkImageUploaderProps> = ({
     for (const item of files) {
       // Update status to uploading
       setUploadingFiles(prev =>
-        prev.map(f => f.id === item.id ? { ...f, status: 'uploading' } : f)
+        prev.map(f => f.id === item.id ? { ...f, status: 'uploading', progress: 0 } : f)
       );
 
       try {

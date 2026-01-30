@@ -12,6 +12,7 @@
 import { generateUploadSignature } from '../../config/firebase';
 import { cloudinaryConfig, CLOUDINARY_UPLOAD_URL } from '../../config/cloudinary';
 import { getIdToken } from '../firebase/authService';
+import { compressImage, shouldCompress, formatFileSize, CompressionResult } from '../imageCompressionService';
 
 // Feature flag: Use unsigned uploads (direct to Cloudinary) when true
 const USE_UNSIGNED_UPLOAD = import.meta.env.VITE_USE_UNSIGNED_UPLOAD === 'true';
@@ -22,6 +23,15 @@ export interface UploadResult {
   path?: string; // Cloudinary secure URL
   publicId?: string; // Cloudinary public ID for future reference
   error?: string;
+  // Compression info (for images)
+  originalSize?: number;
+  compressedSize?: number;
+  compressionRatio?: number;
+}
+
+export interface UploadProgressInfo {
+  phase: 'compressing' | 'uploading';
+  progress: number; // 0-100
 }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -167,18 +177,70 @@ const generateCloudinarySignature = async (
 };
 
 /**
- * Upload image file to Cloudinary
+ * Upload image file to Cloudinary with automatic compression
  * Supports both signed (Firebase Functions) and unsigned (direct) uploads
+ * 
+ * @param file - The image file to upload
+ * @param directory - Cloudinary folder path
+ * @param onProgress - Simple progress callback (0-100) - legacy support
+ * @param onProgressWithPhase - Detailed progress callback with phase info
  */
 export const uploadImageFile = async (
   file: File,
   directory: string = 'tn-forest/images',
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
+  onProgressWithPhase?: (info: UploadProgressInfo) => void
 ): Promise<UploadResult> => {
   const validation = validateImageFile(file);
   if (!validation.valid) {
     return { success: false, error: validation.error };
   }
+
+  // Step 1: Compress image if needed
+  let fileToUpload = file;
+  let compressionResult: CompressionResult | null = null;
+
+  if (shouldCompress(file)) {
+    try {
+      // Notify compression phase started
+      onProgressWithPhase?.({ phase: 'compressing', progress: 0 });
+      
+      compressionResult = await compressImage(
+        file,
+        {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 2048,
+          quality: 0.8,
+          useWebWorker: true,
+        },
+        (progress) => {
+          onProgressWithPhase?.({ phase: 'compressing', progress });
+          // For legacy callback, compression is 0-50% of total progress
+          onProgress?.(Math.round(progress * 0.5));
+        }
+      );
+      
+      fileToUpload = compressionResult.compressedFile;
+      
+      console.log(
+        `Image compressed: ${formatFileSize(compressionResult.originalSize)} → ${formatFileSize(compressionResult.compressedSize)} (${compressionResult.compressionRatio}% reduction)`
+      );
+    } catch (error) {
+      console.warn('Compression failed, uploading original file:', error);
+      // Continue with original file if compression fails
+    }
+  }
+
+  // Step 2: Upload to Cloudinary
+  const handleUploadProgress = (progress: number) => {
+    onProgressWithPhase?.({ phase: 'uploading', progress });
+    // For legacy callback, upload is 50-100% of total progress
+    if (compressionResult) {
+      onProgress?.(50 + Math.round(progress * 0.5));
+    } else {
+      onProgress?.(progress);
+    }
+  };
 
   // Unsigned upload path
   if (USE_UNSIGNED_UPLOAD) {
@@ -190,13 +252,16 @@ export const uploadImageFile = async (
     }
 
     try {
-      const formData = prepareUnsignedFormData(file, directory);
-      const uploadData = await uploadToCloudinary(CLOUDINARY_UPLOAD_URL, formData, onProgress);
+      const formData = prepareUnsignedFormData(fileToUpload, directory);
+      const uploadData = await uploadToCloudinary(CLOUDINARY_UPLOAD_URL, formData, handleUploadProgress);
 
       return {
         success: true,
         path: uploadData.secure_url,
         publicId: uploadData.public_id,
+        originalSize: compressionResult?.originalSize,
+        compressedSize: compressionResult?.compressedSize,
+        compressionRatio: compressionResult?.compressionRatio,
       };
     } catch (uploadError: any) {
       return {
@@ -234,17 +299,20 @@ export const uploadImageFile = async (
     }
 
     // Step 3: Prepare FormData for Cloudinary upload
-    const formData = prepareSignedFormData(file, signature, timestamp, folder);
+    const formData = prepareSignedFormData(fileToUpload, signature, timestamp, folder);
 
     // Step 4: Upload file to Cloudinary
     try {
-      const uploadData = await uploadToCloudinary(CLOUDINARY_UPLOAD_URL, formData, onProgress);
+      const uploadData = await uploadToCloudinary(CLOUDINARY_UPLOAD_URL, formData, handleUploadProgress);
 
-      // Step 5: Return secure URL
+      // Step 5: Return secure URL with compression info
       return {
         success: true,
         path: uploadData.secure_url, // Cloudinary secure URL
         publicId: uploadData.public_id, // For future reference/updates
+        originalSize: compressionResult?.originalSize,
+        compressedSize: compressionResult?.compressedSize,
+        compressionRatio: compressionResult?.compressionRatio,
       };
     } catch (uploadError: any) {
       // Handle upload-specific errors
