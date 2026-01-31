@@ -151,7 +151,9 @@ export interface NewsItem {
   date: string;
   title: string;
   excerpt: string;
-  link?: string;  // Optional link/URL
+  link?: string;  // Optional link/URL (mutually exclusive with pdfUrl)
+  pdfUrl?: string;  // Optional PDF file URL (Firebase Storage)
+  pdfPublicId?: string;  // Storage path for PDF deletion
   createdAt?: any;  // Firestore Timestamp
   updatedAt?: any;  // Firestore Timestamp
   order?: number;  // For sorting
@@ -163,7 +165,9 @@ export interface Event {
   date: string;
   title: string;
   excerpt: string;
-  link?: string;  // Optional link/URL
+  link?: string;  // Optional link/URL (mutually exclusive with pdfUrl)
+  pdfUrl?: string;  // Optional PDF file URL (Firebase Storage)
+  pdfPublicId?: string;  // Storage path for PDF deletion
   createdAt?: any;  // Firestore Timestamp
   updatedAt?: any;  // Firestore Timestamp
   order?: number;  // For sorting

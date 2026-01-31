@@ -168,7 +168,7 @@ const Navbar: React.FC = () => {
                 style={shopButtonStyle}
               >
                 <ShoppingCart className="h-4 w-4 mr-1.5" />
-                Shop
+                Eco-Store
               </Link>
             </div>
           </div>
@@ -259,7 +259,7 @@ const Navbar: React.FC = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 <ShoppingCart className="h-4 w-4 mr-1.5" />
-                Shop
+                Eco-Store
               </Link>
             </div>
           </div>

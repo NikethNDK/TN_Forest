@@ -124,14 +124,26 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
               <p className={`text-gray-600 text-xs xl:text-sm mb-2 ${isRightAligned ? 'text-right' : ''} line-clamp-2`}>
                 {item.excerpt}
               </p>
-              {item.link && (
+              {(item.link || item.pdfUrl) && (
                 <a
-                  href={item.link}
+                  href={item.link || item.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={`text-green-600 hover:text-lime-600 text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''}`}
                 >
-                  {isRightAligned ? (
+                  {item.pdfUrl && !item.link ? (
+                    isRightAligned ? (
+                      <>
+                        <span className="mr-1 group-hover:mr-2 transition-all">←</span>
+                        View PDF
+                      </>
+                    ) : (
+                      <>
+                        View PDF
+                        <span className="ml-1 group-hover:ml-2 transition-all">→</span>
+                      </>
+                    )
+                  ) : isRightAligned ? (
                     <>
                       <span className="mr-1 group-hover:mr-2 transition-all">←</span>
                       View details

@@ -19,6 +19,7 @@ import {
   Unsubscribe
 } from 'firebase/firestore';
 import { db } from '../../config/firebase';
+import { deleteFileFromStorage } from './storageService';
 import type { NewsItem, Event } from '../../types';
 
 const NEWS_COLLECTION = 'news';
@@ -44,6 +45,8 @@ export const getAllNews = async (): Promise<NewsItem[]> => {
         title: data.title || '',
         excerpt: data.excerpt || '',
         link: data.link || undefined,
+        pdfUrl: data.pdfUrl || undefined,
+        pdfPublicId: data.pdfPublicId || undefined,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
         order: data.order
@@ -76,6 +79,8 @@ export const getNewsById = async (id: string): Promise<NewsItem | null> => {
       title: data.title || '',
       excerpt: data.excerpt || '',
       link: data.link || undefined,
+      pdfUrl: data.pdfUrl || undefined,
+      pdfPublicId: data.pdfPublicId || undefined,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
       order: data.order
@@ -97,6 +102,8 @@ export const addNewsItem = async (news: Omit<NewsItem, 'id' | 'createdAt' | 'upd
       title: news.title.trim(),
       excerpt: news.excerpt.trim(),
       link: news.link?.trim() || '',
+      pdfUrl: news.pdfUrl?.trim() || '',
+      pdfPublicId: news.pdfPublicId?.trim() || '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       order: Date.now() // Use timestamp for ordering
@@ -115,7 +122,7 @@ export const addNewsItem = async (news: Omit<NewsItem, 'id' | 'createdAt' | 'upd
  */
 export const updateNewsItem = async (
   id: string,
-  updates: Partial<Pick<NewsItem, 'date' | 'title' | 'excerpt' | 'link'>>
+  updates: Partial<Pick<NewsItem, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId'>>
 ): Promise<void> => {
   try {
     const newsRef = doc(db, NEWS_COLLECTION, id);
@@ -135,6 +142,12 @@ export const updateNewsItem = async (
     if (updates.link !== undefined) {
       updateData.link = updates.link.trim() || '';
     }
+    if (updates.pdfUrl !== undefined) {
+      updateData.pdfUrl = updates.pdfUrl.trim() || '';
+    }
+    if (updates.pdfPublicId !== undefined) {
+      updateData.pdfPublicId = updates.pdfPublicId.trim() || '';
+    }
     
     await updateDoc(newsRef, updateData);
   } catch (error) {
@@ -144,11 +157,22 @@ export const updateNewsItem = async (
 };
 
 /**
- * Delete a news item
+ * Delete a news item (and its PDF from storage if present)
  */
 export const deleteNewsItem = async (id: string): Promise<void> => {
   try {
     const newsRef = doc(db, NEWS_COLLECTION, id);
+    const docSnapshot = await getDoc(newsRef);
+    if (docSnapshot.exists()) {
+      const data = docSnapshot.data();
+      if (data.pdfUrl) {
+        try {
+          await deleteFileFromStorage(data.pdfUrl, data.pdfPublicId);
+        } catch (storageError) {
+          console.warn('Failed to delete PDF from storage:', storageError);
+        }
+      }
+    }
     await deleteDoc(newsRef);
   } catch (error) {
     console.error('Error deleting news item:', error);
@@ -180,6 +204,8 @@ export const subscribeToNews = (
             title: data.title || '',
             excerpt: data.excerpt || '',
             link: data.link || undefined,
+            pdfUrl: data.pdfUrl || undefined,
+            pdfPublicId: data.pdfPublicId || undefined,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             order: data.order
@@ -224,6 +250,8 @@ export const getAllEvents = async (): Promise<Event[]> => {
         title: data.title || '',
         excerpt: data.excerpt || '',
         link: data.link || undefined,
+        pdfUrl: data.pdfUrl || undefined,
+        pdfPublicId: data.pdfPublicId || undefined,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
         order: data.order
@@ -256,6 +284,8 @@ export const getEventById = async (id: string): Promise<Event | null> => {
       title: data.title || '',
       excerpt: data.excerpt || '',
       link: data.link || undefined,
+      pdfUrl: data.pdfUrl || undefined,
+      pdfPublicId: data.pdfPublicId || undefined,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
       order: data.order
@@ -277,6 +307,8 @@ export const addEventItem = async (event: Omit<Event, 'id' | 'createdAt' | 'upda
       title: event.title.trim(),
       excerpt: event.excerpt.trim(),
       link: event.link?.trim() || '',
+      pdfUrl: event.pdfUrl?.trim() || '',
+      pdfPublicId: event.pdfPublicId?.trim() || '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       order: Date.now() // Use timestamp for ordering
@@ -295,7 +327,7 @@ export const addEventItem = async (event: Omit<Event, 'id' | 'createdAt' | 'upda
  */
 export const updateEventItem = async (
   id: string,
-  updates: Partial<Pick<Event, 'date' | 'title' | 'excerpt' | 'link'>>
+  updates: Partial<Pick<Event, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId'>>
 ): Promise<void> => {
   try {
     const eventRef = doc(db, EVENTS_COLLECTION, id);
@@ -315,6 +347,12 @@ export const updateEventItem = async (
     if (updates.link !== undefined) {
       updateData.link = updates.link.trim() || '';
     }
+    if (updates.pdfUrl !== undefined) {
+      updateData.pdfUrl = updates.pdfUrl.trim() || '';
+    }
+    if (updates.pdfPublicId !== undefined) {
+      updateData.pdfPublicId = updates.pdfPublicId.trim() || '';
+    }
     
     await updateDoc(eventRef, updateData);
   } catch (error) {
@@ -324,11 +362,22 @@ export const updateEventItem = async (
 };
 
 /**
- * Delete an event item
+ * Delete an event item (and its PDF from storage if present)
  */
 export const deleteEventItem = async (id: string): Promise<void> => {
   try {
     const eventRef = doc(db, EVENTS_COLLECTION, id);
+    const docSnapshot = await getDoc(eventRef);
+    if (docSnapshot.exists()) {
+      const data = docSnapshot.data();
+      if (data.pdfUrl) {
+        try {
+          await deleteFileFromStorage(data.pdfUrl, data.pdfPublicId);
+        } catch (storageError) {
+          console.warn('Failed to delete PDF from storage:', storageError);
+        }
+      }
+    }
     await deleteDoc(eventRef);
   } catch (error) {
     console.error('Error deleting event:', error);
@@ -360,6 +409,8 @@ export const subscribeToEvents = (
             title: data.title || '',
             excerpt: data.excerpt || '',
             link: data.link || undefined,
+            pdfUrl: data.pdfUrl || undefined,
+            pdfPublicId: data.pdfPublicId || undefined,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             order: data.order

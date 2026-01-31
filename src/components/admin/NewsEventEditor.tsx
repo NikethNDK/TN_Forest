@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Plus, Edit, Trash2, FileText } from 'lucide-react';
 import type { NewsItem, Event } from '../../types';
 import Modal from './Modal';
 import ConfirmationDialog from '../common/ConfirmationDialog';
 import { useConfirmation } from '../../hooks/useConfirmation';
+import { uploadPDFFile } from '../../services/admin/fileUploadService';
 
 interface NewsEventEditorProps<T extends NewsItem | Event> {
   items: T[];
@@ -31,6 +32,10 @@ const NewsEventEditor = <T extends NewsItem | Event>({
   const [showForm, setShowForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isUploadingPdf, setIsUploadingPdf] = useState(false);
+  const [uploadPdfProgress, setUploadPdfProgress] = useState(0);
+  const [uploadPdfError, setUploadPdfError] = useState<string | null>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const confirmation = useConfirmation();
 
   const handleAdd = () => {
@@ -38,11 +43,15 @@ const NewsEventEditor = <T extends NewsItem | Event>({
       date: '',
       title: '',
       excerpt: '',
-      link: undefined
+      link: undefined,
+      pdfUrl: undefined,
+      pdfPublicId: undefined
     } as T;
     setFormData(newItem);
     setEditingId(null);
     setShowForm(true);
+    setUploadPdfError(null);
+    pdfInputRef.current?.setAttribute('value', '');
   };
 
   const handleEdit = (id: string) => {
@@ -51,7 +60,67 @@ const NewsEventEditor = <T extends NewsItem | Event>({
       setFormData({ ...item });
       setEditingId(id);
       setShowForm(true);
+      setUploadPdfError(null);
+      pdfInputRef.current?.setAttribute('value', '');
     }
+  };
+
+  const handleLinkChange = (value: string) => {
+    const trimmed = value.trim() || undefined;
+    setFormData({
+      ...formData!,
+      link: trimmed,
+      pdfUrl: trimmed ? undefined : formData?.pdfUrl,
+      pdfPublicId: trimmed ? undefined : formData?.pdfPublicId
+    } as T);
+    if (trimmed && pdfInputRef.current) {
+      pdfInputRef.current.value = '';
+    }
+  };
+
+  const handlePdfSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !formData) return;
+    if (file.type !== 'application/pdf') {
+      setUploadPdfError('Please select a PDF file.');
+      return;
+    }
+    setUploadPdfError(null);
+    setIsUploadingPdf(true);
+    setUploadPdfProgress(0);
+    try {
+      const result = await uploadPDFFile(
+        file,
+        'tn-forest/news-events-pdf',
+        (progress) => setUploadPdfProgress(progress)
+      );
+      if (result.success && result.path && result.publicId !== undefined) {
+        setFormData({
+          ...formData,
+          pdfUrl: result.path,
+          pdfPublicId: result.publicId || '',
+          link: undefined
+        } as T);
+      } else {
+        setUploadPdfError(result.error || 'Failed to upload PDF');
+      }
+    } catch (err) {
+      setUploadPdfError(err instanceof Error ? err.message : 'Failed to upload PDF');
+    } finally {
+      setIsUploadingPdf(false);
+      setUploadPdfProgress(0);
+      e.target.value = '';
+    }
+  };
+
+  const handleRemovePdf = () => {
+    setFormData({
+      ...formData!,
+      pdfUrl: undefined,
+      pdfPublicId: undefined
+    } as T);
+    pdfInputRef.current?.setAttribute('value', '');
+    setUploadPdfError(null);
   };
 
   const handleSave = async () => {
@@ -60,20 +129,22 @@ const NewsEventEditor = <T extends NewsItem | Event>({
     setIsSaving(true);
     try {
       if (editingId && onEdit) {
-        // Edit existing item
         await onEdit(editingId, {
           date: formData.date,
           title: formData.title,
           excerpt: formData.excerpt,
-          link: formData.link
+          link: formData.link ?? '',
+          pdfUrl: formData.pdfUrl ?? '',
+          pdfPublicId: formData.pdfPublicId ?? ''
         } as Partial<T>);
       } else if (onAdd) {
-        // Add new item
         await onAdd({
           date: formData.date,
           title: formData.title,
           excerpt: formData.excerpt,
-          link: formData.link
+          link: formData.link ?? '',
+          pdfUrl: formData.pdfUrl ?? '',
+          pdfPublicId: formData.pdfPublicId ?? ''
         } as Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'order'>);
       } else if (onItemsChange) {
         // Fallback to old behavior
@@ -206,15 +277,80 @@ const NewsEventEditor = <T extends NewsItem | Event>({
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Link (Optional)
+              Link (Optional — use either link or PDF, not both)
             </label>
             <input
               type="text"
               value={formData?.link || ''}
-              onChange={(e) => setFormData({ ...formData!, link: e.target.value.trim() || undefined } as T)}
+              onChange={(e) => handleLinkChange(e.target.value)}
               placeholder="/news/article-name or https://example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              disabled={!!formData?.pdfUrl}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              PDF (Optional — use either link or PDF, not both)
+            </label>
+            {formData?.pdfUrl && !isUploadingPdf && (
+              <div className="mb-2 p-2 bg-green-50 rounded-lg flex items-center justify-between gap-2">
+                <a
+                  href={formData.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-green-600 hover:underline flex items-center gap-1 truncate"
+                >
+                  <FileText className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">{formData.pdfUrl.split('/').pop() || 'PDF'}</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={handleRemovePdf}
+                  className="text-red-600 hover:text-red-700 text-sm font-medium flex-shrink-0"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+            {!formData?.pdfUrl && (
+              <div className="space-y-2">
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handlePdfSelect}
+                  className="hidden"
+                  disabled={!!formData?.link || isUploadingPdf}
+                />
+                <button
+                  type="button"
+                  onClick={() => pdfInputRef.current?.click()}
+                  disabled={!!formData?.link || isUploadingPdf}
+                  className="relative w-full min-h-[42px] px-4 py-2 rounded-lg border-2 border-dashed border-green-300 bg-green-50 text-green-700 font-medium text-sm hover:bg-green-100 hover:border-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors overflow-hidden"
+                >
+                  {isUploadingPdf ? (
+                    <>
+                      <span className="relative z-10">Uploading… {uploadPdfProgress}%</span>
+                      <span
+                        className="absolute inset-y-0 left-0 bg-green-200 transition-all duration-300"
+                        style={{ width: `${uploadPdfProgress}%` }}
+                      />
+                    </>
+                  ) : (
+                    'Choose PDF to upload'
+                  )}
+                </button>
+                {isUploadingPdf && (
+                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-green-600 transition-all duration-300"
+                      style={{ width: `${uploadPdfProgress}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+            {uploadPdfError && <p className="text-sm text-red-600 mt-1">{uploadPdfError}</p>}
           </div>
           <div className="flex gap-2 pt-4">
             <button
@@ -254,6 +390,11 @@ const NewsEventEditor = <T extends NewsItem | Event>({
                 {item.link && (
                   <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-sm text-green-600 hover:underline">
                     {item.link}
+                  </a>
+                )}
+                {item.pdfUrl && !item.link && (
+                  <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-green-600 hover:underline inline-flex items-center gap-1">
+                    <FileText className="h-4 w-4" /> View PDF
                   </a>
                 )}
               </div>

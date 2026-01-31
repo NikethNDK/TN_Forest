@@ -102,14 +102,14 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                         </p>
                         <h4 className="font-bold text-green-800 mb-1 text-sm">{news.title}</h4>
                         <p className="text-xs text-gray-600 mb-2 line-clamp-2">{news.excerpt}</p>
-                        {news.link && (
+                        {(news.link || news.pdfUrl) && (
                           <a 
-                            href={news.link} 
+                            href={news.link || news.pdfUrl} 
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
                           >
-                            Read more
+                            {news.pdfUrl && !news.link ? 'View PDF' : 'Read more'}
                             <ExternalLink className="h-3 w-3 ml-1" />
                           </a>
                         )}
@@ -134,14 +134,14 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                         </p>
                         <h4 className="font-bold text-green-800 mb-1 text-sm">{event.title}</h4>
                         <p className="text-xs text-gray-600 mb-2 line-clamp-2">{event.excerpt}</p>
-                        {event.link && (
+                        {(event.link || event.pdfUrl) && (
                           <a 
-                            href={event.link} 
+                            href={event.link || event.pdfUrl} 
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
                           >
-                            View details
+                            {event.pdfUrl && !event.link ? 'View PDF' : 'View details'}
                             <ExternalLink className="h-3 w-3 ml-1" />
                           </a>
                         )}

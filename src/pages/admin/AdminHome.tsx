@@ -26,6 +26,7 @@ import {
   updateEventItem,
   deleteEventItem
 } from '../../services/firebase/newsEventService';
+import { deleteFileFromStorage } from '../../services/firebase/storageService';
 import {
   subscribeToSliderImages,
   addSliderImage,
@@ -202,6 +203,14 @@ const AdminHome: React.FC = () => {
 
   const handleEditNews = async (id: string, updates: Partial<NewsItem>) => {
     try {
+      const existing = news.find((n) => n.id === id);
+      if (existing?.pdfUrl && (updates.pdfUrl === '' || updates.pdfUrl === undefined)) {
+        try {
+          await deleteFileFromStorage(existing.pdfUrl, existing.pdfPublicId);
+        } catch (storageError) {
+          console.warn('Failed to delete PDF from storage:', storageError);
+        }
+      }
       await updateNewsItem(id, updates);
     } catch (error) {
       console.error('Error updating news:', error);
@@ -230,6 +239,14 @@ const AdminHome: React.FC = () => {
 
   const handleEditEvent = async (id: string, updates: Partial<Event>) => {
     try {
+      const existing = events.find((e) => e.id === id);
+      if (existing?.pdfUrl && (updates.pdfUrl === '' || updates.pdfUrl === undefined)) {
+        try {
+          await deleteFileFromStorage(existing.pdfUrl, existing.pdfPublicId);
+        } catch (storageError) {
+          console.warn('Failed to delete PDF from storage:', storageError);
+        }
+      }
       await updateEventItem(id, updates);
     } catch (error) {
       console.error('Error updating event:', error);
