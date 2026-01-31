@@ -23,6 +23,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) => {
               src={product.imageUrl} 
               alt={product.name}
               className="w-full h-full object-cover"
+              loading="lazy"
             />
             <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-green-700 font-semibold text-xs px-2 py-1 rounded-full shadow-sm">
               {product.category}

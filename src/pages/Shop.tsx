@@ -27,6 +27,23 @@ import { useFertilizerOrderForm, FertilizerCheckoutData } from '../hooks/useFert
 
 const ITEMS_PER_PAGE = 12;
 
+// Public folder images for bio fertilizers (used when tab is Bio Fertilizers)
+const BIO_FERTILIZER_IMAGES = [
+  { name: 'Azospirillum', path: '/azospirillum.jpg' },
+  { name: 'Phospho Bacteria', path: encodeURI('/phospo bacteria.jpg') },
+  { name: 'Vermicasting', path: '/vermicasting.jpeg' },
+  { name: 'Vesicular Arbuscular Mycorrhizae', path: encodeURI('/Vesicular Arbuscular Mycorrhizae.jpg') },
+] as const;
+
+function getBioFertilizerImageUrl(productName: string): string | undefined {
+  const n = productName.toLowerCase();
+  if (n.includes('azospirillum')) return BIO_FERTILIZER_IMAGES[0].path;
+  if ((n.includes('phospo') || n.includes('phospho')) && n.includes('bacteria')) return BIO_FERTILIZER_IMAGES[1].path;
+  if (n.includes('vermicasting')) return BIO_FERTILIZER_IMAGES[2].path;
+  if ((n.includes('vesicular') && n.includes('mycorrhizae')) || n.includes('vam')) return BIO_FERTILIZER_IMAGES[3].path;
+  return undefined;
+}
+
 const Shop: React.FC = () => {
   const navigate = useNavigate();
 
@@ -155,12 +172,12 @@ const Shop: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <Leaf className="h-10 w-10 text-lime-600 mx-auto mb-3" />
-          <h1 className="text-4xl md:text-5xl font-extrabold text-green-900 mb-4">
-            Forest Products Research Supply
+          <h1 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-4">
+          TamilNadu Forest Department's Research Eco-Store
           </h1>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Discover high-quality saplings, seeds, and bio-fertilizers, genetically
-            verified by our research centers, for sustainable cultivation and
+            Explore high-quality saplings, seeds, and bio-fertilizers
+            from our research centers, for sustainable cultivation and
             afforestation projects in India.
           </p>
         </div>
@@ -375,7 +392,10 @@ const Shop: React.FC = () => {
                           (product) => (
                             <ProductCard
                               key={product.id}
-                              product={product}
+                              product={{
+                                ...product,
+                                imageUrl: product.imageUrl || getBioFertilizerImageUrl(product.name),
+                              }}
                               addToCart={addToCart}
                             />
                           )
