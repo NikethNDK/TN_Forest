@@ -88,7 +88,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
               </div>
 
               {/* Latest News Section */}
-              {displayNews.length > 0 && (
+              {/* {displayNews.length > 0 && (
                 <div className="mb-4">
                   <h3 className="text-lg font-bold text-green-900 mb-3 flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-lime-600" />
@@ -117,10 +117,10 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Recent Events Section */}
-              {displayEvents.length > 0 && (
+              {/* {displayEvents.length > 0 && (
                 <div>
                   <h3 className="text-lg font-bold text-green-900 mb-3 flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-lime-600" />
@@ -149,7 +149,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>

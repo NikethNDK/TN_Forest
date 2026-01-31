@@ -159,7 +159,7 @@ const Shop: React.FC = () => {
             Forest Products Research Supply
           </h1>
           <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Discover high-quality saplings, seeds, and bio-fertilizers, genetically
+            Discover Tamilnadu Forest Research Centre E-Shop / Eco Store, genetically
             verified by our research centers, for sustainable cultivation and
             afforestation projects in India.
           </p>

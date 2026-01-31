@@ -17,7 +17,7 @@ const Header: React.FC = () => {
         <img 
           src="/logo192.png" 
           alt="Tamil Nadu Forest Department Research Wing Logo"
-          className="w-14 h-14 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full flex-shrink-0" 
+          className="w-14 h-14 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-full flex-shrink-0" 
         />
         
         {/* Text Content */}
@@ -32,7 +32,7 @@ const Header: React.FC = () => {
           
           {/* Subtitle */}
           <p 
-            className="text-xs sm:text-sm md:text-base mt-0.5 sm:mt-1 max-w-2xl"
+            className="text-[0.65rem] sm:text-xs md:text-sm mt-0.5 sm:mt-1 max-w-2xl"
             style={{ color: colors.text.secondary }}
           >
             Advancing forest research, conservation, and sustainable development for a greener tomorrow
