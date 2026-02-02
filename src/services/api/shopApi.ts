@@ -41,6 +41,21 @@ shopClient.interceptors.response.use(
 
 export type { ShopDivision };
 
+// --- Me (current user + admin profile) ---
+
+export interface MeResponse {
+  id: number;
+  firebase_uid: string;
+  email: string;
+  admin_type: string | null;
+  division_ids: number[];
+}
+
+export async function getMe(): Promise<MeResponse> {
+  const { data } = await shopClient.get<MeResponse>('/api/users/me/');
+  return data;
+}
+
 // --- Divisions ---
 
 export async function getDivisions(): Promise<ShopDivision[]> {
@@ -143,9 +158,50 @@ export interface UpdateProductPayload {
   image_icon?: string | null;
 }
 
+/** Paginated list response from GET /api/inventory/products/ */
+export interface ProductsPaginatedResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: ShopProductFromApi[];
+}
+
+export interface ProductsListParams {
+  division?: number;
+  category?: string;
+  ordering?: string;
+}
+
+/** Returns first page of products (backward compat). Prefer getProductsPaginated for list UI. */
 export async function getProducts(): Promise<ShopProductFromApi[]> {
-  const { data } = await shopClient.get<ShopProductApi[]>('/api/inventory/products/');
-  return data.map(normalizeProduct);
+  const res = await getProductsPaginated(1, 100);
+  return res.results;
+}
+
+export async function getProductsPaginated(
+  page: number = 1,
+  pageSize: number = 10,
+  params?: ProductsListParams
+): Promise<ProductsPaginatedResponse> {
+  const requestParams: Record<string, string | number | undefined> = {
+    page,
+    page_size: pageSize,
+  };
+  if (params?.division !== undefined) requestParams.division = params.division;
+  if (params?.category !== undefined && params.category !== '') requestParams.category = params.category;
+  if (params?.ordering !== undefined && params.ordering !== '') requestParams.ordering = params.ordering;
+  const { data } = await shopClient.get<{
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: ShopProductApi[];
+  }>('/api/inventory/products/', { params: requestParams });
+  return {
+    count: data.count,
+    next: data.next,
+    previous: data.previous,
+    results: data.results.map(normalizeProduct),
+  };
 }
 
 export async function getProduct(id: number): Promise<ShopProductFromApi> {

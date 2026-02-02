@@ -1,14 +1,16 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, ChevronUp, ChevronDown } from 'lucide-react';
 import { LoadingSpinner } from '../../../components/common';
 import ConfirmationDialog from '../../../components/common/ConfirmationDialog';
 import Modal from '../../../components/admin/Modal';
+import Pagination from '../../../components/shop/Pagination';
 import { useConfirmation } from '../../../hooks/useConfirmation';
 import ImageUploader from '../../../components/admin/ImageUploader';
 import { deleteFileFromStorage } from '../../../services/firebase/storageService';
 import {
-  getProducts,
+  getProductsPaginated,
+  getMe,
   getDivisions,
   createProduct,
   updateProduct,
@@ -23,9 +25,20 @@ const PRODUCT_IMAGE_DIR = 'tn-forest/products';
 
 const CATEGORY_OPTIONS = ['Seeds', 'Bio Fertilizers'] as const;
 
+const DEFAULT_PAGE_SIZE = 10;
+
+type OrderBy = '' | 'price' | '-price' | 'stock' | '-stock';
+
 const AdminShopProducts: React.FC = () => {
   const [products, setProducts] = useState<ShopProductFromApi[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(DEFAULT_PAGE_SIZE);
   const [divisions, setDivisions] = useState<ShopDivision[]>([]);
+  const [adminType, setAdminType] = useState<string | null>(null);
+  const [divisionFilter, setDivisionFilter] = useState<number | ''>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [orderBy, setOrderBy] = useState<OrderBy>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -46,20 +59,29 @@ const AdminShopProducts: React.FC = () => {
 
   const confirmation = useConfirmation();
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const list = await getProducts();
-      setProducts(list);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to load products';
-      setError(message);
-      toast.error(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const fetchProducts = useCallback(
+    async (pageNum: number = page) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = {
+          division: divisionFilter !== '' ? divisionFilter : undefined,
+          category: categoryFilter !== '' ? categoryFilter : undefined,
+          ordering: orderBy !== '' ? orderBy : undefined,
+        };
+        const res = await getProductsPaginated(pageNum, pageSize, params);
+        setProducts(res.results);
+        setTotalCount(res.count);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to load products';
+        setError(message);
+        toast.error(message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [page, pageSize, divisionFilter, categoryFilter, orderBy]
+  );
 
   const fetchDivisions = useCallback(async () => {
     try {
@@ -70,10 +92,23 @@ const AdminShopProducts: React.FC = () => {
     }
   }, []);
 
+  const fetchMe = useCallback(async () => {
+    try {
+      const me = await getMe();
+      setAdminType(me.admin_type ?? null);
+    } catch (err) {
+      console.error('Failed to load me', err);
+    }
+  }, []);
+
   useEffect(() => {
-    fetchProducts();
+    fetchMe();
     fetchDivisions();
-  }, [fetchProducts, fetchDivisions]);
+  }, [fetchMe, fetchDivisions]);
+
+  useEffect(() => {
+    fetchProducts(page);
+  }, [fetchProducts, page]);
 
   const resetForm = useCallback(() => {
     setDivisionId('');
@@ -105,7 +140,7 @@ const AdminShopProducts: React.FC = () => {
       setNameInput(p.name);
       setDescriptionInput(p.description);
       setPriceInput(String(p.price));
-      setStockInput(String(p.stock));
+      setStockInput(p.stock != null ? String(p.stock) : '');
       setCategoryInput(p.category);
       setImageUrl(p.imageUrl || null);
       setImagePublicId(p.imagePublicId || null);
@@ -140,7 +175,7 @@ const AdminShopProducts: React.FC = () => {
     const description = descriptionInput.trim();
     const category = categoryInput.trim();
     const price = parseFloat(priceInput);
-    const stock = parseInt(stockInput, 10);
+    const stock = parseFloat(stockInput);
     if (!name || name.length < 2) {
       toast.error('Name is required (at least 2 characters)');
       return;
@@ -158,7 +193,7 @@ const AdminShopProducts: React.FC = () => {
       return;
     }
     if (Number.isNaN(stock) || stock < 0) {
-      toast.error('Stock must be 0 or greater');
+      toast.error('Stock (kg) must be 0 or greater');
       return;
     }
 
@@ -247,10 +282,69 @@ const AdminShopProducts: React.FC = () => {
     );
   }
 
+  const handleDivisionFilterChange = (value: number | '') => {
+    setDivisionFilter(value);
+    setPage(1);
+  };
+
+  const handleCategoryFilterChange = (value: string) => {
+    setCategoryFilter(value);
+    setPage(1);
+  };
+
+  const cyclePriceSort = () => {
+    setOrderBy((prev): OrderBy => (prev === '' ? 'price' : prev === 'price' ? '-price' : ''));
+    setPage(1);
+  };
+
+  const cycleStockSort = () => {
+    setOrderBy((prev): OrderBy => (prev === '' ? 'stock' : prev === 'stock' ? '-stock' : ''));
+    setPage(1);
+  };
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Products</h2>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-3">
+          {adminType === 'main_admin' && (
+            <div className="flex items-center gap-2">
+              <label htmlFor="filter-division" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                Division
+              </label>
+              <select
+                id="filter-division"
+                value={divisionFilter === '' ? '' : divisionFilter}
+                onChange={(e) => handleDivisionFilterChange(e.target.value === '' ? '' : Number(e.target.value))}
+                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+              >
+                <option value="">All</option>
+                {divisions.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className="flex items-center gap-2">
+            <label htmlFor="filter-category" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+              Category
+            </label>
+            <select
+              id="filter-category"
+              value={categoryFilter}
+              onChange={(e) => handleCategoryFilterChange(e.target.value)}
+              className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            >
+              <option value="">All</option>
+              {CATEGORY_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
         <button
           type="button"
           onClick={openCreate}
@@ -289,10 +383,26 @@ const AdminShopProducts: React.FC = () => {
                   Category
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price
+                  <button
+                    type="button"
+                    onClick={cyclePriceSort}
+                    className="inline-flex items-center gap-1 hover:text-gray-700 focus:outline-none"
+                  >
+                    Price
+                    {orderBy === 'price' && <ChevronUp className="h-4 w-4" />}
+                    {orderBy === '-price' && <ChevronDown className="h-4 w-4" />}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock
+                  <button
+                    type="button"
+                    onClick={cycleStockSort}
+                    className="inline-flex items-center gap-1 hover:text-gray-700 focus:outline-none"
+                  >
+                    Stock (kg)
+                    {orderBy === 'stock' && <ChevronUp className="h-4 w-4" />}
+                    {orderBy === '-stock' && <ChevronDown className="h-4 w-4" />}
+                  </button>
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -326,7 +436,7 @@ const AdminShopProducts: React.FC = () => {
                     ₹{p.price}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {p.stock}
+                    {typeof p.stock === 'number' ? `${p.stock} kg` : '—'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                     <button
@@ -350,6 +460,14 @@ const AdminShopProducts: React.FC = () => {
               ))}
             </tbody>
           </table>
+          <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 flex items-center justify-center">
+            <Pagination
+              currentPage={page}
+              totalPages={Math.ceil(totalCount / pageSize) || 1}
+              onPageChange={setPage}
+              alwaysShow
+            />
+          </div>
         </div>
       )}
 
@@ -427,12 +545,13 @@ const AdminShopProducts: React.FC = () => {
                 </div>
                 <div>
                   <label htmlFor="product-stock" className="block text-sm font-medium text-gray-700 mb-1">
-                    Stock *
+                    Stock (kg) *
                   </label>
                   <input
                     id="product-stock"
                     type="number"
                     min={0}
+                    step={0.01}
                     value={stockInput}
                     onChange={(e) => setStockInput(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"

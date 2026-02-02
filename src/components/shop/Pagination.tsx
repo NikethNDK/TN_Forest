@@ -11,14 +11,18 @@ interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  /** When true, always show the bar (buttons disabled when only one page). */
+  alwaysShow?: boolean;
 }
 
 const Pagination: React.FC<PaginationProps> = ({
   currentPage,
   totalPages,
   onPageChange,
+  alwaysShow = false,
 }) => {
-  if (totalPages <= 1) return null;
+  const totalPagesSafe = Math.max(1, totalPages);
+  if (!alwaysShow && totalPagesSafe <= 1) return null;
 
   return (
     <div className="flex items-center justify-center gap-4 mt-8">
@@ -31,11 +35,11 @@ const Pagination: React.FC<PaginationProps> = ({
         Previous
       </button>
       <span className="text-gray-700 font-medium">
-        Page {currentPage} of {totalPages}
+        Page {currentPage} of {totalPagesSafe}
       </span>
       <button
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        disabled={currentPage === totalPages}
+        onClick={() => onPageChange(Math.min(totalPagesSafe, currentPage + 1))}
+        disabled={currentPage === totalPagesSafe}
         className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
       >
         Next
