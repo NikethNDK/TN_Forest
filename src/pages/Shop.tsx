@@ -21,7 +21,7 @@ import ProductCard from '../components/shop/ProductCard';
 import CartSidebar from '../components/shop/CartSidebar';
 import Pagination from '../components/shop/Pagination';
 import BioFertilizerOrderForm from '../components/shop/BioFertilizerOrderForm';
-import { subscribeToShopProducts, isProductInStock } from '../services/firebase/shopProductService';
+import { getPublicProducts } from '../services/api/publicShopApi';
 import { useCart } from '../hooks/useCart';
 import { useFertilizerOrderForm, FertilizerCheckoutData } from '../hooks/useFertilizerOrderForm';
 
@@ -47,7 +47,7 @@ function getBioFertilizerImageUrl(productName: string): string | undefined {
 const Shop: React.FC = () => {
   const navigate = useNavigate();
 
-  // Products state from Firebase
+  // Products state from public API (DB)
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +78,7 @@ const Shop: React.FC = () => {
 
   // Get available fertilizers (needs to be before hook call)
   const availableFertilizers = products.filter(
-    (p) => p.category === 'Bio Fertilizers' && isProductInStock(p)
+    (p) => p.category === 'Bio Fertilizers' && p.stock > 0
   );
 
   /**
@@ -117,23 +117,30 @@ const Shop: React.FC = () => {
     availableFertilizers,
   });
 
-  // Subscribe to products from Firebase
+  // Fetch products from public API on mount
   useEffect(() => {
+    let cancelled = false;
     setIsLoading(true);
-    const unsubscribe = subscribeToShopProducts(
-      (fetchedProducts) => {
-        setProducts(fetchedProducts);
-        setIsLoading(false);
-        setError(null);
-      },
-      (err) => {
-        console.error('Error fetching products:', err);
-        setError('Failed to load products. Please try again later.');
-        setIsLoading(false);
-      }
-    );
-
-    return () => unsubscribe();
+    setError(null);
+    getPublicProducts()
+      .then((fetchedProducts) => {
+        if (!cancelled) {
+          setProducts(fetchedProducts);
+          setError(null);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error('Error fetching products:', err);
+          setError(err instanceof Error ? err.message : 'Failed to load products. Please try again later.');
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Reset pagination when tab or search changes
