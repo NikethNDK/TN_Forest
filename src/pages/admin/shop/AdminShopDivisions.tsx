@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from '../../../components/common';
+import ConfirmationDialog from '../../../components/common/ConfirmationDialog';
+import Modal from '../../../components/admin/Modal';
 import { useConfirmation } from '../../../hooks/useConfirmation';
 import {
   getDivisions,
@@ -210,74 +212,57 @@ const AdminShopDivisions: React.FC = () => {
         </div>
       )}
 
-      {/* Create/Edit modal */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              {modalMode === 'create' ? 'Add Division' : 'Edit Division'}
-            </h3>
-            <form onSubmit={handleSubmit}>
-              <label htmlFor="division-name" className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
-              <input
-                id="division-name"
-                type="text"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                placeholder="Division name"
-                autoFocus
-                disabled={submitting}
-              />
-              <div className="mt-6 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-                  disabled={submitting}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 disabled:opacity-50"
-                  disabled={submitting}
-                >
-                  {submitting ? 'Saving...' : modalMode === 'create' ? 'Create' : 'Save'}
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={modalMode === 'create' ? 'Add Division' : 'Edit Division'}
+        size="sm"
+        closeOnOutsideClick={false}
+      >
+        <form onSubmit={handleSubmit}>
+          <label htmlFor="division-name" className="block text-sm font-medium text-gray-700 mb-1">
+            Name
+          </label>
+          <input
+            id="division-name"
+            type="text"
+            value={nameInput}
+            onChange={(e) => setNameInput(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+            placeholder="Division name"
+            autoFocus
+            disabled={submitting}
+          />
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={closeModal}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 disabled:opacity-50"
+              disabled={submitting}
+            >
+              {submitting ? 'Saving...' : modalMode === 'create' ? 'Create' : 'Save'}
+            </button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
 
-      {/* Delete confirmation modal */}
-      {confirmation.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-lg shadow-xl max-w-sm w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">{confirmation.title}</h3>
-            <p className="text-gray-600 mb-6">{confirmation.message}</p>
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={confirmation.close}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-              >
-                {confirmation.cancelText ?? 'Cancel'}
-              </button>
-              <button
-                type="button"
-                onClick={confirmation.onConfirm}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-              >
-                {confirmation.confirmText ?? 'Confirm'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationDialog
+        isOpen={confirmation.isOpen}
+        onClose={confirmation.close}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title || 'Confirm Action'}
+        message={confirmation.message}
+        confirmText={confirmation.confirmText}
+        cancelText={confirmation.cancelText}
+        variant={confirmation.variant}
+      />
     </div>
   );
 };
