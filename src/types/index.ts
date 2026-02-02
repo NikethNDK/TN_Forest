@@ -71,6 +71,14 @@ export interface Division {
   updatedAt?: any; // Firestore Timestamp
 }
 
+// EcoStore backend division (Django API); distinct from public-site Division
+export interface ShopDivision {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Shop Product type
 export interface ShopProduct {
   id?: string; // Firestore document ID

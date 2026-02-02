@@ -11,8 +11,8 @@ import {
   ChevronRight,
   Menu,
   X,
-  LogOut
-  // Info
+  LogOut,
+  ShoppingBag
 } from 'lucide-react';
 import { divisions } from '../../data/mockData';
 import { signOutUser } from '../../services/firebase/authService';
@@ -44,6 +44,9 @@ const AdminSidebar: React.FC = () => {
   const isActive = (path: string) => {
     if (path === '/admin') {
       return location.pathname === '/admin';
+    }
+    if (path === '/admin/shop') {
+      return location.pathname.startsWith('/admin/shop');
     }
     return location.pathname.startsWith(path);
   };
@@ -148,6 +151,22 @@ const AdminSidebar: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* EcoStore Admin */}
+          <Link
+            to="/admin/shop"
+            onClick={() => setIsOpen(false)}
+            className={`
+              flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+              ${isActive('/admin/shop')
+                ? 'bg-green-700 text-lime-400'
+                : 'text-green-100 hover:bg-green-800 hover:text-white'
+              }
+            `}
+          >
+            <ShoppingBag className="h-5 w-5" />
+            <span className="font-medium">EcoStore Admin</span>
+          </Link>
 
           {/* Back to Site & Logout */}
           <div className="pt-4 border-t border-green-800 mt-4 space-y-2">
