@@ -56,8 +56,11 @@ const AdminShopProducts: React.FC = () => {
   const [imagePublicId, setImagePublicId] = useState<string | null>(null);
   const [imageIconInput, setImageIconInput] = useState('');
   const [imageJustUploadedInThisSession, setImageJustUploadedInThisSession] = useState(false);
+  const [imageUploading, setImageUploading] = useState(false);
 
   const confirmation = useConfirmation();
+
+  const formDisabled = submitting || imageUploading;
 
   const fetchProducts = useCallback(
     async (pageNum: number = page) => {
@@ -121,6 +124,7 @@ const AdminShopProducts: React.FC = () => {
     setImagePublicId(null);
     setImageIconInput('');
     setImageJustUploadedInThisSession(false);
+    setImageUploading(false);
     setEditingId(null);
     setSubmitting(false);
   }, []);
@@ -488,7 +492,7 @@ const AdminShopProducts: React.FC = () => {
                   value={divisionId}
                   onChange={(e) => setDivisionId(e.target.value === '' ? '' : Number(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  disabled={submitting}
+                  disabled={formDisabled}
                 >
                   <option value="">Select division</option>
                   {divisions.map((d) => (
@@ -509,7 +513,7 @@ const AdminShopProducts: React.FC = () => {
                   onChange={(e) => setNameInput(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="Product name"
-                  disabled={submitting}
+                  disabled={formDisabled}
                 />
               </div>
               <div>
@@ -523,7 +527,7 @@ const AdminShopProducts: React.FC = () => {
                   rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="Description"
-                  disabled={submitting}
+                  disabled={formDisabled}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -540,7 +544,7 @@ const AdminShopProducts: React.FC = () => {
                     onChange={(e) => setPriceInput(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="0.00"
-                    disabled={submitting}
+                    disabled={formDisabled}
                   />
                 </div>
                 <div>
@@ -556,7 +560,7 @@ const AdminShopProducts: React.FC = () => {
                     onChange={(e) => setStockInput(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     placeholder="0"
-                    disabled={submitting}
+                    disabled={formDisabled}
                   />
                 </div>
               </div>
@@ -569,7 +573,7 @@ const AdminShopProducts: React.FC = () => {
                   value={categoryInput}
                   onChange={(e) => setCategoryInput(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                  disabled={submitting}
+                  disabled={formDisabled}
                 >
                   <option value="">Select category</option>
                   {CATEGORY_OPTIONS.map((opt) => (
@@ -588,6 +592,7 @@ const AdminShopProducts: React.FC = () => {
                     <ImageUploader
                       currentImage={imageUrl ?? undefined}
                       onImageChange={handleImageChange}
+                      onUploadingChange={setImageUploading}
                       directory={PRODUCT_IMAGE_DIR}
                       label="Upload image"
                       requireTitle={false}
@@ -599,7 +604,7 @@ const AdminShopProducts: React.FC = () => {
                       onClick={handleRemoveImage}
                       className="p-2 text-red-600 hover:bg-red-50 rounded"
                       aria-label="Remove image"
-                      disabled={submitting}
+                      disabled={formDisabled}
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -618,7 +623,7 @@ const AdminShopProducts: React.FC = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                   placeholder="e.g. 🌿"
                   maxLength={16}
-                  disabled={submitting}
+                  disabled={formDisabled}
                 />
               </div>
               <div className="mt-6 flex justify-end gap-2">
@@ -626,16 +631,16 @@ const AdminShopProducts: React.FC = () => {
                   type="button"
                   onClick={closeModal}
                   className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-                  disabled={submitting}
+                  disabled={formDisabled}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 disabled:opacity-50"
-                  disabled={submitting}
+                  disabled={formDisabled}
                 >
-                  {submitting ? 'Saving...' : modalMode === 'create' ? 'Create' : 'Save'}
+                  {submitting ? 'Saving...' : imageUploading ? 'Uploading...' : modalMode === 'create' ? 'Create' : 'Save'}
                 </button>
               </div>
             </form>

@@ -6,6 +6,8 @@ import GalleryUploadModal, { ImageWithTitle, ExistingImageForEdit } from './Gall
 interface ImageUploaderProps {
   currentImage?: string;
   onImageChange: (imagePath: string, publicId?: string, title?: string) => void;
+  /** Called when upload starts (true) or ends (false). Use to disable parent form submit while uploading. */
+  onUploadingChange?: (uploading: boolean) => void;
   directory?: string;
   label?: string;
   accept?: string;
@@ -15,6 +17,7 @@ interface ImageUploaderProps {
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   currentImage,
   onImageChange,
+  onUploadingChange,
   directory = 'images',
   label = 'Upload Image',
   accept = 'image/jpeg,image/jpg,image/png,image/webp',
@@ -71,6 +74,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const uploadFile = async (file: File, previewUrl: string, title?: string) => {
     setUploading(true);
+    onUploadingChange?.(true);
     setPreview(previewUrl);
 
     try {
@@ -107,6 +111,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       setUploadProgress(0);
     } finally {
       setUploading(false);
+      onUploadingChange?.(false);
     }
   };
 
