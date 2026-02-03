@@ -22,8 +22,12 @@ import CartSidebar from '../components/shop/CartSidebar';
 import Pagination from '../components/shop/Pagination';
 import BioFertilizerOrderForm from '../components/shop/BioFertilizerOrderForm';
 import { getPublicProducts } from '../services/api/publicShopApi';
+import { subscribeToShopProducts } from '../services/firebase/shopProductService';
 import { useCart } from '../hooks/useCart';
 import { useFertilizerOrderForm, FertilizerCheckoutData } from '../hooks/useFertilizerOrderForm';
+
+/** When true, fetch from server DB and fall back to Firestore on error. When false, use Firestore only. */
+const USE_SERVER_DB = false;
 
 const ITEMS_PER_PAGE = 12;
 
@@ -117,29 +121,68 @@ const Shop: React.FC = () => {
     availableFertilizers,
   });
 
-  // Fetch products from public API on mount
+  // Fetch products: server DB (with Firestore fallback) or Firestore only, depending on USE_SERVER_DB
   useEffect(() => {
     let cancelled = false;
+    let firestoreUnsubscribe: (() => void) | null = null;
+
     setIsLoading(true);
     setError(null);
+
+    if (!USE_SERVER_DB) {
+      firestoreUnsubscribe = subscribeToShopProducts(
+        (fetchedProducts) => {
+          if (!cancelled) {
+            setProducts(fetchedProducts);
+            setError(null);
+            setIsLoading(false);
+          }
+        },
+        (err) => {
+          if (!cancelled) {
+            console.error('Error fetching products:', err);
+            setError(err instanceof Error ? err.message : 'Failed to load products. Please try again later.');
+            setIsLoading(false);
+          }
+        }
+      );
+      return () => {
+        cancelled = true;
+        firestoreUnsubscribe?.();
+      };
+    }
+
     getPublicProducts()
       .then((fetchedProducts) => {
         if (!cancelled) {
           setProducts(fetchedProducts);
           setError(null);
+          setIsLoading(false);
         }
       })
       .catch((err) => {
         if (!cancelled) {
-          console.error('Error fetching products:', err);
-          setError(err instanceof Error ? err.message : 'Failed to load products. Please try again later.');
+          console.error('Error fetching products (falling back to Firestore):', err);
+          firestoreUnsubscribe = subscribeToShopProducts(
+            (fetchedProducts) => {
+              if (!cancelled) {
+                setProducts(fetchedProducts);
+                setError(null);
+                setIsLoading(false);
+              }
+            },
+            (firestoreErr) => {
+              if (!cancelled) {
+                setError(firestoreErr instanceof Error ? firestoreErr.message : 'Failed to load products. Please try again later.');
+                setIsLoading(false);
+              }
+            }
+          );
         }
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
       });
     return () => {
       cancelled = true;
+      firestoreUnsubscribe?.();
     };
   }, []);
 
