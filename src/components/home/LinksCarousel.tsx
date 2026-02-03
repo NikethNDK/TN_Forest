@@ -95,9 +95,9 @@ const LinksCarousel: React.FC = () => {
     : scrollDuration;
 
   return (
-    <section className="py-8 sm:py-12 bg-gradient-to-r from-green-50 to-lime-50 overflow-hidden">
+    <section className="py-8 sm:py-12 bg-gradient-to-r from-primary-lightest to-accent-lightest overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center text-green-900 mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-content-heading mb-6 sm:mb-8">
           Important & Useful Links
         </h2>
 
@@ -109,7 +109,7 @@ const LinksCarousel: React.FC = () => {
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex flex-col items-center bg-white rounded-lg p-3 sm:p-4 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-green-600 hover:border-lime-500"
+              className="flex flex-col items-center bg-background-paper rounded-lg p-3 sm:p-4 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-border-primary hover:border-accent-dark"
             >
               <div className="mb-2 sm:mb-3 flex-shrink-0 flex items-center justify-center h-10 w-10 sm:h-12 sm:w-12">
                 <img
@@ -119,7 +119,7 @@ const LinksCarousel: React.FC = () => {
                 />
               </div>
               
-              <h3 className="font-medium text-green-800 text-center text-xs sm:text-sm line-clamp-2">
+              <h3 className="font-medium text-content-headingSecondary text-center text-xs sm:text-sm line-clamp-2">
                 {link.title}
               </h3>
             </a>
@@ -165,7 +165,7 @@ const LinksCarousel: React.FC = () => {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex flex-col items-center bg-white rounded-lg p-4 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-green-600 hover:border-lime-500 flex-shrink-0 w-[200px] min-h-[140px]"
+                className="flex flex-col items-center bg-background-paper rounded-lg p-4 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-t-4 border-border-primary hover:border-accent-dark flex-shrink-0 w-[200px] min-h-[140px]"
               >
                 <div className="mb-3 flex-shrink-0 flex items-center justify-center h-14 w-14">
                   <img
@@ -175,7 +175,7 @@ const LinksCarousel: React.FC = () => {
                   />
                 </div>
                 
-                <h3 className="font-medium text-green-800 text-center text-sm leading-tight">
+                <h3 className="font-medium text-content-headingSecondary text-center text-sm leading-tight">
                   {link.title}
                 </h3>
               </a>

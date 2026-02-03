@@ -48,15 +48,15 @@ const ContentModal: React.FC<ContentModalProps> = ({
       
       {/* Modal */}
       <div
-        className={`relative bg-white rounded-xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-hidden flex flex-col`}
+        className={`relative bg-background-paper rounded-xl shadow-2xl ${sizeClasses[size]} w-full max-h-[90vh] overflow-hidden flex flex-col`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-green-900">{title}</h2>
+        <div className="flex items-center justify-between p-6 border-b border-border-light">
+          <h2 className="text-2xl font-bold text-content-heading">{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
+            className="p-2 hover:bg-background-subtle rounded-lg transition-colors text-content-tertiary hover:text-content-primary"
           >
             <X className="h-5 w-5" />
           </button>

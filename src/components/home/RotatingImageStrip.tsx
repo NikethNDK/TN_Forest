@@ -88,18 +88,18 @@ const RotatingImageStrip: React.FC = () => {
 
         <button
           onClick={prevImage}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-20"
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-background-paper/90 hover:bg-background-paper p-2 sm:p-3 rounded-full shadow-lg transition-all z-20"
           aria-label="Previous image"
         >
-          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-content-headingSecondary" />
         </button>
 
         <button
           onClick={nextImage}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 sm:p-3 rounded-full shadow-lg transition-all z-20"
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-background-paper/90 hover:bg-background-paper p-2 sm:p-3 rounded-full shadow-lg transition-all z-20"
           aria-label="Next image"
         >
-          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-green-800" />
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-content-headingSecondary" />
         </button>
 
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
@@ -109,8 +109,8 @@ const RotatingImageStrip: React.FC = () => {
               onClick={() => setCurrentIndex(index)}
               className={`h-2 rounded-full transition-all ${
                 index === currentIndex 
-                  ? 'w-8 bg-white' 
-                  : 'w-2 bg-white/50 hover:bg-white/75'
+                  ? 'w-8 bg-background-paper' 
+                  : 'w-2 bg-background-paper/50 hover:bg-background-paper/75'
               }`}
               aria-label={`Go to image ${index + 1}`}
             />

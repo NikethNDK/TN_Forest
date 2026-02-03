@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { 
+import {
   subscribeToGlobalGalleryImages,
-  subscribeToDivisionGalleryImages 
+  subscribeToDivisionGalleryImages
 } from '../../services/firebase/galleryImageService';
 import { getOptimizedImageUrl } from '../../utils/imageOptimization';
 import type { GalleryImage } from '../../types';
@@ -13,6 +13,9 @@ interface ImageCarouselProps {
 
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) => {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [featuredIndex, setFeaturedIndex] = useState<number>(0);
+  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
+  const preloadedImagesRef = useRef<Set<number>>(new Set());
 
   // Subscribe to gallery images from Firebase based on scope
   useEffect(() => {
@@ -23,126 +26,71 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
 
     const unsubscribe = scope === 'global'
       ? subscribeToGlobalGalleryImages(
-          (galleryImages) => {
-            // Store full image objects - already sorted by order from the query
-            setImages(galleryImages);
-          },
-          (error) => {
-            console.error('Error loading global gallery images:', error);
-          }
+          (galleryImages) => setImages(galleryImages),
+          (error) => console.error('Error loading global gallery images:', error)
         )
       : subscribeToDivisionGalleryImages(
           divisionSlug!,
-          (galleryImages) => {
-            // Store full image objects - already sorted by order from the query
-            setImages(galleryImages);
-          },
-          (error) => {
-            console.error('Error loading division gallery images:', error);
-          }
+          (galleryImages) => setImages(galleryImages),
+          (error) => console.error('Error loading division gallery images:', error)
         );
 
     return () => unsubscribe();
   }, [scope, divisionSlug]);
 
-  const [featuredIndex, setFeaturedIndex] = useState<number>(0);
-  const [gridIndices, setGridIndices] = useState<number[]>([]);
-  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false);
-  const featuredIndexRef = useRef<number>(0);
-  const preloadedImagesRef = useRef<Set<number>>(new Set());
-
-  // Preload image function - uses optimized Cloudinary URL
-  // Defined early so it can be used in other hooks
-  const preloadImage = useCallback((index: number) => {
-    if (images.length === 0 || index < 0 || index >= images.length) return;
-    if (preloadedImagesRef.current.has(index)) return; // Already preloaded
-
-    const optimizedUrl = getOptimizedImageUrl(images[index].url, 600);
-    const img = new Image();
-    img.src = optimizedUrl;
-    preloadedImagesRef.current.add(index);
-  }, [images]);
-
-  // Initialize grid indices when images are loaded
-  // Only recalculate when images.length changes, not on every render
+  // Clamp featured index when images change so it is always in bounds
   useEffect(() => {
-    if (images.length > 0) {
-      // Initialize grid with 9 random images (excluding index 0 which is featured)
-      const availableIndices = Array.from({ length: images.length - 1 }, (_, i) => i + 1);
-      setGridIndices(availableIndices.sort(() => Math.random() - 0.5).slice(0, 9));
-      // Preload the initial featured image
-      preloadImage(0);
-    }
-  }, [images.length, preloadImage]);
+    if (images.length === 0) return;
+    setFeaturedIndex((prev) => Math.min(prev, Math.max(0, images.length - 1)));
+  }, [images.length]);
 
+  // Reset loaded state when featured index changes
   useEffect(() => {
-    featuredIndexRef.current = featuredIndex;
-    // Reset loaded state when featured index changes
     setIsImageLoaded(false);
   }, [featuredIndex]);
 
-  // Preload next featured image before switching
+  const preloadImage = useCallback((index: number) => {
+    if (images.length === 0 || index < 0 || index >= images.length) return;
+    if (preloadedImagesRef.current.has(index)) return;
+    const img = new Image();
+    img.src = getOptimizedImageUrl(images[index].url, 600);
+    preloadedImagesRef.current.add(index);
+  }, [images]);
+
+  // Preload current and next image to reduce flicker
   useEffect(() => {
     if (images.length === 0) return;
-
-    // Preload the current featured image
     preloadImage(featuredIndex);
-
-    // Preload potential next images (for automatic rotation)
-    const allIndices = Array.from({ length: images.length }, (_, i) => i);
-    const availableForFeatured = allIndices.filter(idx => idx !== featuredIndex);
-    // Preload a few potential next images
-    const nextCandidates = availableForFeatured.slice(0, 3);
-    nextCandidates.forEach(index => preloadImage(index));
+    if (images.length > 1) {
+      preloadImage((featuredIndex + 1) % images.length);
+    }
   }, [featuredIndex, images, preloadImage]);
 
-  const rotateFeatured = useCallback(() => {
-    setGridIndices((prevGrid) => {
-      // Pick a random image from ALL images (0-17) to be the new featured image
-      const allIndices = Array.from({ length: images.length }, (_, i) => i);
-      const availableForFeatured = allIndices.filter(idx => idx !== featuredIndexRef.current);
-      const newFeaturedIndex = availableForFeatured[Math.floor(Math.random() * availableForFeatured.length)];
-      
-      // Preload the new featured image before switching
-      preloadImage(newFeaturedIndex);
-      
-      // Replace a random grid position with the old featured image
-      const randomGridPosition = Math.floor(Math.random() * prevGrid.length);
-      const newGrid = [...prevGrid];
-      newGrid[randomGridPosition] = featuredIndexRef.current;
-      
-      setFeaturedIndex(newFeaturedIndex);
-      return newGrid;
-    });
-  }, [images.length, preloadImage]);
-
-  const handleGridImageClick = (gridImageIndex: number, gridPosition: number): void => {
-    // Preload the clicked image before switching
-    preloadImage(gridImageIndex);
-    
-    setGridIndices((prevGrid) => {
-      const newGrid = [...prevGrid];
-      newGrid[gridPosition] = featuredIndex;
-      setFeaturedIndex(gridImageIndex);
-      return newGrid;
-    });
-  };
-
+  // Auto-advance only when we have more than one image
   useEffect(() => {
-    if (images.length === 0) return;
-    const interval = setInterval(rotateFeatured, 5000);
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setFeaturedIndex((prev) => (prev + 1) % images.length);
+    }, 5000);
     return () => clearInterval(interval);
-  }, [rotateFeatured, images.length]);
+  }, [images.length]);
 
-  // Show placeholder if no images
+  const featured = images[featuredIndex];
+  // Grid: all indices except featured, in order, up to 9 (no separate state)
+  const gridIndices = images
+    .map((_, i) => i)
+    .filter((i) => i !== featuredIndex)
+    .slice(0, 9);
+
+  // Empty state
   if (images.length === 0) {
     return (
-      <section className="sm:py-12 bg-white">
+      <section className="sm:py-12 bg-background-paper">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center text-green-900 mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-content-heading mb-6 sm:mb-8">
             Gallery Highlights
           </h2>
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-content-tertiary">
             <p>No gallery images available yet.</p>
           </div>
         </div>
@@ -151,58 +99,69 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
   }
 
   return (
-    <section className="sm:py-12 bg-white">
+    <section className="sm:py-12 bg-background-paper">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center text-green-900 mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center text-content-heading mb-6 sm:mb-8">
           Gallery Highlights
         </h2>
-        
+
         <div className="relative">
-          <div className="relative w-full h-64 sm:h-80 md:h-96 shadow-2xl overflow-hidden bg-gray-100">
+          <div className="relative w-full h-64 sm:h-80 md:h-96 shadow-2xl overflow-hidden bg-background-muted">
             <div className="flex h-64 sm:h-80 md:h-96">
-              <div className="w-[40%] flex items-center justify-center bg-white relative">
-                {/* Featured image with smooth fade transition */}
-                <img
-                  key={featuredIndex} // Force remount on index change for smooth transition
-                  src={getOptimizedImageUrl(images[featuredIndex].url, 600)}
-                  alt={images[featuredIndex].title || `Featured Nursery Image ${featuredIndex + 1}`}
-                  className={`max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-500 ${
-                    isImageLoaded ? 'opacity-100' : 'opacity-0'
-                  }`}
-                  loading="eager"
-                  fetchPriority="high"
-                  decoding="async"
-                  onLoad={() => setIsImageLoaded(true)}
-                  onError={() => setIsImageLoaded(true)} // Show even if error to prevent stuck state
-                />
-                {/* Title overlay */}
-                {images[featuredIndex].title && (
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 sm:p-4">
-                    <p className="text-white text-sm sm:text-base font-medium text-center line-clamp-2">
-                      {images[featuredIndex].title}
-                    </p>
-                  </div>
+              {/* 40% main featured image */}
+              <div className="w-[40%] flex items-center justify-center bg-background-paper relative">
+                {featured?.url ? (
+                  <>
+                    <img
+                      key={featuredIndex}
+                      src={getOptimizedImageUrl(featured.url, 600)}
+                      alt={featured.title ?? `Featured image ${featuredIndex + 1}`}
+                      className={`max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-500 ${
+                        isImageLoaded ? 'opacity-100' : 'opacity-0'
+                      }`}
+                      loading="eager"
+                      fetchPriority="high"
+                      decoding="async"
+                      onLoad={() => setIsImageLoaded(true)}
+                      onError={() => setIsImageLoaded(true)}
+                    />
+                    {featured.title && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 sm:p-4">
+                        <p className="text-white text-sm sm:text-base font-medium text-center line-clamp-2">
+                          {featured.title}
+                        </p>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-content-tertiary text-sm">No image</div>
                 )}
               </div>
 
-              <div className="w-[60%] p-2 sm:p-4 bg-gray-50">
+              {/* 60% 3×3 grid of thumbnails (all except featured, up to 9) */}
+              <div className="w-[60%] p-2 sm:p-4 bg-background-page">
                 <div className="grid grid-cols-3 gap-1 sm:gap-2 h-full">
-                  {gridIndices.map((imageIndex, gridPosition) => (
-                    <button
-                      key={`${imageIndex}-${gridPosition}`}
-                      onClick={() => handleGridImageClick(imageIndex, gridPosition)}
-                      className="relative aspect-square overflow-hidden rounded-lg hover:opacity-80 transition-opacity duration-200 cursor-pointer bg-white shadow-sm hover:shadow-md"
-                      aria-label={images[imageIndex]?.title || `Select image ${imageIndex + 1}`}
-                    >
-                      <img
-                        src={getOptimizedImageUrl(images[imageIndex]?.url || '', 300)}
-                        alt={images[imageIndex]?.title || `Nursery Image ${imageIndex + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </button>
-                  ))}
+                  {gridIndices.map((imageIndex) => {
+                    const image = images[imageIndex];
+                    if (!image) return null;
+                    return (
+                      <button
+                        key={image.id ?? imageIndex}
+                        type="button"
+                        onClick={() => setFeaturedIndex(imageIndex)}
+                        className="relative aspect-square overflow-hidden rounded-lg hover:opacity-80 transition-opacity duration-200 cursor-pointer bg-background-paper shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-main focus:ring-offset-1"
+                        aria-label={image.title ?? `Select image ${imageIndex + 1}`}
+                      >
+                        <img
+                          src={getOptimizedImageUrl(image.url, 300)}
+                          alt={image.title ?? `Image ${imageIndex + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -212,7 +171,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
         <div className="text-center mt-6 sm:mt-8">
           <a
             href={scope === 'division' && divisionSlug ? `/divisions/${divisionSlug}/gallery` : '/gallery'}
-            className="inline-block bg-green-700 hover:bg-green-800 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md transition-colors text-sm sm:text-base"
+            className="inline-block bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md transition-colors text-sm sm:text-base"
           >
             See More Photos
           </a>
@@ -222,6 +181,4 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
   );
 };
 
-// Memoize component to prevent unnecessary re-renders when parent updates
 export default React.memo(ImageCarousel);
-

@@ -56,7 +56,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
 
   if (items.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-content-tertiary">
         <p>No {itemType === 'news' ? 'news' : 'events'} available yet.</p>
       </div>
     );
@@ -107,7 +107,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
               key={`${item.id || index}-${Math.floor(index / items.length)}`}
               className="group"
             >
-              <p className={`text-xs text-gray-500 mb-1 flex items-center ${isRightAligned ? 'justify-end' : ''}`}>
+              <p className={`text-xs text-content-tertiary mb-1 flex items-center ${isRightAligned ? 'justify-end' : ''}`}>
                 {isRightAligned ? (
                   <>
                     {item.date} <Calendar className="h-3 w-3 ml-1" />
@@ -118,10 +118,10 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
                   </>
                 )}
               </p>
-              <h3 className={`font-bold text-green-800 mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} ${isNews ? 'group-hover:text-green-600' : 'group-hover:text-lime-600'} transition-colors`}>
+              <h3 className={`font-bold text-content-headingSecondary mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} ${isNews ? 'group-hover:text-primary-main' : 'group-hover:text-accent-darker'} transition-colors`}>
                 {item.title}
               </h3>
-              <p className={`text-gray-600 text-xs xl:text-sm mb-2 ${isRightAligned ? 'text-right' : ''} line-clamp-2`}>
+              <p className={`text-content-secondary text-xs xl:text-sm mb-2 ${isRightAligned ? 'text-right' : ''} line-clamp-2`}>
                 {item.excerpt}
               </p>
               {(item.link || item.pdfUrl) && (
@@ -129,7 +129,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
                   href={item.link || item.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-green-600 hover:text-lime-600 text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''}`}
+                  className={`text-content-link hover:text-accent-darker text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''}`}
                 >
                   {item.pdfUrl && !item.link ? (
                     isRightAligned ? (
@@ -158,7 +158,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
               )}
               {isRightAligned && <div className="clear-both"></div>}
               {index < duplicatedItems.length - 1 && (
-                <hr className="mt-6 border-gray-200" />
+                <hr className="mt-6 border-border-light" />
               )}
             </div>
           );

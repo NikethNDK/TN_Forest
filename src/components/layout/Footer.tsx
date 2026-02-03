@@ -78,13 +78,13 @@ const Footer: React.FC = () => {
 
   return (
     <footer 
-      className="relative text-white bg-cover bg-center"
+      className="relative text-footer-text bg-cover bg-center"
       style={{
         backgroundImage: 'url(https://www.shutterstock.com/image-vector/silhouette-forest-isolated-on-white-260nw-2479974867.jpg)',
       }}
     > 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-green-900/90"></div>
+      <div className="absolute inset-0 bg-background-overlay"></div>
       
       {/* Main Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -92,7 +92,7 @@ const Footer: React.FC = () => {
           {/* About Section */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Tamil Nadu Forest Department</h3>
-            <p className="text-green-100 text-sm leading-relaxed">
+            <p className="text-footer-textSecondary text-sm leading-relaxed">
               Dedicated to forest research, conservation, and sustainable development 
               for the betterment of Tamil Nadu's natural heritage.
             </p>
@@ -102,11 +102,11 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/" className="text-green-100 hover:text-white transition-colors">Home</a></li>
-              <li><a href="/about" className="text-green-100 hover:text-white transition-colors">About Us</a></li>
-              <li><a href="/divisions" className="text-green-100 hover:text-white transition-colors">Divisions</a></li>
-              <li><a href="/publication" className="text-green-100 hover:text-white transition-colors">Publications</a></li>
-              <li><a href="/contact" className="text-green-100 hover:text-white transition-colors">Contact</a></li>
+              <li><a href="/" className="text-footer-textSecondary hover:text-footer-text transition-colors">Home</a></li>
+              <li><a href="/about" className="text-footer-textSecondary hover:text-footer-text transition-colors">About Us</a></li>
+              <li><a href="/divisions" className="text-footer-textSecondary hover:text-footer-text transition-colors">Divisions</a></li>
+              <li><a href="/publication" className="text-footer-textSecondary hover:text-footer-text transition-colors">Publications</a></li>
+              <li><a href="/contact" className="text-footer-textSecondary hover:text-footer-text transition-colors">Contact</a></li>
             </ul>
           </div>
 
@@ -114,11 +114,11 @@ const Footer: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Research Divisions</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/divisions/state-forest-research" className="text-green-100 hover:text-white transition-colors">State Forest Research</a></li>
-              <li><a href="/divisions/modern-nursery" className="text-green-100 hover:text-white transition-colors">Modern Nursery</a></li>
-              <li><a href="/divisions/forest-genetics" className="text-green-100 hover:text-white transition-colors">Forest Genetics</a></li>
-              <li><a href="/divisions/industrial-wood" className="text-green-100 hover:text-white transition-colors">Industrial Wood</a></li>
-              <li><a href="/divisions/agro-forestry" className="text-green-100 hover:text-white transition-colors">Agro Forestry</a></li>
+              <li><a href="/divisions/state-forest-research" className="text-footer-textSecondary hover:text-footer-text transition-colors">State Forest Research</a></li>
+              <li><a href="/divisions/modern-nursery" className="text-footer-textSecondary hover:text-footer-text transition-colors">Modern Nursery</a></li>
+              <li><a href="/divisions/forest-genetics" className="text-footer-textSecondary hover:text-footer-text transition-colors">Forest Genetics</a></li>
+              <li><a href="/divisions/industrial-wood" className="text-footer-textSecondary hover:text-footer-text transition-colors">Industrial Wood</a></li>
+              <li><a href="/divisions/agro-forestry" className="text-footer-textSecondary hover:text-footer-text transition-colors">Agro Forestry</a></li>
             </ul>
           </div>
 
@@ -128,48 +128,48 @@ const Footer: React.FC = () => {
             {footerLocation ? (
               <div className="space-y-3 text-sm">
                 <div className="flex items-start">
-                  <MapPin className="h-4 w-4 mt-1 mr-2 text-green-300 flex-shrink-0" />
-                  <span className="text-green-100 whitespace-pre-line">
+                  <MapPin className="h-4 w-4 mt-1 mr-2 text-footer-icon flex-shrink-0" />
+                  <span className="text-footer-textSecondary whitespace-pre-line">
                     {footerLocation.location}
                   </span>
                 </div>
                 {footerLocation.phone && (
                   <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                    <span className="text-green-100">{footerLocation.phone}</span>
+                    <Phone className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                    <span className="text-footer-textSecondary">{footerLocation.phone}</span>
                   </div>
                 )}
                 {footerLocation.email && (
                   <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                    <span className="text-green-100">{footerLocation.email}</span>
+                    <Mail className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                    <span className="text-footer-textSecondary">{footerLocation.email}</span>
                   </div>
                 )}
                 <div className="flex items-center">
-                  <Globe className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                  <span className="text-green-100">www.tnfrd.gov.in</span>
+                  <Globe className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                  <span className="text-footer-textSecondary">www.tnfrd.gov.in</span>
                 </div>
               </div>
             ) : (
               <div className="space-y-3 text-sm">
                 <div className="flex items-start">
-                  <MapPin className="h-4 w-4 mt-1 mr-2 text-green-300 flex-shrink-0" />
-                  <span className="text-green-100">
+                  <MapPin className="h-4 w-4 mt-1 mr-2 text-footer-icon flex-shrink-0" />
+                  <span className="text-footer-textSecondary">
                     Forest Department Complex,<br />
                     Chennai, Tamil Nadu 600006
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                  <span className="text-green-100">+91 XXXXX XXXXX</span>
+                  <Phone className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                  <span className="text-footer-textSecondary">+91 XXXXX XXXXX</span>
                 </div>
                 <div className="flex items-center">
-                  <Mail className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                  <span className="text-green-100">example@example.com</span>
+                  <Mail className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                  <span className="text-footer-textSecondary">example@example.com</span>
                 </div>
                 <div className="flex items-center">
-                  <Globe className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                  <span className="text-green-100">www.tnfrd.gov.in</span>
+                  <Globe className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                  <span className="text-footer-textSecondary">www.tnfrd.gov.in</span>
                 </div>
               </div>
             )}
@@ -180,14 +180,14 @@ const Footer: React.FC = () => {
             <h3 className="text-lg font-semibold mb-4">Real-Time Info</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                <span className="text-green-100 font-medium">
+                <Clock className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                <span className="text-footer-textSecondary font-medium">
                   {formatDateTime(currentTime)}
                 </span>
               </div>
               <div className="flex items-center">
-                <UserCheck className="h-4 w-4 mr-2 text-green-300 flex-shrink-0" />
-                <span className="text-green-100 font-medium">
+                <UserCheck className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
+                <span className="text-footer-textSecondary font-medium">
                   Total Visitors: {visitors.toLocaleString()}
                 </span>
               </div>
@@ -195,11 +195,11 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-green-700 mt-8 pt-8 text-center">
-          <p className="text-green-100 text-sm">
+        <div className="border-t border-footer-border mt-8 pt-8 text-center">
+          <p className="text-footer-textSecondary text-sm">
             © 2024 Tamil Nadu Forest Department Research Wing. All rights reserved.
           </p>
-          <p className="text-green-200 text-xs mt-2">
+          <p className="text-content-inverseSecondary text-xs mt-2">
             Committed to forest conservation and sustainable development
           </p>
         </div>

@@ -29,18 +29,18 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
         disabled={currentPage === 1}
-        className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+        className="px-4 py-2 bg-interactive-primaryDefault text-interactive-primaryText rounded-lg font-semibold disabled:bg-interactive-disabled disabled:cursor-not-allowed hover:bg-interactive-primaryHover transition-colors flex items-center"
       >
         <ChevronLeft className="h-5 w-5 mr-1" />
         Previous
       </button>
-      <span className="text-gray-700 font-medium">
+      <span className="text-content-primary font-medium">
         Page {currentPage} of {totalPagesSafe}
       </span>
       <button
         onClick={() => onPageChange(Math.min(totalPagesSafe, currentPage + 1))}
         disabled={currentPage === totalPagesSafe}
-        className="px-4 py-2 bg-green-700 text-white rounded-lg font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-green-800 transition-colors flex items-center"
+        className="px-4 py-2 bg-interactive-primaryDefault text-interactive-primaryText rounded-lg font-semibold disabled:bg-interactive-disabled disabled:cursor-not-allowed hover:bg-interactive-primaryHover transition-colors flex items-center"
       >
         Next
         <ChevronRight className="h-5 w-5 ml-1" />

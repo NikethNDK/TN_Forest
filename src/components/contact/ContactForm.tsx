@@ -40,76 +40,76 @@ const ContactForm: React.FC = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="name" className="block text-sm font-medium text-form-label mb-2">
             Full Name *
           </label>
           <input
             type="text"
             id="name"
             {...register('name')}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-lime-500 focus:border-lime-500 transition-shadow ${
-              errors.name ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
+              errors.name ? 'border-status-error-main' : 'border-border-default'
             }`}
           />
           {errors.name && (
-            <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+            <p className="mt-1 text-sm text-status-error-main">{errors.name.message}</p>
           )}
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-form-label mb-2">
             Email Address *
           </label>
           <input
             type="email"
             id="email"
             {...register('email')}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-lime-500 focus:border-lime-500 transition-shadow ${
-              errors.email ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
+              errors.email ? 'border-status-error-main' : 'border-border-default'
             }`}
           />
           {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+            <p className="mt-1 text-sm text-status-error-main">{errors.email.message}</p>
           )}
         </div>
       </div>
       <div>
-        <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="subject" className="block text-sm font-medium text-form-label mb-2">
           Subject *
         </label>
         <input
           type="text"
           id="subject"
           {...register('subject')}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-lime-500 focus:border-lime-500 transition-shadow ${
-            errors.subject ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
+            errors.subject ? 'border-status-error-main' : 'border-border-default'
           }`}
         />
         {errors.subject && (
-          <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
+          <p className="mt-1 text-sm text-status-error-main">{errors.subject.message}</p>
         )}
       </div>
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="message" className="block text-sm font-medium text-form-label mb-2">
           Message *
         </label>
         <textarea
           id="message"
           rows={6}
           {...register('message')}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-lime-500 focus:border-lime-500 transition-shadow ${
-            errors.message ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
+            errors.message ? 'border-status-error-main' : 'border-border-default'
           }`}
           placeholder="Please provide details about your inquiry (e.g., collaboration proposal, data request, general question)."
         />
         {errors.message && (
-          <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
+          <p className="mt-1 text-sm text-status-error-main">{errors.message.message}</p>
         )}
       </div>
       
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-lime-500 hover:bg-lime-600 disabled:bg-gray-400 text-green-900 disabled:text-gray-600 px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center shadow-lg text-lg"
+        className="w-full bg-interactive-secondaryDefault hover:bg-interactive-secondaryHover disabled:bg-interactive-disabled text-interactive-secondaryText disabled:text-interactive-disabledText px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center shadow-lg text-lg"
       >
         <Send className="h-5 w-5 mr-3" />
         {isSubmitting ? 'Submitting...' : 'Submit Message'}

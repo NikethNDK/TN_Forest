@@ -20,15 +20,15 @@ const ProductSection: React.FC<ProductSectionProps> = ({ title, icon: Icon, prod
 
   return (
     <div className="mb-12">
-      <h2 className="text-3xl font-bold text-green-900 mb-8 flex items-center">
-        <Icon className="h-7 w-7 mr-3 text-lime-600" />
+      <h2 className="text-3xl font-bold text-content-heading mb-8 flex items-center">
+        <Icon className="h-7 w-7 mr-3 text-accent-darker" />
         {title}
       </h2>
       
       {products.length === 0 ? (
-        <div className="text-center py-8 bg-white rounded-xl shadow-lg border border-gray-100">
-          <Leaf className="h-10 w-10 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-500">No {title.toLowerCase()} currently match your search.</p>
+        <div className="text-center py-8 bg-background-paper rounded-xl shadow-lg border border-border-lightest">
+          <Leaf className="h-10 w-10 text-content-muted mx-auto mb-3" />
+          <p className="text-content-tertiary">No {title.toLowerCase()} currently match your search.</p>
         </div>
       ) : (
         <>
@@ -42,7 +42,7 @@ const ProductSection: React.FC<ProductSectionProps> = ({ title, icon: Icon, prod
             <div className="text-center mt-8">
               <button
                 onClick={() => setLimit(isExpanded ? INITIAL_LIMIT : products.length)}
-                className="bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-300 shadow-md flex items-center justify-center mx-auto"
+                className="bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText px-6 py-3 rounded-lg font-semibold transition-colors duration-300 shadow-md flex items-center justify-center mx-auto"
               >
                 {isExpanded ? (
                   <>Show Less</>

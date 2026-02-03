@@ -15,8 +15,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) => {
   const stockDisplay = inStock ? `${product.stock} ${product.unit}` : 'Out of Stock';
 
   return (
-    <div key={product.id} className="bg-white rounded-xl shadow-lg overflow-hidden border-t-4 border-lime-400 hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
-      <div className="h-44 bg-green-50 relative overflow-hidden">
+    <div key={product.id} className="bg-background-paper rounded-xl shadow-lg overflow-hidden border-t-4 border-card-borderAccent hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+      <div className="h-44 bg-primary-lightest relative overflow-hidden">
         {product.imageUrl ? (
           <>
             <img 
@@ -25,35 +25,35 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) => {
               className="w-full h-full object-cover"
               loading="lazy"
             />
-            <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-sm text-green-700 font-semibold text-xs px-2 py-1 rounded-full shadow-sm">
+            <div className="absolute bottom-2 left-2 bg-background-paper/90 backdrop-blur-sm text-primary-main font-semibold text-xs px-2 py-1 rounded-full shadow-sm">
               {product.category}
             </div>
           </>
         ) : (
           <div className="h-full flex flex-col items-center justify-center p-4">
             <div className="text-5xl mb-2">{product.imageIcon || '🌿'}</div>
-            <div className="text-green-700 font-semibold text-center text-sm">{product.category}</div>
+            <div className="text-primary-main font-semibold text-center text-sm">{product.category}</div>
           </div>
         )}
       </div>
       <div className="p-6">
         <div className="h-20 mb-4"> 
-          <h3 className="text-lg font-bold text-green-900 mb-1 line-clamp-2">
+          <h3 className="text-lg font-bold text-content-heading mb-1 line-clamp-2">
             <span className="italic">{product.name}</span>
           </h3>
-          <p className="text-gray-600 text-xs line-clamp-2">
+          <p className="text-content-secondary text-xs line-clamp-2">
             {product.description}
           </p>
         </div>
         
-        <div className="flex items-center justify-between mb-4 border-t border-gray-100 pt-3">
-          <span className="text-2xl font-extrabold text-green-700">
+        <div className="flex items-center justify-between mb-4 border-t border-border-lightest pt-3">
+          <span className="text-2xl font-extrabold text-primary-main">
             ₹{product.price}
           </span>
           <span className={`px-3 py-1 rounded-full text-xs font-medium ${
             inStock 
-                ? 'bg-lime-100 text-lime-800' 
-                : 'bg-red-100 text-red-800'
+                ? 'bg-badge-inStockBg text-badge-inStockText' 
+                : 'bg-badge-outOfStockBg text-badge-outOfStockText'
           }`}>
             {stockDisplay}
           </span>
@@ -63,8 +63,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) => {
           disabled={!inStock}
           className={`w-full py-3 px-4 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center shadow-lg ${
             inStock
-                ? 'bg-lime-500 hover:bg-lime-600 text-green-900'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-interactive-secondaryDefault hover:bg-interactive-secondaryHover text-interactive-secondaryText'
+                : 'bg-interactive-disabled text-interactive-disabledText cursor-not-allowed'
           }`}
         >
           <Plus className="h-4 w-4 mr-2" />

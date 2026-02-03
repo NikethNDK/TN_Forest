@@ -56,18 +56,19 @@ function mapToShopProduct(raw: PublicProductRaw): ShopProduct {
 export interface GetPublicProductsParams {
   category?: string;
   ordering?: string;
+  page_size?: number;
 }
 
 /**
  * Fetches products from the public API (no auth).
- * Uses page_size=100 and returns the first page of results.
+ * Uses page_size from params or 100 by default; returns the first page of results.
  */
 export async function getPublicProducts(
   params?: GetPublicProductsParams
 ): Promise<ShopProduct[]> {
   const requestParams: Record<string, string | number | undefined> = {
     page: 1,
-    page_size: 100,
+    page_size: params?.page_size ?? 100,
   };
   if (params?.category) requestParams.category = params.category;
   if (params?.ordering) requestParams.ordering = params.ordering;

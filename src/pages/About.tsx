@@ -60,7 +60,7 @@ const About: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-page">
       {/* Introductory Banner/Header */}
       <PageBanner
         subtitle="Our Legacy of Science and Stewardship"
@@ -77,13 +77,13 @@ const About: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Mission */}
-              <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
+              <div className="bg-background-paper rounded-xl shadow-xl p-10 border-t-4 border-border-primary transition-shadow duration-300 hover:shadow-2xl">
                 <div className="flex items-center mb-6">
-                  <Target className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
-                  <h2 className="text-2xl font-bold text-green-900">Our Mission</h2>
+                  <Target className="h-10 w-10 p-2 bg-primary-lighter text-primary-main rounded-full mr-3" />
+                  <h2 className="text-2xl font-bold text-content-heading">Our Mission</h2>
                 </div>
                 <div 
-                  className="text-gray-700 leading-relaxed whitespace-pre-wrap"
+                  className="text-content-primary leading-relaxed whitespace-pre-wrap"
                   style={{ whiteSpace: 'pre-wrap' }}
                 >
                   {missionVision?.mission || 'Mission content will appear here...'}
@@ -91,13 +91,13 @@ const About: React.FC = () => {
               </div>
 
               {/* Vision */}
-              <div className="bg-white rounded-xl shadow-xl p-10 border-t-4 border-green-600 transition-shadow duration-300 hover:shadow-2xl">
+              <div className="bg-background-paper rounded-xl shadow-xl p-10 border-t-4 border-border-primary transition-shadow duration-300 hover:shadow-2xl">
                 <div className="flex items-center mb-6">
-                  <Eye className="h-10 w-10 p-2 bg-green-100 text-green-700 rounded-full mr-3" />
-                  <h2 className="text-2xl font-bold text-green-900">Our Vision</h2>
+                  <Eye className="h-10 w-10 p-2 bg-primary-lighter text-primary-main rounded-full mr-3" />
+                  <h2 className="text-2xl font-bold text-content-heading">Our Vision</h2>
                 </div>
                 <div 
-                  className="text-gray-700 leading-relaxed whitespace-pre-wrap"
+                  className="text-content-primary leading-relaxed whitespace-pre-wrap"
                   style={{ whiteSpace: 'pre-wrap' }}
                 >
                   {missionVision?.vision || 'Vision content will appear here...'}
@@ -109,7 +109,7 @@ const About: React.FC = () => {
       </section>
 
       {/* Leadership & Governance Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-background-page">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             title="Leadership & Governance"

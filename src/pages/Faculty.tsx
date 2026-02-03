@@ -29,11 +29,11 @@ const Faculty: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="py-12 bg-gray-50 min-h-screen">
+      <div className="py-12 bg-background-page min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-            <span className="ml-3 text-gray-600">Loading faculty members...</span>
+            <Loader2 className="h-8 w-8 animate-spin text-primary-main" />
+            <span className="ml-3 text-content-secondary">Loading faculty members...</span>
           </div>
         </div>
       </div>
@@ -42,13 +42,13 @@ const Faculty: React.FC = () => {
 
   if (error) {
     return (
-      <div className="py-12 bg-gray-50 min-h-screen">
+      <div className="py-12 bg-background-page min-h-screen">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-12">
-            <p className="text-red-600 mb-4">Error loading faculty members: {error}</p>
+            <p className="text-status-error-main mb-4">Error loading faculty members: {error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className="px-4 py-2 bg-interactive-primaryDefault text-interactive-primaryText rounded-lg hover:bg-interactive-primaryHover"
             >
               Retry
             </button>
@@ -59,14 +59,14 @@ const Faculty: React.FC = () => {
   }
 
   return (
-    <div className="py-12 bg-gray-50 min-h-screen">
+    <div className="py-12 bg-background-page min-h-screen">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-12">
-          <h1 className="text-2xl md:text-3xl font-medium text-gray-900 mb-2">
+          <h1 className="text-2xl md:text-3xl font-medium text-content-primary mb-2">
             Leadership & Governance
           </h1>
-          <p className="text-sm text-gray-500 max-w-xl mx-auto">
+          <p className="text-sm text-content-tertiary max-w-xl mx-auto">
             The distinguished leadership team of the Tamil Nadu Forest Department.
           </p>
         </div>
@@ -79,7 +79,7 @@ const Faculty: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-content-tertiary">
             <p>No faculty members available at this time.</p>
           </div>
         )}

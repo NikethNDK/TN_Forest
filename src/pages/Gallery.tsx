@@ -105,14 +105,14 @@ const Gallery: React.FC = () => {
   const selectedImage = selectedImageIndex !== null ? images[selectedImageIndex] : null;
 
   return (
-    <div className="min-h-screen bg-white py-12">
+    <div className="min-h-screen bg-background-paper py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-green-800 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-content-headingSecondary mb-6">
             {division ? `${division.name} Gallery` : 'Gallery'}
           </h1>
           {division?.description && (
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-content-secondary max-w-3xl mx-auto leading-relaxed">
               {division.description}
             </p>
           )}
@@ -120,11 +120,11 @@ const Gallery: React.FC = () => {
 
         {isLoading ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">Loading gallery images...</p>
+            <p className="text-content-tertiary text-lg">Loading gallery images...</p>
           </div>
         ) : images.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
+            <p className="text-content-tertiary text-lg">
               {divisionSlug 
                 ? 'No gallery images available for this division yet.' 
                 : 'No gallery images available yet.'}
@@ -135,7 +135,7 @@ const Gallery: React.FC = () => {
             {images.map((image, index) => (
               <div
                 key={image.id}
-                className="relative group aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 bg-gray-100 cursor-pointer"
+                className="relative group aspect-square overflow-hidden rounded-lg shadow-md hover:shadow-xl transition-shadow duration-200 bg-background-muted cursor-pointer"
                 onClick={() => handleImageClick(index)}
               >
                 <img
@@ -168,7 +168,7 @@ const Gallery: React.FC = () => {
           {/* Close Button */}
           <button
             onClick={closeModal}
-            className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition-colors"
+            className="absolute top-4 right-4 z-10 bg-background-paper/10 hover:bg-background-paper/20 text-content-inverse p-2 rounded-full transition-colors"
             aria-label="Close modal"
           >
             <X className="h-6 w-6" />

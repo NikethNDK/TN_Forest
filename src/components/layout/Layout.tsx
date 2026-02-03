@@ -9,10 +9,10 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-page">
       <Header />
       <Navbar />
-      <main className="bg-gray-50">
+      <main className="bg-background-page">
         {children}
       </main>
       <Footer />

@@ -1,17 +1,27 @@
 /**
- * TN Forest Application Color Palette
- * 
- * This file defines the centralized color palette for the entire application.
- * Use these semantic color names for consistency across all components.
- * 
- * Usage:
- * - Import colors: import { colors } from '@/config/colors'
- * - Use in Tailwind: Reference the Tailwind class equivalents in comments
+ * TN Forest — Color Palette
+ *
+ * Single source of truth for app colors. Use semantic names so one change
+ * updates the whole UI.
+ *
+ * Quick pick:
+ *   Buttons (primary)   → interactive.primaryDefault + interactive.primaryText
+ *   Buttons (secondary) → interactive.secondaryDefault + interactive.secondaryText
+ *   Page background     → background.page
+ *   Cards / modals      → background.paper
+ *   Body text           → text.primary
+ *   Headings            → text.heading
+ *   Links               → text.link / text.linkHover
+ *   Success/Error/etc   → status.success.main, status.error.main, …
+ *
+ * Import: import { colors, forestGreen } from '@/config/colors'
  */
 
 // =============================================================================
-// FOREST GREEN SCALE (Custom Brand Colors)
+// BRAND SCALES (base palettes — use semantic colors below in UI)
 // =============================================================================
+
+/** Forest green — primary brand. Use via colors.primary in components. */
 export const forestGreen = {
   50: '#f0f9f0',
   100: '#dcf2dc',
@@ -26,221 +36,242 @@ export const forestGreen = {
   950: '#0a1a0a',
 } as const;
 
+/** Lime — accent/highlights. Use via colors.accent in components. */
+export const lime = {
+  50: '#f7fee7',
+  100: '#ecfccb',
+  200: '#d9f99d',
+  300: '#bef264',
+  400: '#a3e635',
+  500: '#84cc16',
+  600: '#65a30d',
+  700: '#4d7c0f',
+  800: '#3f6212',
+  900: '#365314',
+  950: '#1a2e05',
+} as const;
+
+/** Light blue — optional accent. Use via colors.lightBlue in components. */
+export const lightBlue = {
+  50: '#f0f9ff',
+  100: '#e0f2fe',
+  200: '#bae6fd',
+  300: '#7dd3fc',
+  400: '#38bdf8',
+  500: '#0ea5e9',
+  600: '#0284c7',
+  700: '#0369a1',
+  800: '#075985',
+  900: '#0c4a6e',
+  950: '#082f49',
+} as const;
+
 // =============================================================================
-// SEMANTIC COLOR PALETTE
+// SEMANTIC PALETTE (use these in components)
 // =============================================================================
 
 export const colors = {
   // ---------------------------------------------------------------------------
-  // PRIMARY - Main brand color (Forest Green)
-  // Used for: Primary buttons, active states, main CTAs, headers
+  // PRIMARY — Forest green. Use for: main CTAs, key actions, headers
   // ---------------------------------------------------------------------------
   primary: {
-    lightest: forestGreen[50],    // Tailwind: forest-green-50 | Very light backgrounds
-    lighter: forestGreen[100],    // Tailwind: forest-green-100 | Light backgrounds
-    light: forestGreen[400],      // Tailwind: forest-green-400 | Light accents
-    main: forestGreen[700],       // Tailwind: forest-green-700 | Primary buttons, borders
-    dark: forestGreen[800],       // Tailwind: forest-green-800 | Hover states
-    darker: forestGreen[900],     // Tailwind: forest-green-900 | Headers, overlays
-    darkest: forestGreen[950],    // Tailwind: forest-green-950 | Deepest backgrounds
+    lightest: forestGreen[50],
+    lighter: forestGreen[100],
+    light: forestGreen[400],
+    main: forestGreen[700],
+    dark: forestGreen[800],
+    darker: forestGreen[900],
+    darkest: forestGreen[950],
   },
 
   // ---------------------------------------------------------------------------
-  // ACCENT - Secondary brand color (Lime)
-  // Used for: Highlights, badges, icons, secondary CTAs, navbar
+  // ACCENT — Lime. Use for: highlights, badges, secondary CTAs, navbar
   // ---------------------------------------------------------------------------
   accent: {
-    lightest: '#f7fee7',          // Tailwind: lime-50 | Very light backgrounds
-    lighter: '#ecfccb',           // Tailwind: lime-100 | Light badge backgrounds
-    light: '#a3e635',             // Tailwind: lime-400 | Borders, light accents
-    main: '#b9f041',              // Custom | Navbar background, primary accent
-    dark: '#84cc16',              // Tailwind: lime-500 | Buttons, active states
-    darker: '#65a30d',            // Tailwind: lime-600 | Hover states
-    darkest: '#3f6212',           // Tailwind: lime-800 | Badge text
+    lightest: lime[50],
+    lighter: lime[100],
+    light: lime[400],
+    main: lime[300],
+    dark: lime[500],
+    darker: lime[600],
+    darkest: lime[800],
   },
 
   // ---------------------------------------------------------------------------
-  // BACKGROUND - Page and surface backgrounds
-  // Used for: Page backgrounds, cards, sections, containers
+  // LIGHT BLUE — Optional accent
+  // ---------------------------------------------------------------------------
+  lightBlue: {
+    lightest: lightBlue[50],
+    lighter: lightBlue[100],
+    light: lightBlue[400],
+    main: lightBlue[500],
+    dark: lightBlue[600],
+    darker: lightBlue[700],
+    darkest: lightBlue[900],
+  },
+
+  // ---------------------------------------------------------------------------
+  // BACKGROUND — Surfaces. Use for: page, cards, sections, overlays
   // ---------------------------------------------------------------------------
   background: {
-    page: '#f8fafc',              // Tailwind: slate-50 | Main page background
-    paper: '#ffffff',             // Tailwind: white | Cards, modals, paper surfaces
-    subtle: '#f9fafb',            // Tailwind: gray-50 | Subtle section backgrounds
-    muted: '#f3f4f6',             // Tailwind: gray-100 | Muted backgrounds, disabled
-    elevated: '#ffffff',          // Tailwind: white | Elevated surfaces (dropdowns, tooltips)
-    overlay: 'rgba(20, 51, 20, 0.9)', // forest-green-900/90 | Modal overlays, footer
+    page: '#f8fafc',
+    paper: '#ffffff',
+    subtle: '#f9fafb',
+    muted: '#f3f4f6',
+    elevated: '#ffffff',
+    overlay: 'rgba(20, 51, 20, 0.9)',
   },
 
   // ---------------------------------------------------------------------------
-  // TEXT - Typography colors
-  // Used for: Headings, body text, labels, placeholders
+  // TEXT — Typography. Use for: body, headings, links, labels
   // ---------------------------------------------------------------------------
   text: {
-    primary: '#1f2937',           // Tailwind: gray-800 | Main body text
-    secondary: '#4b5563',         // Tailwind: gray-600 | Secondary text, descriptions
-    tertiary: '#6b7280',          // Tailwind: gray-500 | Helper text, captions
-    muted: '#9ca3af',             // Tailwind: gray-400 | Disabled text, placeholders
-    inverse: '#ffffff',           // Tailwind: white | Text on dark backgrounds
-    inverseSecondary: '#dcfce7',  // Tailwind: green-100 | Secondary text on dark
-    heading: forestGreen[900],    // Tailwind: forest-green-900 | Page headings
-    headingSecondary: forestGreen[800], // Tailwind: forest-green-800 | Section headings
-    link: forestGreen[700],       // Tailwind: forest-green-700 | Links
-    linkHover: forestGreen[600],  // Tailwind: forest-green-600 | Link hover states
+    primary: '#1f2937',
+    secondary: '#4b5563',
+    tertiary: '#6b7280',
+    muted: '#9ca3af',
+    inverse: '#ffffff',
+    inverseSecondary: '#dcfce7',
+    heading: forestGreen[900],
+    headingSecondary: forestGreen[800],
+    link: forestGreen[700],
+    linkHover: forestGreen[600],
   },
 
   // ---------------------------------------------------------------------------
-  // BORDER - Border and divider colors
-  // Used for: Card borders, input borders, dividers, separators
+  // BORDER — Dividers and outlines. Use for: cards, inputs, separators
   // ---------------------------------------------------------------------------
   border: {
-    lightest: '#f3f4f6',          // Tailwind: gray-100 | Very subtle borders
-    light: '#e5e7eb',             // Tailwind: gray-200 | Default borders, dividers
-    default: '#d1d5db',           // Tailwind: gray-300 | Input borders
-    dark: '#9ca3af',              // Tailwind: gray-400 | Emphasized borders
-    primary: forestGreen[700],    // Tailwind: forest-green-700 | Primary accent borders
-    accent: '#a3e635',            // Tailwind: lime-400 | Accent borders, card highlights
-    accentDark: '#84cc16',        // Tailwind: lime-500 | Stronger accent borders
+    lightest: '#f3f4f6',
+    light: '#e5e7eb',
+    default: '#d1d5db',
+    dark: '#9ca3af',
+    primary: forestGreen[700],
+    accent: lime[400],
+    accentDark: lime[500],
   },
 
   // ---------------------------------------------------------------------------
-  // STATUS - Feedback and state colors
-  // Used for: Alerts, badges, form validation, notifications
+  // STATUS — Feedback. Use for: success, error, warning, info (alerts, badges)
   // ---------------------------------------------------------------------------
   status: {
-    // Success
     success: {
-      lightest: '#f0fdf4',        // Tailwind: green-50 | Success background light
-      light: '#dcfce7',           // Tailwind: green-100 | Success background
-      main: '#16a34a',            // Tailwind: green-600 | Success icons, text
-      dark: '#15803d',            // Tailwind: green-700 | Success buttons
+      lightest: '#f0fdf4',
+      light: '#dcfce7',
+      main: '#16a34a',
+      dark: '#15803d',
     },
-    // Error
     error: {
-      lightest: '#fef2f2',        // Tailwind: red-50 | Error input background
-      light: '#fee2e2',           // Tailwind: red-100 | Error background
-      main: '#dc2626',            // Tailwind: red-600 | Error icons, text
-      dark: '#b91c1c',            // Tailwind: red-700 | Error buttons
-      text: '#991b1b',            // Tailwind: red-800 | Error badge text
+      lightest: '#fef2f2',
+      light: '#fee2e2',
+      main: '#dc2626',
+      dark: '#b91c1c',
+      text: '#991b1b',
     },
-    // Warning
     warning: {
-      lightest: '#fffbeb',        // Tailwind: amber-50 | Warning background light
-      light: '#ffedd5',           // Tailwind: orange-100 | Warning background
-      main: '#ea580c',            // Tailwind: orange-600 | Warning icons, text
-      dark: '#c2410c',            // Tailwind: orange-700 | Warning buttons
+      lightest: '#fffbeb',
+      light: '#ffedd5',
+      main: '#ea580c',
+      dark: '#c2410c',
     },
-    // Info
     info: {
-      lightest: '#eff6ff',        // Tailwind: blue-50 | Info background light
-      light: '#dbeafe',           // Tailwind: blue-100 | Info background
-      border: '#bfdbfe',          // Tailwind: blue-200 | Info borders
-      main: '#2563eb',            // Tailwind: blue-600 | Info icons, text
-      dark: '#1d4ed8',            // Tailwind: blue-700 | Info buttons
-      text: '#1e40af',            // Tailwind: blue-800 | Info badge text
+      lightest: '#eff6ff',
+      light: '#dbeafe',
+      border: '#bfdbfe',
+      main: '#2563eb',
+      dark: '#1d4ed8',
+      text: '#1e40af',
     },
   },
 
   // ---------------------------------------------------------------------------
-  // INTERACTIVE - Button and interactive element colors
-  // Used for: Buttons, links, clickable elements
+  // INTERACTIVE — Buttons and focus. Use for: buttons, disabled, focus ring
   // ---------------------------------------------------------------------------
   interactive: {
-    // Primary button (Forest green)
     primaryDefault: forestGreen[700],
     primaryHover: forestGreen[600],
     primaryActive: forestGreen[800],
     primaryText: '#ffffff',
 
-    // Secondary button (Lime accent)
-    secondaryDefault: '#84cc16',  // Tailwind: lime-500
-    secondaryHover: '#65a30d',    // Tailwind: lime-600
-    secondaryActive: '#4d7c0f',   // Tailwind: lime-700
+    secondaryDefault: lime[500],
+    secondaryHover: lime[600],
+    secondaryActive: lime[700],
     secondaryText: forestGreen[900],
 
-    // Ghost/Outline buttons
     ghostDefault: 'transparent',
     ghostHover: forestGreen[50],
     ghostBorder: forestGreen[700],
     ghostText: forestGreen[700],
 
-    // Disabled state
-    disabled: '#e5e7eb',          // Tailwind: gray-200
-    disabledText: '#9ca3af',      // Tailwind: gray-400
+    disabled: '#e5e7eb',
+    disabledText: '#9ca3af',
 
-    // Focus ring
-    focusRing: '#84cc16',         // Tailwind: lime-500
+    focusRing: lime[500],
   },
 
   // ---------------------------------------------------------------------------
-  // COMPONENT-SPECIFIC - Colors tied to specific UI components
+  // COMPONENTS — Per-component overrides when needed
   // ---------------------------------------------------------------------------
   components: {
-    // Navbar
     navbar: {
-      background: '#b9f041',      // Custom bright lime
+      background: lime[300],
       text: forestGreen[950],
-      textHover: '#bbf7d0',       // Tailwind: green-200
+      textHover: forestGreen[200],
       mobileMenu: forestGreen[800],
     },
-    // Footer
     footer: {
-      background: 'rgba(20, 51, 20, 0.9)', // forest-green-900/90
+      background: 'rgba(20, 51, 20, 0.9)',
       text: '#ffffff',
-      textSecondary: '#dcfce7',   // Tailwind: green-100
-      icon: '#86efac',            // Tailwind: green-300
+      textSecondary: '#dcfce7',
+      icon: '#86efac',
       border: forestGreen[700],
     },
-    // Cards
     card: {
       background: '#ffffff',
-      border: '#e5e7eb',          // Tailwind: gray-200
-      borderAccent: '#a3e635',    // Tailwind: lime-400
+      border: '#e5e7eb',
+      borderAccent: lime[400],
       shadow: 'rgba(0, 0, 0, 0.1)',
     },
-    // Forms
     form: {
-      inputBorder: '#d1d5db',     // Tailwind: gray-300
-      inputFocus: '#84cc16',      // Tailwind: lime-500
-      inputError: '#ef4444',      // Tailwind: red-500
-      inputErrorBg: '#fef2f2',    // Tailwind: red-50
+      inputBorder: '#d1d5db',
+      inputFocus: lime[500],
+      inputError: '#ef4444',
+      inputErrorBg: '#fef2f2',
       label: forestGreen[900],
-      placeholder: '#9ca3af',     // Tailwind: gray-400
+      placeholder: '#9ca3af',
     },
-    // Scrollbar
     scrollbar: {
-      thumb: '#a7f3d0',           // Custom emerald tint
-      track: '#f0fdf4',           // Tailwind: green-50
+      thumb: '#a7f3d0',
+      track: '#f0fdf4',
     },
-    // Badges/Tags
     badge: {
-      inStockBg: '#ecfccb',       // Tailwind: lime-100
-      inStockText: '#3f6212',     // Tailwind: lime-800
-      outOfStockBg: '#fee2e2',    // Tailwind: red-100
-      outOfStockText: '#991b1b',  // Tailwind: red-800
+      inStockBg: lime[100],
+      inStockText: lime[800],
+      outOfStockBg: '#fee2e2',
+      outOfStockText: '#991b1b',
     },
   },
 
   // ---------------------------------------------------------------------------
-  // GRADIENTS - Gradient definitions
+  // GRADIENTS (derived from brand scales)
   // ---------------------------------------------------------------------------
   gradients: {
-    forest: 'linear-gradient(135deg, #0a1a0a 0%, #143314 50%, #1a4d1a 100%)',
-    forestVertical: 'linear-gradient(180deg, #0a1a0a 0%, #143314 50%, #1a4d1a 100%)',
-    accent: 'linear-gradient(135deg, #84cc16 0%, #b9f041 100%)',
+    forest: `linear-gradient(135deg, ${forestGreen[950]} 0%, ${forestGreen[900]} 50%, ${forestGreen[700]} 100%)`,
+    forestVertical: `linear-gradient(180deg, ${forestGreen[950]} 0%, ${forestGreen[900]} 50%, ${forestGreen[700]} 100%)`,
+    accent: `linear-gradient(135deg, ${lime[500]} 0%, ${lime[300]} 100%)`,
     overlay: 'linear-gradient(to bottom, transparent 0%, rgba(20, 51, 20, 0.8) 100%)',
   },
 
   // ---------------------------------------------------------------------------
-  // SHADOWS - Box shadow colors
+  // SHADOWS
   // ---------------------------------------------------------------------------
   shadows: {
     subtle: 'rgba(0, 0, 0, 0.05)',
     default: 'rgba(0, 0, 0, 0.1)',
     medium: 'rgba(0, 0, 0, 0.15)',
     strong: 'rgba(0, 0, 0, 0.25)',
-    text: 'rgba(0, 0, 0, 0.5)',    // Text shadow on hero images
-    accent: 'rgba(132, 204, 22, 0.3)', // Lime glow effect
+    text: 'rgba(0, 0, 0, 0.5)',
+    accent: 'rgba(132, 204, 22, 0.3)',
   },
 } as const;
 
@@ -279,6 +310,8 @@ export const colors = {
 
 // Type exports for TypeScript support
 export type ForestGreenShade = keyof typeof forestGreen;
+export type LimeShade = keyof typeof lime;
+export type LightBlueShade = keyof typeof lightBlue;
 export type ColorPalette = typeof colors;
 export type PrimaryColors = typeof colors.primary;
 export type AccentColors = typeof colors.accent;

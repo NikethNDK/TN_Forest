@@ -100,21 +100,21 @@ const OverviewWithFacilities: React.FC<OverviewWithFacilitiesProps> = ({
 
     // Create facility category cards component
     const facilityCards = (
-      <div key="facility-categories" className="mb-8 border-t border-gray-200 pt-8">
+      <div key="facility-categories" className="mb-8 border-t border-border-light pt-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {facilityCategories.map((category) => (
             <button
               key={category.id}
               onClick={() => onCategoryClick(category.id)}
-              className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200 text-left border-2 border-gray-200 hover:border-green-500 group"
+              className="bg-background-paper rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200 text-left border-2 border-border-light hover:border-primary-light group"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-green-700 group-hover:text-green-800">
+                <h3 className="text-xl font-semibold text-primary-main group-hover:text-content-headingSecondary">
                   {category.title}
                 </h3>
-                <ExternalLink className="h-5 w-5 text-gray-400 group-hover:text-green-600 transition-colors" />
+                <ExternalLink className="h-5 w-5 text-content-muted group-hover:text-primary-main transition-colors" />
               </div>
-              <p className="text-sm text-gray-600 mt-2">Click to view details</p>
+              <p className="text-sm text-content-secondary mt-2">Click to view details</p>
             </button>
           ))}
         </div>
@@ -319,10 +319,10 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-green-800 mb-6">
+          <h1 className="text-4xl md:text-5xl font-bold text-content-headingSecondary mb-6">
             {division?.name || 'Modern Nursery Division'}
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-content-secondary max-w-3xl mx-auto leading-relaxed">
             {division?.description}
           </p>
         </div>
@@ -330,15 +330,15 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-8">
-              <h2 className="text-2xl font-bold text-green-800 mb-6 flex items-center">
+            <div className="bg-background-paper rounded-lg shadow-lg p-6 sticky top-8">
+              <h2 className="text-2xl font-bold text-content-headingSecondary mb-6 flex items-center">
                 <Leaf className="h-6 w-6 mr-3" />
                 Research Centers
               </h2>
               {selectedCenter && (
                 <button
                   onClick={() => setSelectedCenter(null)}
-                  className="w-full mb-4 px-3 py-2 bg-gray-100 hover:bg-green-600 text-gray-700 hover:text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm font-medium"
+                  className="w-full mb-4 px-3 py-2 bg-background-muted hover:bg-interactive-primaryDefault text-content-primary hover:text-interactive-primaryText rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-sm font-medium"
                 >
                   <X className="h-4 w-4" />
                   Clear Selection
@@ -346,9 +346,9 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
               )}
               <div className="space-y-2 max-h-[600px] overflow-y-auto pr-2">
                 {isLoading ? (
-                  <div className="text-center py-4 text-gray-500">Loading centers...</div>
+                  <div className="text-center py-4 text-content-tertiary">Loading centers...</div>
                 ) : researchCenters.length === 0 ? (
-                  <div className="text-center py-4 text-gray-500">No research centers available</div>
+                  <div className="text-center py-4 text-content-tertiary">No research centers available</div>
                 ) : (
                   researchCenters.map((center) => {
                     // Add experiments to center if available
@@ -362,12 +362,12 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                         onClick={() => handleCenterSelect(centerWithExperiments)}
                         className={`w-full text-left p-3 rounded-lg transition-colors duration-200 ${
                           selectedCenter?.id === center.id
-                            ? 'bg-green-100 text-green-800 border-2 border-green-300'
-                            : 'bg-gray-50 hover:bg-green-50 text-gray-700 hover:text-green-700'
+                            ? 'bg-primary-lighter text-content-headingSecondary border-2 border-primary-light'
+                            : 'bg-background-page hover:bg-primary-lightest text-content-primary hover:text-primary-main'
                         }`}
                       >
                         <div className="font-semibold text-sm mb-1">{center.name}</div>
-                        <div className="text-xs text-gray-500">{center.location || '—'}</div>
+                        <div className="text-xs text-content-tertiary">{center.location || '—'}</div>
                       </button>
                     );
                   })
@@ -381,12 +381,12 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
             {selectedCenter ? (
               <div className="space-y-8">
                 {/* Center Header */}
-                <div className="bg-white rounded-lg shadow-lg p-8">
+                <div className="bg-background-paper rounded-lg shadow-lg p-8">
                   <div className="flex flex-col md:flex-row gap-6 mb-6">
                     {/* Center Image Box */}
                     {getCenterImage(selectedCenter) && (
                       <div className="flex-shrink-0">
-                        <div className="w-full md:w-64 h-48 md:h-64 rounded-lg overflow-hidden shadow-md border border-gray-200">
+                        <div className="w-full md:w-64 h-48 md:h-64 rounded-lg overflow-hidden shadow-md border border-border-light">
                           <img
                             src={getCenterImage(selectedCenter) || ''}
                             alt={selectedCenter.name}
@@ -398,22 +398,22 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                     
                     {/* Center Details */}
                     <div className="flex-1">
-                      <h2 className="text-3xl font-bold text-green-800 mb-4">
+                      <h2 className="text-3xl font-bold text-content-headingSecondary mb-4">
                         {selectedCenter.name}
                       </h2>
                       <div className="space-y-3">
                         {(selectedCenter.location || selectedCenter.coordinates) && (
                         <div 
                           onClick={() => handleLocationClick(selectedCenter.coordinates)}
-                          className={`flex items-center text-gray-600 ${
-                            selectedCenter.coordinates ? 'cursor-pointer hover:text-green-700 transition-colors' : ''
+                          className={`flex items-center text-content-secondary ${
+                            selectedCenter.coordinates ? 'cursor-pointer hover:text-primary-main transition-colors' : ''
                           }`}
                           title={selectedCenter.coordinates ? 'Click to get directions on Google Maps' : ''}
                         >
-                          <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                          <MapPin className="h-5 w-5 mr-2 text-primary-main" />
                           <span className="font-medium">{selectedCenter.location || 'Location not specified'}</span>
                           {selectedCenter.coordinates && (
-                            <span className="ml-2 text-xs text-green-600 opacity-70">(Click for directions)</span>
+                            <span className="ml-2 text-xs text-primary-main opacity-70">(Click for directions)</span>
                           )}
                         </div>
                         )}
@@ -421,7 +421,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                         {selectedCenter.customFields && selectedCenter.customFields.length > 0 ? (
                           selectedCenter.customFields.map((field) => (
                             field.label.trim() && field.value.trim() && (
-                              <div key={field.id} className="flex items-center text-gray-600">
+                              <div key={field.id} className="flex items-center text-content-secondary">
                                 <span className="font-medium mr-2">{field.label}:</span>
                                 <span>
                                   {field.label.toLowerCase() === 'area' 
@@ -435,19 +435,19 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                           // Fallback to legacy fields for backward compatibility
                           <>
                             {selectedCenter.area && (
-                              <div className="flex items-center text-gray-600">
+                              <div className="flex items-center text-content-secondary">
                                 <span className="font-medium mr-2">Area:</span>
                                 <span>{selectedCenter.area} hectares</span>
                               </div>
                             )}
                             {selectedCenter.district && (
-                              <div className="flex items-center text-gray-600">
+                              <div className="flex items-center text-content-secondary">
                                 <span className="font-medium mr-2">District:</span>
                                 <span>{selectedCenter.district}</span>
                               </div>
                             )}
                             {selectedCenter.range && (
-                              <div className="flex items-center text-gray-600">
+                              <div className="flex items-center text-content-secondary">
                                 <span className="font-medium mr-2">Range:</span>
                                 <span>{selectedCenter.range}</span>
                               </div>
@@ -458,14 +458,14 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                     </div>
                   </div>
                   
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-lg text-content-primary leading-relaxed">
                     {selectedCenter.description}
                   </p>
                 </div>
 
                 {/* Experiments Section */}
-                <div className="bg-white rounded-lg shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-green-800 mb-6 flex items-center">
+                <div className="bg-background-paper rounded-lg shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-content-headingSecondary mb-6 flex items-center">
                     <TreePine className="h-6 w-6 mr-3" />
                     Experiments
                   </h3>
@@ -485,18 +485,18 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                         return (
                           <>
                             {/* Pagination Info */}
-                            <div className="mb-4 text-sm text-gray-600">
+                            <div className="mb-4 text-sm text-content-secondary">
                               Showing {startItem}-{endItem} of {selectedCenter.experiments.length} experiments
                             </div>
 
                             {/* Experiments List */}
                             <div className="space-y-3">
                               {paginatedExperiments.map((experiment) => (
-                                <div key={experiment.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                                  <div className="flex items-center p-4 hover:bg-gray-50 transition-colors">
+                                <div key={experiment.id} className="border border-border-light rounded-lg overflow-hidden">
+                                  <div className="flex items-center p-4 hover:bg-background-page transition-colors">
                                     {/* Experiment Image or Center Image */}
                                     {getExperimentImage(experiment, selectedCenter) && (
-                                      <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-gray-200 flex-shrink-0 mr-4">
+                                      <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-border-light flex-shrink-0 mr-4">
                                         <img
                                           src={getExperimentImage(experiment, selectedCenter) || ''}
                                           alt={experiment.imageUrl || experiment.imagePath ? experiment.title : selectedCenter.name}
@@ -506,10 +506,10 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                     )}
                                     {/* Experiment Info */}
                                     <div className="flex-1">
-                                      <h4 className="text-lg font-semibold text-green-800 mb-1">
+                                      <h4 className="text-lg font-semibold text-content-headingSecondary mb-1">
                                         {experiment.title}
                                       </h4>
-                                      <p className="text-sm text-gray-600 line-clamp-2">
+                                      <p className="text-sm text-content-secondary line-clamp-2">
                                         {experiment.description}
                                       </p>
                                     </div>
@@ -517,7 +517,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                     {(experiment.pdfUrl || experiment.pdfPath) && (
                                       <button
                                         onClick={() => handleViewPDF(experiment.pdfUrl, experiment.pdfPath)}
-                                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
+                                        className="bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
                                       >
                                         View PDF
                                       </button>
@@ -530,7 +530,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                             {/* Pagination Controls */}
                             <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                               {/* Page Info */}
-                              <div className="text-sm text-gray-600">
+                              <div className="text-sm text-content-secondary">
                                 Page {currentPage} of {totalPages}
                               </div>
 
@@ -542,8 +542,8 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                   disabled={currentPage === 1}
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
                                     currentPage === 1
-                                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                      : 'bg-green-600 hover:bg-green-700 text-white'
+                                      ? 'bg-interactive-disabled text-interactive-disabledText cursor-not-allowed'
+                                      : 'bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText'
                                   }`}
                                 >
                                   <ChevronLeft className="h-4 w-4" />
@@ -562,7 +562,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                     if (!showPage) {
                                       // Show ellipsis
                                       if (pageNum === currentPage - 2 || pageNum === currentPage + 2) {
-                                        return <span key={pageNum} className="px-2 text-gray-400">...</span>;
+                                        return <span key={pageNum} className="px-2 text-content-muted">...</span>;
                                       }
                                       return null;
                                     }
@@ -573,8 +573,8 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                         onClick={() => setCurrentPage(pageNum)}
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
                                           currentPage === pageNum
-                                            ? 'bg-green-600 text-white'
-                                            : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                            ? 'bg-interactive-primaryDefault text-interactive-primaryText'
+                                            : 'bg-background-muted hover:bg-border-light text-content-primary'
                                         }`}
                                       >
                                         {pageNum}
@@ -589,8 +589,8 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                   disabled={currentPage === totalPages}
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
                                     currentPage === totalPages
-                                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                      : 'bg-green-600 hover:bg-green-700 text-white'
+                                      ? 'bg-interactive-disabled text-interactive-disabledText cursor-not-allowed'
+                                      : 'bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText'
                                   }`}
                                 >
                                   Next
@@ -603,7 +603,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                       })()}
                     </>
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-content-tertiary">
                       No experiments available for this research center.
                     </div>
                   )}
@@ -612,33 +612,33 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                 {/* Center Contact Info and Map */}
                 <div className="space-y-6">
                   {/* Contact Information */}
-                  <div className="bg-green-50 rounded-lg p-6">
-                    <h3 className="text-xl font-semibold text-green-800 mb-4">
+                  <div className="bg-primary-lightest rounded-lg p-6">
+                    <h3 className="text-xl font-semibold text-content-headingSecondary mb-4">
                       Contact Information
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {selectedCenter.phone && (
                         <div className="flex items-center">
-                          <Phone className="h-5 w-5 text-green-600 mr-3" />
-                          <span className="text-gray-700">{selectedCenter.phone}</span>
+                          <Phone className="h-5 w-5 text-primary-main mr-3" />
+                          <span className="text-content-primary">{selectedCenter.phone}</span>
                         </div>
                       )}
                       {!selectedCenter.phone && (
                         <div className="flex items-center">
-                          <Phone className="h-5 w-5 text-green-600 mr-3" />
-                          <span className="text-gray-700">{config.contactFallbacks.phone}</span>
+                          <Phone className="h-5 w-5 text-primary-main mr-3" />
+                          <span className="text-content-primary">{config.contactFallbacks.phone}</span>
                         </div>
                       )}
                       {selectedCenter.email && (
                         <div className="flex items-center">
-                          <Mail className="h-5 w-5 text-green-600 mr-3" />
-                          <span className="text-gray-700">{selectedCenter.email}</span>
+                          <Mail className="h-5 w-5 text-primary-main mr-3" />
+                          <span className="text-content-primary">{selectedCenter.email}</span>
                         </div>
                       )}
                       {!selectedCenter.email && (
                         <div className="flex items-center">
-                          <Mail className="h-5 w-5 text-green-600 mr-3" />
-                          <span className="text-gray-700">
+                          <Mail className="h-5 w-5 text-primary-main mr-3" />
+                          <span className="text-content-primary">
                             {selectedCenter.name.toLowerCase().replace(/\s+/g, '')}@{config.contactFallbacks.emailDomain}
                           </span>
                         </div>
@@ -648,12 +648,12 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
 
                   {/* Map Section */}
                   {selectedCenter.coordinates && (
-                    <div className="bg-white rounded-lg shadow-lg p-6 relative z-[1]">
-                      <h3 className="text-xl font-semibold text-green-800 mb-4 flex items-center">
-                        <MapPin className="h-5 w-5 mr-2 text-green-600" />
+                    <div className="bg-background-paper rounded-lg shadow-lg p-6 relative z-[1]">
+                      <h3 className="text-xl font-semibold text-content-headingSecondary mb-4 flex items-center">
+                        <MapPin className="h-5 w-5 mr-2 text-primary-main" />
                         Location on Map
                       </h3>
-                      <div className="rounded-lg overflow-hidden shadow-md border border-gray-200 relative h-[300px] z-[1] cursor-pointer">
+                      <div className="rounded-lg overflow-hidden shadow-md border border-border-light relative h-[300px] z-[1] cursor-pointer">
                         <MapContainer
                           key={`${selectedCenter.coordinates.lat}-${selectedCenter.coordinates.lng}`}
                           center={[selectedCenter.coordinates.lat, selectedCenter.coordinates.lng]}
@@ -673,17 +673,17 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                           <Marker position={[selectedCenter.coordinates.lat, selectedCenter.coordinates.lng]}>
                             <Popup>
                               <div className="text-center">
-                                <strong className="text-green-800">{selectedCenter.name}</strong>
+                                <strong className="text-content-headingSecondary">{selectedCenter.name}</strong>
                                 <br />
-                                <span className="text-sm text-gray-600">{selectedCenter.location || '—'}</span>
+                                <span className="text-sm text-content-secondary">{selectedCenter.location || '—'}</span>
                                 <br />
-                                <span className="text-xs text-gray-500 mt-1 block">Click anywhere on the map to get directions</span>
+                                <span className="text-xs text-content-tertiary mt-1 block">Click anywhere on the map to get directions</span>
                               </div>
                             </Popup>
                           </Marker>
                         </MapContainer>
                       </div>
-                      <p className="text-sm text-gray-600 mt-3 text-center italic">
+                      <p className="text-sm text-content-secondary mt-3 text-center italic">
                         💡 Click anywhere on the map to open Google Maps with directions to this location
                       </p>
                     </div>
@@ -717,14 +717,14 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
         </div>
 
         {/* Toll Free Number Box */}
-        <div className="mt-16 bg-gray-100 rounded-lg shadow-lg p-8 border-2 border-gray-300">
+        <div className="mt-16 bg-background-muted rounded-lg shadow-lg p-8 border-2 border-border-default">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-            <Phone className="h-8 w-8 text-green-700" />
+            <Phone className="h-8 w-8 text-primary-main" />
             <div className="text-center md:text-left">
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">Toll Free Number</h3>
+              <h3 className="text-xl font-semibold text-content-primary mb-2">Toll Free Number</h3>
               <a 
                 href={`tel:${division?.tollFreeNumber?.replace(/-/g, '') || config.tollFreeFallback.tel}`}
-                className="text-3xl md:text-4xl font-bold text-green-700 hover:text-green-800 transition-colors"
+                className="text-3xl md:text-4xl font-bold text-primary-main hover:text-content-headingSecondary transition-colors"
               >
                 {division?.tollFreeNumber || config.tollFreeFallback.display}
               </a>
@@ -733,15 +733,15 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
         </div>
 
         {/* Division Statistics */}
-        {/* <div className="mt-8 bg-green-800 rounded-lg p-8">
-          <h2 className="text-3xl font-bold text-white mb-8 text-center">
+        {/* <div className="mt-8 bg-primary-dark rounded-lg p-8">
+          <h2 className="text-3xl font-bold text-content-inverse mb-8 text-center">
             {division?.name || 'Modern Nursery Division'} Statistics
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {config.stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-4xl font-bold text-green-300 mb-2">{stat.value}</div>
-                <div className="text-green-100">{stat.label}</div>
+                <div className="text-4xl font-bold text-primary-light mb-2">{stat.value}</div>
+                <div className="text-primary-lighter">{stat.label}</div>
               </div>
             ))}
           </div>

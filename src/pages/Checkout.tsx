@@ -386,30 +386,30 @@ const Checkout: React.FC = () => {
   // Order Success View
   if (orderPlaced) {
     return (
-      <div className="py-16 bg-gray-50 min-h-screen">
+      <div className="py-16 bg-background-page min-h-screen">
         <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-white rounded-xl shadow-xl p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="h-12 w-12 text-green-600" />
+          <div className="bg-background-paper rounded-xl shadow-xl p-8 text-center">
+            <div className="w-20 h-20 bg-primary-lighter rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle className="h-12 w-12 text-primary-main" />
             </div>
-            <h1 className="text-3xl font-bold text-green-900 mb-4">
+            <h1 className="text-3xl font-bold text-content-heading mb-4">
               Order Placed Successfully!
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-content-secondary mb-6">
               Thank you for your order. We have received your payment details and will
               verify the transaction shortly.
             </p>
             
-            <div className="bg-green-50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-gray-600 mb-1">Your Order ID</p>
-              <p className="text-xl font-bold text-green-800">{orderId}</p>
+            <div className="bg-primary-lightest rounded-lg p-4 mb-6">
+              <p className="text-sm text-content-secondary mb-1">Your Order ID</p>
+              <p className="text-xl font-bold text-content-headingSecondary">{orderId}</p>
             </div>
 
-            <div className="bg-blue-50 rounded-lg p-4 mb-8">
-              <p className="text-sm text-gray-700">
+            <div className="bg-status-info-lightest rounded-lg p-4 mb-8">
+              <p className="text-sm text-content-primary">
                 <strong>Transaction ID:</strong> {transactionId}
               </p>
-              <p className="text-sm text-gray-600 mt-2">
+              <p className="text-sm text-content-secondary mt-2">
                 Our team will verify your payment and contact you at{' '}
                 <strong>{deliveryDetails.email}</strong> or{' '}
                 <strong>{deliveryDetails.phone}</strong> within 24-48 hours.
@@ -418,7 +418,7 @@ const Checkout: React.FC = () => {
 
             <button
               onClick={() => navigate('/shop')}
-              className="px-8 py-3 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition-colors"
+              className="px-8 py-3 bg-interactive-primaryDefault text-interactive-primaryText rounded-lg font-semibold hover:bg-interactive-primaryHover transition-colors"
             >
               Continue Shopping
             </button>
@@ -431,19 +431,19 @@ const Checkout: React.FC = () => {
   const totalPrice = getTotalPrice();
 
   return (
-    <div className="py-16 bg-gray-50 min-h-screen">
+    <div className="py-16 bg-background-page min-h-screen">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={() => navigate('/shop')}
-            className="flex items-center text-green-700 hover:text-green-800 font-medium mb-4"
+            className="flex items-center text-primary-main hover:text-content-headingSecondary font-medium mb-4"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
             Back to Shop
           </button>
-          <h1 className="text-3xl font-bold text-green-900 flex items-center">
-            <ShoppingBag className="h-8 w-8 mr-3 text-lime-600" />
+          <h1 className="text-3xl font-bold text-content-heading flex items-center">
+            <ShoppingBag className="h-8 w-8 mr-3 text-accent-darker" />
             Checkout
           </h1>
         </div>
@@ -452,9 +452,9 @@ const Checkout: React.FC = () => {
           {/* Left Column - Order Summary & Delivery Details */}
           <div className="space-y-6">
             {/* Order Summary */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-green-900 mb-4 flex items-center">
-                <Package className="h-5 w-5 mr-2 text-lime-600" />
+            <div className="bg-background-paper rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-bold text-content-heading mb-4 flex items-center">
+                <Package className="h-5 w-5 mr-2 text-accent-darker" />
                 Order Summary ({getCartItemCount()} items)
               </h2>
 
@@ -462,54 +462,54 @@ const Checkout: React.FC = () => {
                 {cart.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0"
+                    className="flex items-center justify-between py-3 border-b border-border-lightest last:border-b-0"
                   >
                     <div className="flex items-center">
                       <span className="text-2xl mr-3">{item.imageIcon || '🌿'}</span>
                       <div>
-                        <p className="font-medium text-green-800">{item.name}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="font-medium text-content-headingSecondary">{item.name}</p>
+                        <p className="text-sm text-content-tertiary">
                           {item.quantity} {item.unit} × ₹{item.price}
                         </p>
                       </div>
                     </div>
-                    <p className="font-bold text-green-700">
+                    <p className="font-bold text-primary-main">
                       ₹{item.price * item.quantity}
                     </p>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t border-gray-200 mt-4 pt-4">
+              <div className="border-t border-border-light mt-4 pt-4">
                 <div className="flex justify-between items-center text-lg">
-                  <span className="font-semibold text-green-900">Total Amount:</span>
-                  <span className="text-2xl font-bold text-lime-600">₹{totalPrice}</span>
+                  <span className="font-semibold text-content-heading">Total Amount:</span>
+                  <span className="text-2xl font-bold text-accent-darker">₹{totalPrice}</span>
                 </div>
               </div>
             </div>
 
             {/* Delivery Details Form */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-green-900 mb-4 flex items-center">
-                <MapPin className="h-5 w-5 mr-2 text-lime-600" />
+            <div className="bg-background-paper rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-bold text-content-heading mb-4 flex items-center">
+                <MapPin className="h-5 w-5 mr-2 text-accent-darker" />
                 Delivery Details
               </h2>
 
               <form className="space-y-4">
                 {/* Name */}
                 <div>
-                  <label className="block text-sm font-semibold text-green-900 mb-1">
-                    Full Name <span className="text-red-500">*</span>
+                  <label className="block text-sm font-semibold text-content-heading mb-1">
+                    Full Name <span className="text-status-error-main">*</span>
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted" />
                     <input
                       type="text"
                       value={deliveryDetails.name}
                       onChange={(e) => updateDeliveryField('name', e.target.value)}
                       onBlur={() => handleFieldBlur('name', deliveryDetails.name)}
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 ${
-                        errors.name && touched.name ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus ${
+                        errors.name && touched.name ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                       }`}
                       placeholder="Enter your full name"
                       maxLength={100}
@@ -517,25 +517,25 @@ const Checkout: React.FC = () => {
                     />
                   </div>
                   {errors.name && touched.name && (
-                    <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                    <p className="text-status-error-main text-xs mt-1">{errors.name}</p>
                   )}
                 </div>
 
                 {/* Email & Phone Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-green-900 mb-1">
-                      Email <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-content-heading mb-1">
+                      Email <span className="text-status-error-main">*</span>
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted" />
                       <input
                         type="email"
                         value={deliveryDetails.email}
                         onChange={(e) => updateDeliveryField('email', e.target.value)}
                         onBlur={() => handleFieldBlur('email', deliveryDetails.email)}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 ${
-                          errors.email && touched.email ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus ${
+                          errors.email && touched.email ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                         }`}
                         placeholder="your@email.com"
                         maxLength={100}
@@ -543,22 +543,22 @@ const Checkout: React.FC = () => {
                       />
                     </div>
                     {errors.email && touched.email && (
-                      <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                      <p className="text-status-error-main text-xs mt-1">{errors.email}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-green-900 mb-1">
-                      Phone <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-content-heading mb-1">
+                      Phone <span className="text-status-error-main">*</span>
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted" />
                       <input
                         type="tel"
                         value={deliveryDetails.phone}
                         onChange={(e) => updateDeliveryField('phone', e.target.value)}
                         onBlur={() => handleFieldBlur('phone', deliveryDetails.phone)}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 ${
-                          errors.phone && touched.phone ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus ${
+                          errors.phone && touched.phone ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                         }`}
                         placeholder="9876543210"
                         maxLength={15}
@@ -566,22 +566,22 @@ const Checkout: React.FC = () => {
                       />
                     </div>
                     {errors.phone && touched.phone && (
-                      <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
+                      <p className="text-status-error-main text-xs mt-1">{errors.phone}</p>
                     )}
                   </div>
                 </div>
 
                 {/* Address */}
                 <div>
-                  <label className="block text-sm font-semibold text-green-900 mb-1">
-                    Delivery Address <span className="text-red-500">*</span>
+                  <label className="block text-sm font-semibold text-content-heading mb-1">
+                    Delivery Address <span className="text-status-error-main">*</span>
                   </label>
                   <textarea
                     value={deliveryDetails.address}
                     onChange={(e) => updateDeliveryField('address', e.target.value)}
                     onBlur={() => handleFieldBlur('address', deliveryDetails.address)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 resize-none ${
-                      errors.address && touched.address ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus resize-none ${
+                      errors.address && touched.address ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                     }`}
                     rows={2}
                     placeholder="House/Flat No., Street, Landmark"
@@ -589,25 +589,25 @@ const Checkout: React.FC = () => {
                     required
                   />
                   {errors.address && touched.address && (
-                    <p className="text-red-500 text-xs mt-1">{errors.address}</p>
+                    <p className="text-status-error-main text-xs mt-1">{errors.address}</p>
                   )}
                 </div>
 
                 {/* City, State, Pincode Row */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold text-green-900 mb-1">
-                      City <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-content-heading mb-1">
+                      City <span className="text-status-error-main">*</span>
                     </label>
                     <div className="relative">
-                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                      <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted" />
                       <input
                         type="text"
                         value={deliveryDetails.city}
                         onChange={(e) => updateDeliveryField('city', e.target.value)}
                         onBlur={() => handleFieldBlur('city', deliveryDetails.city)}
-                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 ${
-                          errors.city && touched.city ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus ${
+                          errors.city && touched.city ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                         }`}
                         placeholder="City"
                         maxLength={50}
@@ -615,47 +615,47 @@ const Checkout: React.FC = () => {
                       />
                     </div>
                     {errors.city && touched.city && (
-                      <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+                      <p className="text-status-error-main text-xs mt-1">{errors.city}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-green-900 mb-1">
-                      State <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-content-heading mb-1">
+                      State <span className="text-status-error-main">*</span>
                     </label>
                     <input
                       type="text"
                       value={deliveryDetails.state}
                       onChange={(e) => updateDeliveryField('state', e.target.value)}
                       onBlur={() => handleFieldBlur('state', deliveryDetails.state)}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 ${
-                        errors.state && touched.state ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus ${
+                        errors.state && touched.state ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                       }`}
                       placeholder="State"
                       maxLength={50}
                       required
                     />
                     {errors.state && touched.state && (
-                      <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+                      <p className="text-status-error-main text-xs mt-1">{errors.state}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-green-900 mb-1">
-                      Pincode <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-content-heading mb-1">
+                      Pincode <span className="text-status-error-main">*</span>
                     </label>
                     <input
                       type="text"
                       value={deliveryDetails.pincode}
                       onChange={(e) => updateDeliveryField('pincode', e.target.value)}
                       onBlur={() => handleFieldBlur('pincode', deliveryDetails.pincode)}
-                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 ${
-                        errors.pincode && touched.pincode ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus ${
+                        errors.pincode && touched.pincode ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                       }`}
                       placeholder="600001"
                       maxLength={6}
                       required
                     />
                     {errors.pincode && touched.pincode && (
-                      <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>
+                      <p className="text-status-error-main text-xs mt-1">{errors.pincode}</p>
                     )}
                   </div>
                 </div>
@@ -666,25 +666,25 @@ const Checkout: React.FC = () => {
           {/* Right Column - Payment */}
           <div className="space-y-6">
             {/* Payment Section */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-green-900 mb-4 flex items-center">
-                <CreditCard className="h-5 w-5 mr-2 text-lime-600" />
+            <div className="bg-background-paper rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-bold text-content-heading mb-4 flex items-center">
+                <CreditCard className="h-5 w-5 mr-2 text-accent-darker" />
                 Payment
               </h2>
 
               {/* QR Code Section */}
-              <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-br from-primary-lightest to-accent-lightest rounded-xl p-6 mb-6">
                 <div className="text-center">
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm text-content-secondary mb-4">
                     Scan the QR code below to pay via UPI
                   </p>
                   
                   {/* QR Code Placeholder */}
-                  <div className="inline-block bg-white p-4 rounded-xl shadow-md mb-4">
-                    {/* <div className="w-48 h-48 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
+                  <div className="inline-block bg-background-paper p-4 rounded-xl shadow-md mb-4">
+                    {/* <div className="w-48 h-48 bg-background-muted rounded-lg flex items-center justify-center border-2 border-dashed border-border-default">
                       <div className="text-center">
-                        <QrCode className="h-16 w-16 text-gray-400 mx-auto mb-2" />
-                        <p className="text-xs text-gray-500">
+                        <QrCode className="h-16 w-16 text-content-muted mx-auto mb-2" />
+                        <p className="text-xs text-content-tertiary">
                           QR Code
                         </p>
                       </div>
@@ -696,28 +696,28 @@ const Checkout: React.FC = () => {
                       />
                   </div>
 
-                  <div className="bg-white rounded-lg p-3 shadow-sm">
-                    <p className="text-xs text-gray-500">UPI ID</p>
-                    <p className="font-mono font-bold text-green-800">{PAYMENT_UPI_ID}</p>
-                    <p className="text-xs text-gray-500 mt-1">{PAYMENT_ACCOUNT_NAME}</p>
+                  <div className="bg-background-paper rounded-lg p-3 shadow-sm">
+                    <p className="text-xs text-content-tertiary">UPI ID</p>
+                    <p className="font-mono font-bold text-content-headingSecondary">{PAYMENT_UPI_ID}</p>
+                    <p className="text-xs text-content-tertiary mt-1">{PAYMENT_ACCOUNT_NAME}</p>
                   </div>
                 </div>
               </div>
 
               {/* Amount to Pay */}
-              <div className="bg-lime-100 rounded-lg p-4 mb-6">
+              <div className="bg-accent-lighter rounded-lg p-4 mb-6">
                 <div className="flex justify-between items-center">
-                  <span className="font-semibold text-green-900">Amount to Pay:</span>
-                  <span className="text-3xl font-bold text-green-800">₹{totalPrice}</span>
+                  <span className="font-semibold text-content-heading">Amount to Pay:</span>
+                  <span className="text-3xl font-bold text-content-headingSecondary">₹{totalPrice}</span>
                 </div>
               </div>
 
               {/* Transaction ID Input */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-green-900 mb-2">
-                  Transaction ID / UTR Number <span className="text-red-500">*</span>
+                <label className="block text-sm font-semibold text-content-heading mb-2">
+                  Transaction ID / UTR Number <span className="text-status-error-main">*</span>
                 </label>
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs text-content-tertiary mb-2">
                   After making the payment, enter the Transaction ID or UTR number from your payment app (8-30 characters)
                 </p>
                 <input
@@ -725,23 +725,23 @@ const Checkout: React.FC = () => {
                   value={transactionId}
                   onChange={(e) => handleTransactionIdChange(e.target.value)}
                   onBlur={() => handleFieldBlur('transactionId', transactionId)}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 font-mono ${
-                    errors.transactionId && touched.transactionId ? 'border-red-500 bg-red-50' : 'border-gray-300'
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus font-mono ${
+                    errors.transactionId && touched.transactionId ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
                   }`}
                   placeholder="Enter Transaction ID"
                   maxLength={30}
                   required
                 />
                 {errors.transactionId && touched.transactionId && (
-                  <p className="text-red-500 text-xs mt-1">{errors.transactionId}</p>
+                  <p className="text-status-error-main text-xs mt-1">{errors.transactionId}</p>
                 )}
               </div>
 
               {/* Info Alert */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div className="bg-status-info-lightest border border-status-info-border rounded-lg p-4 mb-6">
                 <div className="flex items-start">
-                  <AlertCircle className="h-5 w-5 text-blue-600 mr-2 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-blue-800">
+                  <AlertCircle className="h-5 w-5 text-status-info-main mr-2 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-status-info-text">
                     <p className="font-semibold mb-1">Payment Verification</p>
                     <p>
                       Your order will be confirmed once we verify your payment. This usually
@@ -757,8 +757,8 @@ const Checkout: React.FC = () => {
                 disabled={!isFormValid() || isSubmitting}
                 className={`w-full py-4 rounded-lg font-bold text-lg transition-all duration-300 flex items-center justify-center ${
                   isFormValid() && !isSubmitting
-                    ? 'bg-lime-500 hover:bg-lime-600 text-green-900 shadow-lg hover:shadow-xl'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    ? 'bg-interactive-secondaryDefault hover:bg-interactive-secondaryHover text-interactive-secondaryText shadow-lg hover:shadow-xl'
+                    : 'bg-interactive-disabled text-interactive-disabledText cursor-not-allowed'
                 }`}
               >
                 {isSubmitting ? (

@@ -217,15 +217,15 @@ const Shop: React.FC = () => {
   };
 
   return (
-    <div className="py-16 bg-gray-50 min-h-screen font-sans">
+    <div className="py-16 bg-background-page min-h-screen font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <Leaf className="h-10 w-10 text-lime-600 mx-auto mb-3" />
-          <h1 className="text-3xl md:text-4xl font-extrabold text-green-900 mb-4">
+          <Leaf className="h-10 w-10 text-accent-darker mx-auto mb-3" />
+          <h1 className="text-3xl md:text-4xl font-extrabold text-content-heading mb-4">
           TamilNadu Forest Department's Research Eco-Store
           </h1>
-          <p className="text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+          <p className="text-lg text-content-secondary max-w-4xl mx-auto leading-relaxed">
             Explore high-quality saplings, seeds, and bio-fertilizers
             from our research centers, for sustainable cultivation and
             afforestation projects in India.
@@ -233,28 +233,28 @@ const Shop: React.FC = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="bg-white rounded-xl shadow-xl p-5 mb-12 sticky top-20 z-10">
+        <div className="bg-background-paper rounded-xl shadow-xl p-5 mb-12 sticky top-20 z-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex-1 relative w-full md:w-auto">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted" />
               <input
                 type="text"
                 placeholder="Search for Teak, Sandalwood, Mango seeds, Bio-fertilizers..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-shadow text-gray-700"
+                className="w-full pl-10 pr-4 py-3 border border-form-inputBorder rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow text-content-primary"
               />
             </div>
 
             <button
               ref={cartButtonRef}
               onClick={() => setShowCart(!showCart)}
-              className="relative bg-green-700 hover:bg-green-800 text-white px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow-lg w-full md:w-auto flex-shrink-0"
+              className="relative bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center shadow-lg w-full md:w-auto flex-shrink-0"
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
               {showCart ? 'Hide Order' : 'View Order'}
               {getCartItemCount() > 0 && (
-                <span className="absolute -top-3 -right-3 bg-red-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold ring-2 ring-white">
+                <span className="absolute -top-3 -right-3 bg-status-error-main text-content-inverse text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold ring-2 ring-background-paper">
                   {getCartItemCount()}
                 </span>
               )}
@@ -264,23 +264,23 @@ const Shop: React.FC = () => {
 
         {/* Loading State */}
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-xl">
-            <Loader2 className="h-12 w-12 text-lime-600 animate-spin mb-4" />
-            <p className="text-gray-600 font-medium">Loading products...</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-background-paper rounded-xl shadow-xl">
+            <Loader2 className="h-12 w-12 text-accent-darker animate-spin mb-4" />
+            <p className="text-content-secondary font-medium">Loading products...</p>
           </div>
         )}
 
         {/* Error State */}
         {error && !isLoading && (
-          <div className="text-center py-16 bg-white rounded-xl shadow-xl">
+          <div className="text-center py-16 bg-background-paper rounded-xl shadow-xl">
             <div className="text-6xl mb-4">😕</div>
-            <h3 className="text-2xl font-bold text-red-600 mb-2">
+            <h3 className="text-2xl font-bold text-status-error-main mb-2">
               Unable to Load Products
             </h3>
-            <p className="text-gray-600 mb-4">{error}</p>
+            <p className="text-content-secondary mb-4">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-green-700 text-white rounded-lg font-semibold hover:bg-green-800 transition-colors"
+              className="px-6 py-2 bg-interactive-primaryDefault text-interactive-primaryText rounded-lg font-semibold hover:bg-interactive-primaryHover transition-colors"
             >
               Retry
             </button>
@@ -295,11 +295,11 @@ const Shop: React.FC = () => {
               combinedSearchResults.length > 0 ? (
                 <div>
                   <div className="mb-6">
-                    <h2 className="text-3xl font-bold text-green-900 mb-2 flex items-center">
-                      <Search className="h-7 w-7 mr-3 text-lime-600" />
+                    <h2 className="text-3xl font-bold text-content-heading mb-2 flex items-center">
+                      <Search className="h-7 w-7 mr-3 text-accent-darker" />
                       Search Results
                     </h2>
-                    <p className="text-gray-600">
+                    <p className="text-content-secondary">
                       Found {combinedSearchResults.length} product
                       {combinedSearchResults.length !== 1 ? 's' : ''} matching "
                       {searchTerm}"
@@ -325,12 +325,12 @@ const Shop: React.FC = () => {
                   />
                 </div>
               ) : (
-                <div className="text-center py-16 bg-white rounded-xl shadow-xl">
+                <div className="text-center py-16 bg-background-paper rounded-xl shadow-xl">
                   <div className="text-6xl mb-4">🔍</div>
-                  <h3 className="text-2xl font-bold text-green-900 mb-2">
+                  <h3 className="text-2xl font-bold text-content-heading mb-2">
                     No Products Match Your Search
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-content-secondary">
                     Try a broader search term (e.g., 'tree', 'fertilizer') or check
                     the Seeds and Bio Fertilizers sections.
                   </p>
@@ -340,19 +340,19 @@ const Shop: React.FC = () => {
               // Tabbed View
               <div>
                 {/* Category Tabs */}
-                <div className="bg-white rounded-t-xl border-b border-gray-200 mb-0 flex">
+                <div className="bg-background-paper rounded-t-xl border-b border-border-light mb-0 flex">
                   <button
                     onClick={() => setActiveTab('Seeds')}
                     className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
                       activeTab === 'Seeds'
-                        ? 'text-green-700 bg-white'
-                        : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
+                        ? 'text-primary-main bg-background-paper'
+                        : 'text-content-secondary hover:text-primary-main hover:bg-background-page'
                     }`}
                   >
                     <div className="flex items-center justify-center">
                       <Sprout
                         className={`h-5 w-5 mr-2 ${
-                          activeTab === 'Seeds' ? 'text-lime-600' : 'text-gray-400'
+                          activeTab === 'Seeds' ? 'text-accent-darker' : 'text-content-muted'
                         }`}
                       />
                       Seeds
@@ -360,8 +360,8 @@ const Shop: React.FC = () => {
                         <span
                           className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
                             activeTab === 'Seeds'
-                              ? 'bg-lime-100 text-lime-800'
-                              : 'bg-gray-200 text-gray-600'
+                              ? 'bg-badge-inStockBg text-badge-inStockText'
+                              : 'bg-interactive-disabled text-interactive-disabledText'
                           }`}
                         >
                           {seedsSaplings.length}
@@ -369,23 +369,23 @@ const Shop: React.FC = () => {
                       )}
                     </div>
                     {activeTab === 'Seeds' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-main rounded-t-full"></div>
                     )}
                   </button>
                   <button
                     onClick={() => setActiveTab('Bio Fertilizers')}
                     className={`flex-1 px-6 py-4 font-semibold text-lg transition-all relative ${
                       activeTab === 'Bio Fertilizers'
-                        ? 'text-green-700 bg-white'
-                        : 'text-gray-600 hover:text-green-700 hover:bg-gray-50'
+                        ? 'text-primary-main bg-background-paper'
+                        : 'text-content-secondary hover:text-primary-main hover:bg-background-page'
                     }`}
                   >
                     <div className="flex items-center justify-center">
                       <FlaskConical
                         className={`h-5 w-5 mr-2 ${
                           activeTab === 'Bio Fertilizers'
-                            ? 'text-lime-600'
-                            : 'text-gray-400'
+                            ? 'text-accent-darker'
+                            : 'text-content-muted'
                         }`}
                       />
                       Bio Fertilizers
@@ -393,8 +393,8 @@ const Shop: React.FC = () => {
                         <span
                           className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
                             activeTab === 'Bio Fertilizers'
-                              ? 'bg-lime-100 text-lime-800'
-                              : 'bg-gray-200 text-gray-600'
+                              ? 'bg-badge-inStockBg text-badge-inStockText'
+                              : 'bg-interactive-disabled text-interactive-disabledText'
                           }`}
                         >
                           {bioFertilizers.length}
@@ -402,13 +402,13 @@ const Shop: React.FC = () => {
                       )}
                     </div>
                     {activeTab === 'Bio Fertilizers' && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-green-700 rounded-t-full"></div>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-primary-main rounded-t-full"></div>
                     )}
                   </button>
                 </div>
 
                 {/* Tab Content */}
-                <div className="bg-white rounded-b-xl shadow-xl p-6 border-t-0">
+                <div className="bg-background-paper rounded-b-xl shadow-xl p-6 border-t-0">
                   {activeTab === 'Seeds' ? (
                     seedsSaplings.length > 0 ? (
                       <>
@@ -431,8 +431,8 @@ const Shop: React.FC = () => {
                       </>
                     ) : (
                       <div className="text-center py-16">
-                        <Sprout className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                        <p className="text-gray-600">No seeds available at the moment.</p>
+                        <Sprout className="h-16 w-16 text-content-muted mx-auto mb-4" />
+                        <p className="text-content-secondary">No seeds available at the moment.</p>
                       </div>
                     )
                   ) : bioFertilizers.length > 0 ? (
@@ -459,8 +459,8 @@ const Shop: React.FC = () => {
                     </>
                   ) : (
                     <div className="text-center py-16">
-                      <FlaskConical className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">
+                      <FlaskConical className="h-16 w-16 text-content-muted mx-auto mb-4" />
+                      <p className="text-content-secondary">
                         No bio fertilizers available at the moment.
                       </p>
                     </div>
@@ -497,37 +497,37 @@ const Shop: React.FC = () => {
         />
 
         {/* Quality Commitment Section */}
-        <div className="mt-20 bg-green-900 rounded-xl p-10 shadow-2xl">
-          <h2 className="text-3xl font-bold text-lime-400 mb-8 text-center">
+        <div className="mt-20 bg-primary-darker rounded-xl p-10 shadow-2xl">
+          <h2 className="text-3xl font-bold text-accent-light mb-8 text-center">
             Our Commitment to Quality
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-white">
-            <div className="text-center p-4 rounded-lg bg-green-800 border border-green-700">
-              <div className="w-16 h-16 bg-lime-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                <Star className="h-8 w-8 text-green-900" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-content-inverse">
+            <div className="text-center p-4 rounded-lg bg-primary-dark border border-border-primary">
+              <div className="w-16 h-16 bg-accent-dark rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <Star className="h-8 w-8 text-content-heading" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Genetic Purity</h3>
-              <p className="text-green-200 text-sm">
+              <p className="text-content-inverseSecondary text-sm">
                 All seeds, saplings, and bio-fertilizers are verified for superior
                 quality and traceability by our accredited labs.
               </p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-green-800 border border-green-700">
-              <div className="w-16 h-16 bg-lime-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                <ShoppingCart className="h-8 w-8 text-green-900" />
+            <div className="text-center p-4 rounded-lg bg-primary-dark border border-border-primary">
+              <div className="w-16 h-16 bg-accent-dark rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <ShoppingCart className="h-8 w-8 text-content-heading" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Direct from Research</h3>
-              <p className="text-green-200 text-sm">
+              <p className="text-content-inverseSecondary text-sm">
                 Purchases directly fund ongoing forestry research, conservation
                 efforts, and climate mitigation studies.
               </p>
             </div>
-            <div className="text-center p-4 rounded-lg bg-green-800 border border-green-700">
-              <div className="w-16 h-16 bg-lime-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
-                <Leaf className="h-8 w-8 text-green-900" />
+            <div className="text-center p-4 rounded-lg bg-primary-dark border border-border-primary">
+              <div className="w-16 h-16 bg-accent-dark rounded-full flex items-center justify-center mx-auto mb-4 shadow-xl">
+                <Leaf className="h-8 w-8 text-content-heading" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Expert Guidance</h3>
-              <p className="text-green-200 text-sm">
+              <p className="text-content-inverseSecondary text-sm">
                 Gain exclusive access to planting protocols and long-term support
                 from our experienced forestry scientists.
               </p>

@@ -46,19 +46,19 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
         >
           {/* Modal Container - Smaller size, stops event propagation */}
           <div 
-            className="bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[75vh] overflow-hidden flex flex-col pointer-events-auto transform transition-all"
+            className="bg-background-paper rounded-2xl shadow-2xl max-w-xl w-full max-h-[75vh] overflow-hidden flex flex-col pointer-events-auto transform transition-all"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-green-700 to-lime-500 p-4 md:p-5 flex items-center justify-between">
-              <h2 className="text-lg md:text-xl font-bold text-white flex items-center">
+            <div className="bg-gradient-to-r from-primary-main to-accent-dark p-4 md:p-5 flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-bold text-content-inverse flex items-center">
                 <Info className="h-5 w-5 md:h-6 md:w-6 mr-2" />
                 <span className="hidden sm:inline">Welcome to TamilNadu Forest Department's Research Wing</span>
                 <span className="sm:hidden">Welcome</span>
               </h2>
               <button
                 onClick={handleClose}
-                className="text-white hover:text-gray-200 transition-colors p-1.5 rounded-full hover:bg-white hover:bg-opacity-20 flex-shrink-0"
+                className="text-content-inverse hover:opacity-80 transition-colors p-1.5 rounded-full hover:bg-background-paper hover:bg-opacity-20 flex-shrink-0"
                 aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
@@ -68,19 +68,19 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
               {/* Shop Information Section */}
-              <div className="bg-gradient-to-br from-green-50 to-lime-50 rounded-xl p-4 md:p-5 mb-4 border-l-4 border-green-600">
+              <div className="bg-gradient-to-br from-primary-lightest to-accent-lightest rounded-xl p-4 md:p-5 mb-4 border-l-4 border-border-primary">
                 <div className="flex items-center mb-3">
-                  <ShoppingBag className="h-5 w-5 text-green-700 mr-2" />
-                  <h3 className="text-lg font-bold text-green-900">Explore Our Forest Products Eco-Store</h3>
+                  <ShoppingBag className="h-5 w-5 text-primary-main mr-2" />
+                  <h3 className="text-lg font-bold text-content-heading">Explore Our Forest Products Eco-Store</h3>
                 </div>
-                <p className="text-sm text-gray-700 mb-3 leading-relaxed">
+                <p className="text-sm text-content-primary mb-3 leading-relaxed">
                   Discover high-quality seeds, saplings, and bio-fertilizers directly from our research centers. 
                   {/* All products are backed by our scientific research, ensuring the best 
                   quality for your afforestation and cultivation projects. */}
                 </p>
                 <button
                   onClick={handleShopNavigation}
-                  className="bg-lime-500 hover:bg-lime-600 text-green-900 font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center shadow-lg text-sm"
+                  className="bg-interactive-secondaryDefault hover:bg-interactive-secondaryHover text-interactive-secondaryText font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center shadow-lg text-sm"
                 >
                   Visit Eco-Store
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -90,24 +90,24 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
               {/* Latest News Section */}
               {/* {displayNews.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="text-lg font-bold text-green-900 mb-3 flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-lime-600" />
+                  <h3 className="text-lg font-bold text-content-heading mb-3 flex items-center">
+                    <Calendar className="h-4 w-4 mr-2 text-accent-darker" />
                     Latest News
                   </h3>
                   <div className="space-y-3">
                     {displayNews.map((news, index) => (
-                      <div key={index} className="bg-white border-l-4 border-green-600 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
-                        <p className="text-xs text-gray-500 mb-1 flex items-center">
+                      <div key={index} className="bg-background-paper border-l-4 border-primary-main rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
+                        <p className="text-xs text-content-tertiary mb-1 flex items-center">
                           <Calendar className="h-3 w-3 mr-1" /> {news.date}
                         </p>
-                        <h4 className="font-bold text-green-800 mb-1 text-sm">{news.title}</h4>
-                        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{news.excerpt}</p>
+                        <h4 className="font-bold text-content-headingSecondary mb-1 text-sm">{news.title}</h4>
+                        <p className="text-xs text-content-secondary mb-2 line-clamp-2">{news.excerpt}</p>
                         {(news.link || news.pdfUrl) && (
                           <a 
                             href={news.link || news.pdfUrl} 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
+                            className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"
                           >
                             {news.pdfUrl && !news.link ? 'View PDF' : 'Read more'}
                             <ExternalLink className="h-3 w-3 ml-1" />
@@ -122,24 +122,24 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
               {/* Recent Events Section */}
               {/* {displayEvents.length > 0 && (
                 <div>
-                  <h3 className="text-lg font-bold text-green-900 mb-3 flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-lime-600" />
+                  <h3 className="text-lg font-bold text-content-heading mb-3 flex items-center">
+                    <Calendar className="h-4 w-4 mr-2 text-accent-darker" />
                     Recent Events
                   </h3>
                   <div className="space-y-3">
                     {displayEvents.map((event, index) => (
-                      <div key={index} className="bg-white border-l-4 border-lime-500 rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
-                        <p className="text-xs text-gray-500 mb-1 flex items-center">
+                      <div key={index} className="bg-background-paper border-l-4 border-accent-dark rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
+                        <p className="text-xs text-content-tertiary mb-1 flex items-center">
                           <Calendar className="h-3 w-3 mr-1" /> {event.date}
                         </p>
-                        <h4 className="font-bold text-green-800 mb-1 text-sm">{event.title}</h4>
-                        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{event.excerpt}</p>
+                        <h4 className="font-bold text-content-headingSecondary mb-1 text-sm">{event.title}</h4>
+                        <p className="text-xs text-content-secondary mb-2 line-clamp-2">{event.excerpt}</p>
                         {(event.link || event.pdfUrl) && (
                           <a 
                             href={event.link || event.pdfUrl} 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-green-600 hover:text-lime-600 text-xs font-semibold inline-flex items-center"
+                            className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"
                           >
                             {event.pdfUrl && !event.link ? 'View PDF' : 'View details'}
                             <ExternalLink className="h-3 w-3 ml-1" />
@@ -159,7 +159,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
       {showFloatingIcon && (
         <button
           onClick={handleFloatingIconClick}
-          className="fixed bottom-6 right-6 bg-green-700 hover:bg-green-800 text-white p-4 rounded-full shadow-2xl z-40 transition-all duration-300 hover:scale-110 flex items-center justify-center"
+          className="fixed bottom-6 right-6 bg-lightBlue-main hover:bg-lightBlue-dark text-lightBlue-lightest p-4 rounded-full shadow-2xl z-40 transition-all duration-300 hover:scale-110 flex items-center justify-center"
           aria-label="Open welcome modal"
         >
           <Info className="h-6 w-6" />
