@@ -6,9 +6,10 @@ interface RotatingConveyorProps {
   items: (NewsItem | Event)[];
   itemType: 'news' | 'event';
   isRightAligned?: boolean;
+  variant?: 'light' | 'dark';
 }
 
-const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, isRightAligned = false }) => {
+const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, isRightAligned = false, variant = 'light' }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [singleSetHeight, setSingleSetHeight] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -54,9 +55,11 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
     }
   }, [items]);
 
+  const isDark = variant === 'dark';
+
   if (items.length === 0) {
     return (
-      <div className="text-center py-8 text-content-tertiary">
+      <div className={`text-center py-8 ${isDark ? 'text-white/70' : 'text-content-tertiary'}`}>
         <p>No {itemType === 'news' ? 'news' : 'events'} available yet.</p>
       </div>
     );
@@ -105,9 +108,9 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
           return (
             <div
               key={`${item.id || index}-${Math.floor(index / items.length)}`}
-              className="group"
+              className={`group ${isDark ? 'py-3 border-b border-white/10 hover:bg-white/10 transition-colors cursor-pointer rounded' : ''}`}
             >
-              <p className={`text-xs text-content-tertiary mb-1 flex items-center ${isRightAligned ? 'justify-end' : ''}`}>
+              <p className={`text-xs mb-1 flex items-center ${isRightAligned ? 'justify-end' : ''} ${isDark ? 'text-white/70' : 'text-content-tertiary'}`}>
                 {isRightAligned ? (
                   <>
                     {item.date} <Calendar className="h-3 w-3 ml-1" />
@@ -118,10 +121,10 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
                   </>
                 )}
               </p>
-              <h3 className={`font-bold text-content-headingSecondary mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} ${isNews ? 'group-hover:text-primary-main' : 'group-hover:text-accent-darker'} transition-colors`}>
+              <h3 className={`font-bold mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} transition-colors ${isDark ? 'text-white group-hover:text-white/90' : `text-content-headingSecondary ${isNews ? 'group-hover:text-primary-main' : 'group-hover:text-accent-darker'}`}`}>
                 {item.title}
               </h3>
-              <p className={`text-content-secondary text-xs xl:text-sm mb-2 ${isRightAligned ? 'text-right' : ''} line-clamp-2`}>
+              <p className={`text-xs xl:text-sm mb-2 ${isRightAligned ? 'text-right' : ''} line-clamp-2 ${isDark ? 'text-white/80' : 'text-content-secondary'}`}>
                 {item.excerpt}
               </p>
               {(item.link || item.pdfUrl) && (
@@ -129,7 +132,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
                   href={item.link || item.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-content-link hover:text-accent-darker text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''}`}
+                  className={`text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''} ${isDark ? 'text-white hover:text-white/90' : 'text-content-link hover:text-accent-darker'}`}
                 >
                   {item.pdfUrl && !item.link ? (
                     isRightAligned ? (
@@ -157,7 +160,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
                 </a>
               )}
               {isRightAligned && <div className="clear-both"></div>}
-              {index < duplicatedItems.length - 1 && (
+              {index < duplicatedItems.length - 1 && !isDark && (
                 <hr className="mt-6 border-border-light" />
               )}
             </div>

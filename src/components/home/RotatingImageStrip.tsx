@@ -56,8 +56,8 @@ const RotatingImageStrip: React.FC = () => {
   // Show placeholder if no images
   if (images.length === 0) {
     return (
-      <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden rounded-lg shadow-lg flex items-center justify-center">
-        <div className="text-white text-center">
+      <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-cream overflow-hidden rounded-lg shadow-elevated flex items-center justify-center">
+        <div className="text-content-heading text-center">
           <p className="text-lg">No slider images available</p>
         </div>
       </section>
@@ -65,18 +65,8 @@ const RotatingImageStrip: React.FC = () => {
   }
 
   return (
-    <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-to-r from-green-900 to-green-700 overflow-hidden rounded-lg shadow-lg">
+    <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-cream overflow-hidden rounded-lg shadow-elevated">
       <div className="relative w-full h-full">
-        {/* COMMENTED OUT: Blurred background - uncomment to restore original carousel style */}
-        {/* <div className="absolute inset-0 w-full h-full">
-          <img
-            src={getOptimizedImageUrl(images[currentIndex], 1920)}
-            alt={`Nursery Image Background ${currentIndex + 1}`}
-            className="w-full h-full object-cover scale-110 blur-md transition-opacity duration-500 ease-in-out"
-            decoding="async"
-          />
-        </div> */}
-
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <img
             src={getOptimizedImageUrl(images[currentIndex], 1200)}
@@ -84,33 +74,34 @@ const RotatingImageStrip: React.FC = () => {
             className="w-full h-full object-cover transition-opacity duration-500 ease-in-out"
             decoding="async"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
         </div>
 
         <button
           onClick={prevImage}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-background-paper/90 hover:bg-background-paper p-2 sm:p-3 rounded-full shadow-lg transition-all z-20"
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-sm p-2 sm:p-3 rounded-full transition-all z-20"
           aria-label="Previous image"
         >
-          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-content-headingSecondary" />
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
 
         <button
           onClick={nextImage}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-background-paper/90 hover:bg-background-paper p-2 sm:p-3 rounded-full shadow-lg transition-all z-20"
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white backdrop-blur-sm p-2 sm:p-3 rounded-full transition-all z-20"
           aria-label="Next image"
         >
-          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-content-headingSecondary" />
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </button>
 
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-20">
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
           {images.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`h-2 rounded-full transition-all ${
-                index === currentIndex 
-                  ? 'w-8 bg-background-paper' 
-                  : 'w-2 bg-background-paper/50 hover:bg-background-paper/75'
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentIndex
+                  ? 'bg-forest-gold w-8'
+                  : 'bg-white/50 hover:bg-white/80'
               }`}
               aria-label={`Go to image ${index + 1}`}
             />

@@ -112,8 +112,10 @@ export const colors = {
 
   // ---------------------------------------------------------------------------
   // BACKGROUND — Surfaces. Use for: page, cards, sections, overlays
+  // default = section background (e.g. gallery) — reference --background: 48 100% 97% → warm cream
   // ---------------------------------------------------------------------------
   background: {
+    default: '#fffef0',
     page: '#f8fafc',
     paper: '#ffffff',
     subtle: '#f9fafb',
@@ -221,10 +223,11 @@ export const colors = {
     },
     footer: {
       background: 'rgba(20, 51, 20, 0.9)',
+      overlay: 'rgba(115, 72, 48, 0.9)',
       text: '#ffffff',
-      textSecondary: '#dcfce7',
-      icon: '#86efac',
-      border: forestGreen[700],
+      textSecondary: 'rgba(255, 254, 240, 0.8)',
+      icon: '#fcd34d',
+      border: 'rgba(255, 255, 255, 0.1)',
     },
     card: {
       background: '#ffffff',
@@ -260,6 +263,9 @@ export const colors = {
     forestVertical: `linear-gradient(180deg, ${forestGreen[950]} 0%, ${forestGreen[900]} 50%, ${forestGreen[700]} 100%)`,
     accent: `linear-gradient(135deg, ${lime[500]} 0%, ${lime[300]} 100%)`,
     overlay: 'linear-gradient(to bottom, transparent 0%, rgba(20, 51, 20, 0.8) 100%)',
+    cream: 'linear-gradient(180deg, #fefce8 0%, #fef9c3 30%, #f8fafc 100%)',
+    hero: `linear-gradient(135deg, ${forestGreen[800]} 0%, ${forestGreen[700]} 50%, ${forestGreen[600]} 100%)`,
+    gold: 'linear-gradient(90deg, #d97706 0%, #b45309 50%, #92400e 100%)',
   },
 
   // ---------------------------------------------------------------------------
@@ -270,9 +276,28 @@ export const colors = {
     default: 'rgba(0, 0, 0, 0.1)',
     medium: 'rgba(0, 0, 0, 0.15)',
     strong: 'rgba(0, 0, 0, 0.25)',
+    elevated: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)',
+    soft: '0 2px 8px rgba(0, 0, 0, 0.08)',
+    gold: '0 4px 14px rgba(180, 83, 9, 0.25)',
     text: 'rgba(0, 0, 0, 0.5)',
     accent: 'rgba(132, 204, 22, 0.3)',
   },
+
+  // ---------------------------------------------------------------------------
+  // FOREST GOLD — Carousel/slider accent (active dot, highlights). Amber/gold.
+  // ---------------------------------------------------------------------------
+  forestGold: '#b45309',
+
+  // ---------------------------------------------------------------------------
+  // FOREST OLIVE / FOREST TEAL — Sidebar tickers (news = olive, events = teal).
+  // ---------------------------------------------------------------------------
+  forestOlive: '#4a5d23',
+  forestTeal: '#0f766e',
+
+  // ---------------------------------------------------------------------------
+  // FOREST CREAM — Shop section background (solid cream).
+  // ---------------------------------------------------------------------------
+  forestCream: '#fef9c3',
 } as const;
 
 // =============================================================================

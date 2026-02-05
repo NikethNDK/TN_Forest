@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { Camera, ArrowRight } from 'lucide-react';
 import {
   subscribeToGlobalGalleryImages,
   subscribeToDivisionGalleryImages
@@ -82,14 +84,25 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
     .filter((i) => i !== featuredIndex)
     .slice(0, 9);
 
-  // Empty state
+  const galleryHref = scope === 'division' && divisionSlug ? `/divisions/${divisionSlug}/gallery` : '/gallery';
+
+  // Empty state — bg-background matches reference GallerySection
   if (images.length === 0) {
     return (
-      <section className="sm:py-12 bg-background-paper">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center text-content-heading mb-6 sm:mb-8">
-            Gallery Highlights
+      <section id="gallery" className="py-16 px-4 bg-background">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Camera className="h-6 w-6 text-forest-olive" />
+            <span className="text-forest-olive font-semibold text-sm uppercase tracking-wide">
+              Photo Gallery
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary-main text-center mb-4">
+            Glimpses of Our Forests
           </h2>
+          <p className="text-content-secondary text-center max-w-2xl mx-auto mb-8">
+            Explore the stunning biodiversity and natural beauty of Tamil Nadu&apos;s forests through our curated collection.
+          </p>
           <div className="text-center py-12 text-content-tertiary">
             <p>No gallery images available yet.</p>
           </div>
@@ -99,14 +112,25 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
   }
 
   return (
-    <section className="sm:py-12 bg-background-paper">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center text-content-heading mb-6 sm:mb-8">
-          Gallery Highlights
-        </h2>
+    <section id="gallery" className="py-16 px-4 bg-background">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Camera className="h-6 w-6 text-forest-olive" />
+            <span className="text-forest-olive font-semibold text-sm uppercase tracking-wide">
+              Photo Gallery
+            </span>
+          </div>
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary-main mb-4">
+            Glimpses of Our Forests
+          </h2>
+          <p className="text-content-secondary max-w-2xl mx-auto">
+            Explore the stunning biodiversity and natural beauty of Tamil Nadu&apos;s forests through our curated collection.
+          </p>
+        </div>
 
         <div className="relative">
-          <div className="relative w-full h-64 sm:h-80 md:h-96 shadow-2xl overflow-hidden bg-background-muted">
+          <div className="relative w-full h-64 sm:h-80 md:h-96 shadow-soft overflow-hidden bg-background-muted rounded-xl">
             <div className="flex h-64 sm:h-80 md:h-96">
               {/* 40% main featured image */}
               <div className="w-[40%] flex items-center justify-center bg-background-paper relative">
@@ -126,8 +150,8 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
                       onError={() => setIsImageLoaded(true)}
                     />
                     {featured.title && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 sm:p-4">
-                        <p className="text-white text-sm sm:text-base font-medium text-center line-clamp-2">
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-transparent to-transparent p-3 sm:p-4">
+                        <p className="text-white text-sm sm:text-base font-serif font-semibold text-center line-clamp-2">
                           {featured.title}
                         </p>
                       </div>
@@ -149,7 +173,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
                         key={image.id ?? imageIndex}
                         type="button"
                         onClick={() => setFeaturedIndex(imageIndex)}
-                        className="relative aspect-square overflow-hidden rounded-lg hover:opacity-80 transition-opacity duration-200 cursor-pointer bg-background-paper shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-main focus:ring-offset-1"
+                        className="relative aspect-square overflow-hidden rounded-lg hover:opacity-80 transition-opacity duration-200 cursor-pointer bg-background-paper shadow-soft hover:shadow-elevated focus:outline-none focus:ring-2 focus:ring-primary-main focus:ring-offset-1"
                         aria-label={image.title ?? `Select image ${imageIndex + 1}`}
                       >
                         <img
@@ -168,13 +192,14 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
           </div>
         </div>
 
-        <div className="text-center mt-6 sm:mt-8">
-          <a
-            href={scope === 'division' && divisionSlug ? `/divisions/${divisionSlug}/gallery` : '/gallery'}
-            className="inline-block bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-md transition-colors text-sm sm:text-base"
+        <div className="text-center mt-8">
+          <Link
+            to={galleryHref}
+            className="inline-flex items-center border-2 border-primary-main text-primary-main hover:bg-primary-main hover:text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg transition-colors text-sm sm:text-base group"
           >
-            See More Photos
-          </a>
+            View More
+            <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
         </div>
       </div>
     </section>

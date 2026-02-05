@@ -15,11 +15,16 @@ export default {
     extend: {
       colors: {
         'forest-green': forestGreen,
+        'forest-gold': colors.forestGold,
+        'forest-olive': colors.forestOlive,
+        'forest-teal': colors.forestTeal,
+        'forest-cream': colors.forestCream,
         primary: colors.primary,
         accent: colors.accent,
-        background: colors.background,
+        background: { DEFAULT: colors.background.default, ...colors.background },
         // "content" = text palette (avoids Tailwind conflict → classes: text-content-heading, etc.)
         content: colors.text,
+        foreground: colors.text.heading,
         border: colors.border,
         status: colors.status,
         interactive: colors.interactive,
@@ -28,6 +33,16 @@ export default {
         form: colors.components.form,
         badge: colors.components.badge,
         lightBlue: colors.lightBlue,
+      },
+      backgroundImage: {
+        'gradient-cream': colors.gradients.cream,
+        'gradient-hero': colors.gradients.hero,
+        'gradient-gold': colors.gradients.gold,
+      },
+      boxShadow: {
+        elevated: colors.shadows.elevated,
+        soft: colors.shadows.soft,
+        gold: colors.shadows.gold,
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

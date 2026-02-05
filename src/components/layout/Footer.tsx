@@ -84,7 +84,7 @@ const Footer: React.FC = () => {
       }}
     > 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-background-overlay"></div>
+      <div className="absolute inset-0 bg-footer-overlay"></div>
       
       {/* Main Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
