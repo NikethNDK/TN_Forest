@@ -11,8 +11,8 @@ const Header: React.FC = () => {
         // backgroundImage: `url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80')`,
       }}
     >
-      {/* Content - Logo and text side by side */}
-      <div className="flex items-center justify-center gap-3 sm:gap-4 px-4 sm:px-6 md:px-8">
+      {/* Content container - matches body background */}
+      <div className="flex items-center justify-center gap-3 sm:gap-4 px-4 sm:px-6 md:px-8 mx-auto max-w-7xl">
         {/* Logo */}
         <img 
           src="/logo192.png" 
@@ -25,7 +25,7 @@ const Header: React.FC = () => {
           {/* Title */}
           <h1 
             className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight"
-            style={{ color: colors.text.heading }}
+            style={{ color: colors.text.primary }}
           >
             TAMIL NADU FOREST DEPARTMENT - RESEARCH WING
           </h1>

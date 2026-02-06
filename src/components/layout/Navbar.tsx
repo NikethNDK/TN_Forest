@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X, ShoppingCart } from 'lucide-react';
 import { divisions } from '../../data/mockData';
 import type { Division } from '../../types';
 import { colors } from '../../config/colors';
+import { useDivisionTheme } from '../../providers/DivisionThemeProvider';
 
 interface NavItem {
   name: string;
@@ -11,6 +12,7 @@ interface NavItem {
 }
 
 const Navbar: React.FC = () => {
+  const { theme } = useDivisionTheme();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isDivisionsOpen, setIsDivisionsOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -47,9 +49,9 @@ const Navbar: React.FC = () => {
     };
   }, [isDivisionsOpen]);
 
-  // Inline styles using color palette
+  // Inline styles using division theme
   const navLinkStyle = {
-    color: colors.text.inverse, // White text on dark green background
+    color: theme.navbarText,
   };
 
   const navLinkHoverClass = "px-4 py-3 text-base font-medium transition-colors duration-200 hover:opacity-80";
@@ -62,7 +64,7 @@ const Navbar: React.FC = () => {
   return (
     <nav 
       className="shadow-lg sticky top-0 z-50"
-      style={{ backgroundColor: colors.primary.main }}
+      style={{ backgroundColor: theme.navbarBg }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
@@ -71,7 +73,7 @@ const Navbar: React.FC = () => {
             <Link 
               to="/" 
               className="text-2xl font-bold"
-              style={{ color: colors.text.inverse }}
+              style={{ color: theme.navbarText }}
             >
               {/* TNFDRW */}
             </Link>
@@ -181,7 +183,7 @@ const Navbar: React.FC = () => {
             <button
               onClick={toggleMenu}
               className="p-2 rounded-md transition-colors duration-200 hover:opacity-80"
-              style={{ color: colors.text.inverse }}
+              style={{ color: theme.navbarText }}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -193,12 +195,12 @@ const Navbar: React.FC = () => {
           <div className="md:hidden">
             <div 
               className="px-2 pt-2 pb-3 space-y-1 sm:px-3"
-              style={{ backgroundColor: colors.primary.dark }}
+              style={{ backgroundColor: theme.navbarBg }}
             >
               <Link
                 to="/"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: colors.text.inverse }}
+                style={{ color: theme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
@@ -207,7 +209,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/about"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: colors.text.inverse }}
+                style={{ color: theme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
@@ -217,7 +219,7 @@ const Navbar: React.FC = () => {
               <div className="pt-2">
                 <div 
                   className="px-4 py-3 text-base font-medium"
-                  style={{ color: colors.text.inverse }}
+                  style={{ color: theme.navbarText }}
                 >
                   Divisions
                 </div>
@@ -226,7 +228,7 @@ const Navbar: React.FC = () => {
                     key={division.id}
                     to={`/divisions/${division.slug}`}
                     className="block px-8 py-2 rounded-md text-sm transition-colors duration-200 hover:opacity-80"
-                    style={{ color: colors.text.inverseSecondary }}
+                    style={{ color: theme.navbarText, opacity: 0.9 }}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {division.name}
@@ -237,7 +239,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/publication"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: colors.text.inverse }}
+                style={{ color: theme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Publication
@@ -246,7 +248,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/contact"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: colors.text.inverse }}
+                style={{ color: theme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact Us

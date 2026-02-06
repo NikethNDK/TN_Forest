@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Globe, Clock, UserCheck } from 'lucide-react';
 import { subscribeToFooterLocation } from '../../services/firebase/contactService';
 import { incrementVisitorCount, subscribeToVisitorCount } from '../../services/firebase/visitorService';
 import type { ContactLocation } from '../../types';
+import { useDivisionTheme } from '../../providers/DivisionThemeProvider';
 
 // Function to format the date and time
 const formatDateTime = (date: Date): string => {
@@ -19,6 +20,7 @@ const formatDateTime = (date: Date): string => {
 };
 
 const Footer: React.FC = () => {
+  const { theme } = useDivisionTheme();
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [visitors, setVisitors] = useState<number>(0);
   const [footerLocation, setFooterLocation] = useState<ContactLocation | null>(null);
@@ -78,21 +80,25 @@ const Footer: React.FC = () => {
 
   return (
     <footer 
-      className="relative text-footer-text bg-cover bg-center"
+      className="relative bg-cover bg-center"
       style={{
         backgroundImage: 'url(https://www.shutterstock.com/image-vector/silhouette-forest-isolated-on-white-260nw-2479974867.jpg)',
+        color: theme.footerText,
       }}
     > 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-footer-overlay"></div>
+      <div 
+        className="absolute inset-0" 
+        style={{ backgroundColor: theme.footerOverlay }}
+      ></div>
       
       {/* Main Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* About Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Tamil Nadu Forest Department</h3>
-            <p className="text-footer-textSecondary text-sm leading-relaxed">
+            <h3 className="text-lg font-semibold mb-4" style={{ color: theme.footerText }}>Tamil Nadu Forest Department</h3>
+            <p className="text-sm leading-relaxed" style={{ color: theme.footerText, opacity: 0.9 }}>
               Dedicated to forest research, conservation, and sustainable development 
               for the betterment of Tamil Nadu's natural heritage.
             </p>
@@ -100,76 +106,76 @@ const Footer: React.FC = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: theme.footerText }}>Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/" className="text-footer-textSecondary hover:text-footer-text transition-colors">Home</a></li>
-              <li><a href="/about" className="text-footer-textSecondary hover:text-footer-text transition-colors">About Us</a></li>
-              <li><a href="/divisions" className="text-footer-textSecondary hover:text-footer-text transition-colors">Divisions</a></li>
-              <li><a href="/publication" className="text-footer-textSecondary hover:text-footer-text transition-colors">Publications</a></li>
-              <li><a href="/contact" className="text-footer-textSecondary hover:text-footer-text transition-colors">Contact</a></li>
+              <li><a href="/" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Home</a></li>
+              <li><a href="/about" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>About Us</a></li>
+              <li><a href="/divisions" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Divisions</a></li>
+              <li><a href="/publication" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Publications</a></li>
+              <li><a href="/contact" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Contact</a></li>
             </ul>
           </div>
 
           {/* Research Divisions */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Research Divisions</h3>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: theme.footerText }}>Research Divisions</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="/divisions/state-forest-research" className="text-footer-textSecondary hover:text-footer-text transition-colors">State Forest Research</a></li>
-              <li><a href="/divisions/modern-nursery" className="text-footer-textSecondary hover:text-footer-text transition-colors">Modern Nursery</a></li>
-              <li><a href="/divisions/forest-genetics" className="text-footer-textSecondary hover:text-footer-text transition-colors">Forest Genetics</a></li>
-              <li><a href="/divisions/industrial-wood" className="text-footer-textSecondary hover:text-footer-text transition-colors">Industrial Wood</a></li>
-              <li><a href="/divisions/agro-forestry" className="text-footer-textSecondary hover:text-footer-text transition-colors">Agro Forestry</a></li>
+              <li><a href="/divisions/state-forest-research" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>State Forest Research</a></li>
+              <li><a href="/divisions/modern-nursery" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Modern Nursery</a></li>
+              <li><a href="/divisions/forest-genetics" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Forest Genetics</a></li>
+              <li><a href="/divisions/industrial-wood" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Industrial Wood</a></li>
+              <li><a href="/divisions/agro-forestry" className="transition-colors hover:opacity-80" style={{ color: theme.footerText, opacity: 0.9 }}>Agro Forestry</a></li>
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: theme.footerText }}>Contact Information</h3>
             {footerLocation ? (
               <div className="space-y-3 text-sm">
                 <div className="flex items-start">
-                  <MapPin className="h-4 w-4 mt-1 mr-2 text-footer-icon flex-shrink-0" />
-                  <span className="text-footer-textSecondary whitespace-pre-line">
+                  <MapPin className="h-4 w-4 mt-1 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                  <span className="whitespace-pre-line" style={{ color: theme.footerText, opacity: 0.9 }}>
                     {footerLocation.location}
                   </span>
                 </div>
                 {footerLocation.phone && (
                   <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                    <span className="text-footer-textSecondary">{footerLocation.phone}</span>
+                    <Phone className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                    <span style={{ color: theme.footerText, opacity: 0.9 }}>{footerLocation.phone}</span>
                   </div>
                 )}
                 {footerLocation.email && (
                   <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                    <span className="text-footer-textSecondary">{footerLocation.email}</span>
+                    <Mail className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                    <span style={{ color: theme.footerText, opacity: 0.9 }}>{footerLocation.email}</span>
                   </div>
                 )}
                 <div className="flex items-center">
-                  <Globe className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                  <span className="text-footer-textSecondary">www.tnfrd.gov.in</span>
+                  <Globe className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                  <span style={{ color: theme.footerText, opacity: 0.9 }}>www.tnfrd.gov.in</span>
                 </div>
               </div>
             ) : (
               <div className="space-y-3 text-sm">
                 <div className="flex items-start">
-                  <MapPin className="h-4 w-4 mt-1 mr-2 text-footer-icon flex-shrink-0" />
-                  <span className="text-footer-textSecondary">
+                  <MapPin className="h-4 w-4 mt-1 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                  <span style={{ color: theme.footerText, opacity: 0.9 }}>
                     Forest Department Complex,<br />
                     Chennai, Tamil Nadu 600006
                   </span>
                 </div>
                 <div className="flex items-center">
-                  <Phone className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                  <span className="text-footer-textSecondary">+91 XXXXX XXXXX</span>
+                  <Phone className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                  <span style={{ color: theme.footerText, opacity: 0.9 }}>+91 XXXXX XXXXX</span>
                 </div>
                 <div className="flex items-center">
-                  <Mail className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                  <span className="text-footer-textSecondary">example@example.com</span>
+                  <Mail className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                  <span style={{ color: theme.footerText, opacity: 0.9 }}>example@example.com</span>
                 </div>
                 <div className="flex items-center">
-                  <Globe className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                  <span className="text-footer-textSecondary">www.tnfrd.gov.in</span>
+                  <Globe className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                  <span style={{ color: theme.footerText, opacity: 0.9 }}>www.tnfrd.gov.in</span>
                 </div>
               </div>
             )}
@@ -177,17 +183,17 @@ const Footer: React.FC = () => {
 
           {/* Dynamic Info */}
           <div className="lg:col-span-1 md:col-span-2">
-            <h3 className="text-lg font-semibold mb-4">Real-Time Info</h3>
+            <h3 className="text-lg font-semibold mb-4" style={{ color: theme.footerText }}>Real-Time Info</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center">
-                <Clock className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                <span className="text-footer-textSecondary font-medium">
+                <Clock className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                <span className="font-medium" style={{ color: theme.footerText, opacity: 0.9 }}>
                   {formatDateTime(currentTime)}
                 </span>
               </div>
               <div className="flex items-center">
-                <UserCheck className="h-4 w-4 mr-2 text-footer-icon flex-shrink-0" />
-                <span className="text-footer-textSecondary font-medium">
+                <UserCheck className="h-4 w-4 mr-2 flex-shrink-0" style={{ color: theme.footerText, opacity: 0.9 }} />
+                <span className="font-medium" style={{ color: theme.footerText, opacity: 0.9 }}>
                   Total Visitors: {visitors.toLocaleString()}
                 </span>
               </div>
@@ -195,11 +201,11 @@ const Footer: React.FC = () => {
           </div>
         </div>
 
-        <div className="border-t border-footer-border mt-8 pt-8 text-center">
-          <p className="text-footer-textSecondary text-sm">
+        <div className="border-t mt-8 pt-8 text-center" style={{ borderColor: theme.footerText, opacity: 0.2 }}>
+          <p className="text-sm" style={{ color: theme.footerText, opacity: 0.9 }}>
             © 2024 Tamil Nadu Forest Department Research Wing. All rights reserved.
           </p>
-          <p className="text-content-inverseSecondary text-xs mt-2">
+          <p className="text-xs mt-2" style={{ color: theme.footerText, opacity: 0.8 }}>
             Committed to forest conservation and sustainable development
           </p>
         </div>

@@ -32,23 +32,111 @@ export const industrialWoodResearchDivisionConfig: IndustrialWoodResearchDivisio
   overview: (
     <div className="space-y-8">
       <div className="bg-white rounded-lg shadow-lg p-8">
-        {/* Vision Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
+        {/* AT A GLANCE Section */}
+        <div className="mb-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
-            Vision
+            1. Industrial Wood Research Division AT A GLANCE
           </h3>
           <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
             <p className="text-justify">
-              To become a leading centre of excellence in industrial forestry by delivering cutting-edge research, high-quality planting materials, and sustainable wood production technologies that meet the growing demands of wood-based industries while ensuring environmental conservation, climate resilience, and socioeconomic benefits for communities.
+              Industrial Wood [Research] Division was initially formed with Assistant Conservator of Forests, Intensive Wattle Research unit, during 1963 with its headquarters at Coonoor as per G.O.Ms.No.1007 Food and Agriculture Department dated 22.5.61. Then the Headquarters was shifted to Coimbatore for effective supervision of all experiments from a center.
+            </p>
+            <p className="text-justify">
+              The Chemist and Lab attender, along with Research Laboratory, established as per G.O.Ms.No.2174 Agriculture Department dated 14.7.69, functioning under the control of Assistant Conservator of Forests, Intensive Wattle Research unit at Udhagamandalam, was also shifted to Coimbatore.
+            </p>
+            <p className="text-justify">
+              The post of the Assistant Conservator of Forests of this unit had been upgraded as "Deputy Conservator of Forests" in G.O.Ms.No.1971 Forests and Fisheries Department dated 04.10.1985 to facilitate and to integrate it with the institute 'TREE'. The name of the division office was also changed as "The office of the "Deputy Conservator of Forests, Industrial Wood [Research] Division". And initially functioning with four Ranges viz., Kodaikanal, Madurai, Sivagangai and Nazareth. Consequent to winding up of Tamil Nadu Agricultural Development Project, the Seed Technology and Transfer Technology Divisions which were functioning with headquarters at Trichy, were merged with Industrial Wood Research Division on 01.10.1998 and the Head Quarters of Industrial Wood Research Division was shifted to Mukkombu on 19.02.1999 as per G.O.Ms.No.15 Forest and Fisheries dated 19.01.1999
+            </p>
+            <p className="text-justify">
+              From 19.2.1999 this division is functioning at Mukkombu with 6 Ranges viz., Trichy (Mukkombu), Kodaikanal, Madurai, Pudukottai, Jeyankondam (erstwhile Kumbakonam) and Nazareth. The jurisdiction comprises over fourteen southern district viz. Trichy, Perambalur, Nagappattinam, Thanjavur, Pudukottai, Sivagangai, Ramanathapuram, Virudhunagar, Tuticorin, Dindigul, Madurai, Tirunelveli and Kanyakumari. From 1.2.05 Theni Range is functioning as 7th Range. From 19.9.06 onwards Nazareth, Madurai, Theni Range were transferred to Madurai Agro Forestry Research Division.
+            </p>
+            <div className="space-y-2 mt-4">
+              <p className="text-justify">
+                <strong>a)</strong> This division was formed mainly for enhancement of the yield of Industrial Raw materials, tree improvement works by selecting candidate trees from species like Eucalyptus, Alnus, Populars, Casuarina Holoptelia integrifolia, Ferronia elephantum, Ailanthus excels, Swietinea chloroxyline and match wood industrial species.
+              </p>
+              <p className="text-justify">
+                <strong>b)</strong> Conducting various bio-chemical tests in the Industrial wood division laboratory to assess the properties of various woods, tannin content in various species and santalol in sandal oil.
+              </p>
+              <p className="text-justify">
+                <strong>c)</strong> Analysis of oil content in various tree born oil seeds.
+              </p>
+              <p className="text-justify">
+                <strong>d)</strong> Development of Nursery protocols for raising various industrially important species.
+              </p>
+              <p className="text-justify">
+                <strong>e)</strong> Research on Dye yielding trees, Veneer and match wood species and Energy plantations.
+              </p>
+              <p className="text-justify">
+                <strong>f)</strong> Conducting various Industrial allied experiments in 4 agro climatic zone. viz. High rainfall zone, Southern zone, High altitude and hilly zone, Cauvery delta zone.
+              </p>
+              <p className="text-justify">
+                <strong>g)</strong> In this division we have carried out experiments under TAP Phase II, Part II, Coastal afforestation WGDP, Jatropha and Bamboo scheme.
+              </p>
+              <p className="text-justify">
+                <strong>h)</strong> We are implementing the coastal experiment under NMBA scheme at Kodiyampalayam RF of Nagapattinam District.
+              </p>
+              <p className="text-justify">
+                <strong>i)</strong> Now in division we have carried out experiments under J.A. Research, TBGP, and CAMPA Schemes.
+              </p>
+            </div>
+            <p className="text-justify mt-4">
+              As per G.O.Ms.No. 228 E&F (FRI) Dept. Dt.26.09.2012.
+            </p>
+            <div className="space-y-2 ml-4">
+              <p className="text-justify">
+                <strong>1)</strong> The post of Deputy Conservator Forests, Industrial Wood Research Division, Mukkombu, and Trichy be redeployed to Tamil Nadu Forest Academy Coimbatore as Deputy Director.
+              </p>
+              <p className="text-justify">
+                <strong>2)</strong> The post of Assistant Conservator of Forests utilized in Tamil Nadu Forest Academy, Coimbatore be redeployed as Assistant Conservator of Forests, Industrial Wood Research Division, Mukkombu, Trichy.
+              </p>
+            </div>
+            <p className="text-justify mt-4">
+              As per G.O.Ms.No. 159 E&F (FR Spl.B) Dept. Dated.26.10.2017.
+            </p>
+            <div className="space-y-2 ml-4">
+              <p className="text-justify">
+                <strong>3)</strong> The post of Assistant Conservator Forests, Industrial Wood Research Division, Mukkombu, Trichy was re-organized to under the Control of District Forest Officer, Dharmapuri.
+              </p>
+              <p className="text-justify">
+                <strong>4)</strong> The post of Deputy Conservator of Forests utilized in Agro Forestry Research Division, Madurai was re-organized as Deputy Conservator of Forests, Industrial Wood Research Division, Mukkombu, Trichy.
+              </p>
+            </div>
+            <p className="text-justify mt-4">
+              Presently this division is functioning at Mukkombu with 4 Ranges viz., Trichy (Mukkombu), Kodaikanal, Pudukkottai & Jeyankondam. The jurisdiction comprises over nine southern district viz. Trichy, Preambular, Nagapattinam, Thanjavur, Pudukkottai, Ariyalur,Thiruvarur, Karur & Namakkal.
             </p>
           </div>
         </div>
 
-        {/* Mission Section */}
+        {/* Administrative Set Up Section - Placeholder */}
         <div className="mb-8 border-t border-gray-200 pt-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
-            Mission
+            2. Administrative Set Up
           </h3>
+          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+            <p className="text-center text-gray-500 italic">
+              [Administrative set up content placeholder]
+            </p>
+          </div>
+        </div>
+
+        {/* Vision Section */}
+        <div className="mb-8 border-t border-gray-200 pt-8">
+          <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
+            3. Vision and Mission of the Division
+          </h3>
+          <div className="mb-6">
+            <h4 className="text-xl font-semibold text-green-600 mb-4 text-center">Vision</h4>
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
+              <p className="text-justify">
+                To become a leading centre of excellence in industrial forestry by delivering cutting-edge research, high-quality planting materials, and sustainable wood production technologies that meet the growing demands of wood-based industries while ensuring environmental conservation, climate resilience, and socioeconomic benefits for communities.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mission Section */}
+        <div className="mb-8">
+          <h4 className="text-xl font-semibold text-green-600 mb-4 text-center">Mission</h4>
           <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6">
             <div>
               <h4 className="text-xl font-semibold text-green-600 mb-2">1. Genetic Improvement and Resource Development</h4>
@@ -113,84 +201,6 @@ export const industrialWoodResearchDivisionConfig: IndustrialWoodResearchDivisio
             </div>
           </div>
         </div>
-
-        {/* Focus Areas Section */}
-        {/* <div className="mb-8 border-t border-gray-200 pt-8">
-          <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
-            Focus Areas of the Division
-          </h3>
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6">
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Mass Multiplication</h4>
-              <p className="text-justify">
-                Mass multiplies the commercially important species to meet the supply and demand of seedlings for farmers and department purpose. It takes long time to attain the mature seed so we had to multiply through vegetative propagation method for mass multiplication in a short period. The selected sprigs were collected from the candidate plus trees of known genetic source available in the location and appropriate hormones was applied and placed in the mist chamber and the rooted propagules were kept in the shade net. After 15 to 30 days for rooting, germinated vegetative propagules were transferred to appropriate poly bags. The germinated seedlings were kept for hardening in the hardening chamber and monitored the plants periodically. Clonal seedlings are raised successfully in the nursery within the short period for mass multiplication. Quality seedlings were distributed to the farmers for fulfill their needs.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Introduction Trial</h4>
-              <p className="text-justify">
-                The economic and environmental benefits obtained from farm forestry will be greatest where the trees being used are well adapted to the sites on which they are planted. It is generally understood that some species will out-perform others in a particular environment, but within a single species there can also be a great deal of genetic variation. There is usually a wide range in the performances of different provenances within a trial or plantation.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Seed Stand</h4>
-              <p className="text-justify">
-                Trees are generally short-lived. The hard seed coat means that germination occurs over a prolonged period after seed dispersal and that seed can remain viable for long periods in the soil. The flowers are self-fertile, and most seed results from self-pollination. Flowering and fruiting occurs throughout the year as long as moisture permits and fruiting is associated with suppression of vegetative growth. Arboreal cultivars had been selected for lower flowering rate. Fruits ripen in 10-15 weeks. A group of trees that has been identified or set aside specifically as a seed source. They are groups of trees that are established and managed to maximize seed production. Fruits from these trees are harvested exclusively for seed collection. These seeds were stored and distributed to grow new trees for multiple benefits and uses.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Clonal Seed Orchard</h4>
-              <p className="text-justify">
-                Vegetative propagation like coppice, sprigs, cuttings, layering and tissue culture shall be explored in order to have identical parental characteristic of tree vegetative propagation from coppice shoots can be tried by selecting various CPTs from different provenance and clones collected. The clonal evaluation trial will be converted in to CSO after the evaluation is complete. Good genotypes are preserved. It will maximum genetic gain are obtained. The genetic material and combining ability are known. It's easier to manage for increased growth and flowering control. Pressure to vogue for early seed production are less. Problem with early mating are less. Full progeny trail will eventually be available to verify and early rouging. Improved seed is available before progeny testing is complete.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Seedling Seed Orchard</h4>
-              <p className="text-justify">
-                Seed orchard raised from seedlings produced from selected parents through natural or controlled pollination for create superior genetic source for collection of superior quality seeds by establishing from various provenance. Study on growth rate and parental character and to compare among species from different zone.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Hedge Stool</h4>
-              <p className="text-justify">
-                Coppicing is a traditional method of woodland management which exploits the capacity of many species of trees to put out new shoots from their stump or roots if cut down. In a coppiced wood, which is called a copse, young tree stems are repeatedly cut down to near ground level, resulting in a stool. New growth emerges, and after a number of years, the coppiced tree is harvested, and the cycle begins anew. Pollarding is a similar process carried out at a higher level on the tree in order to prevent grazing animals from eating new shoots.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Medicinal Plant Conservation</h4>
-              <p className="text-justify">
-                The field of plant conservation includes the study of plant decline and its causes, techniques to conserve rare and endangered plants. Medicinal plant conservation can be considered a part of conservation biology, a relatively young field that emphasizes the conservation of medicinal plant biodiversity and whole ecosystems, as opposed to the conservation of individual species.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Demonstration Plot</h4>
-              <p className="text-justify">
-                A demonstration plot is a field that can be used to teach, experiment, and share ideas about cultural practices.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Bambusetum</h4>
-              <p className="text-justify">
-                "Bambusetum" means a garden having a collection of bamboo plants. The goal of the project goal is to attach the potentials of bamboo in providing practical and effective use, protect the ecosystem and provide economic activities to the communities. The area covers species of bamboo planted. It will be very useful for future development of Bamboo in laterite soil to Department as well as farmer.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xl font-semibold text-green-600 mb-2">Agroforestry Model</h4>
-              <p className="text-justify">
-                Agroforestry is a land use system which integrate trees on farmlands and rural landscapes to enhance productivity, profitability, diversity and ecosystem sustainability. Agroforestry also generates significant employment opportunities.
-              </p>
-            </div>
-          </div>
-        </div> */}
       </div>
     </div>
   ),
