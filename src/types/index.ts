@@ -31,6 +31,16 @@ export interface Experiment {
   updatedAt?: any; // Firestore Timestamp
 }
 
+// Genetic Resource type (per research center)
+export interface GeneticResource {
+  id?: string;
+  name: string;
+  pdfUrl: string;
+  pdfPublicId?: string; // Firebase Storage path for deletion
+  createdAt?: any; // Firestore Timestamp
+  updatedAt?: any; // Firestore Timestamp
+}
+
 // Research Center type
 // Custom Field type for research centers
 export interface CustomField {
@@ -48,6 +58,7 @@ export interface ResearchCenter {
   range?: string; // Deprecated: use customFields instead, kept for backward compatibility
   description?: string;
   experiments?: Experiment[]; // Optional, may be in subcollection
+  geneticResources?: GeneticResource[]; // Optional, may be in subcollection
   coordinates?: Coordinates;
   phone?: string;
   email?: string;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Leaf, MapPin, Phone, Mail, ChevronLeft, ChevronRight, X, TreePine, ExternalLink } from 'lucide-react';
+import { Leaf, MapPin, Phone, Mail, ChevronLeft, ChevronRight, X, TreePine, ExternalLink, FileText } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
-import type { ResearchCenter, Experiment, Coordinates, Division } from '../../types';
+import type { ResearchCenter, Experiment, GeneticResource, Coordinates, Division } from '../../types';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import ImageCarousel from '../home/ImageCarousel';
@@ -9,6 +9,7 @@ import ContentModal from './ContentModal';
 import { subscribeToDivision } from '../../services/firebase/divisionService';
 import { subscribeToResearchCenters } from '../../services/firebase/researchCenterService';
 import { subscribeToExperiments } from '../../services/firebase/experimentService';
+import { subscribeToGeneticResources } from '../../services/firebase/geneticResourceService';
 
 export type DivisionStatItem = {
   value: string;
@@ -158,6 +159,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
   const [division, setDivision] = useState<Division | null>(null);
   const [researchCenters, setResearchCenters] = useState<ResearchCenter[]>([]);
   const [centerExperiments, setCenterExperiments] = useState<Map<string, Experiment[]>>(new Map());
+  const [centerGeneticResources, setCenterGeneticResources] = useState<Map<string, GeneticResource[]>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
   
@@ -228,6 +230,40 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
         },
         (error) => {
           console.error(`Error loading experiments for center ${centerId}:`, error);
+        }
+      );
+
+      unsubscribes.push(unsubscribe);
+    });
+
+    return () => {
+      unsubscribes.forEach(unsub => unsub());
+    };
+  }, [division?.id, researchCenters]);
+
+  // Subscribe to genetic resources for each center
+  useEffect(() => {
+    if (!division?.id || researchCenters.length === 0) return;
+
+    const divisionId = division.id.toString();
+    const unsubscribes: Array<() => void> = [];
+
+    researchCenters.forEach((center) => {
+      if (!center.id) return;
+      const centerId = center.id.toString();
+
+      const unsubscribe = subscribeToGeneticResources(
+        divisionId,
+        centerId,
+        (resources) => {
+          setCenterGeneticResources(prev => {
+            const newMap = new Map(prev);
+            newMap.set(centerId, resources);
+            return newMap;
+          });
+        },
+        (error) => {
+          console.error(`Error loading genetic resources for center ${centerId}:`, error);
         }
       );
 
@@ -461,6 +497,51 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                   <p className="text-lg text-content-primary leading-relaxed">
                     {selectedCenter.description}
                   </p>
+                </div>
+
+                {/* Genetic Resources Section */}
+                <div className="bg-background-paper rounded-lg shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-content-headingSecondary mb-6 flex items-center">
+                    <FileText className="h-6 w-6 mr-3" />
+                    Genetic Resources
+                  </h3>
+                  {(() => {
+                    const resources = selectedCenter.id
+                      ? centerGeneticResources.get(selectedCenter.id.toString()) || []
+                      : [];
+                    return resources.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {resources.map((resource) => (
+                          <a
+                            key={resource.id}
+                            href={resource.pdfUrl || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={resource.pdfUrl ? 'Open PDF in new tab' : undefined}
+                            className={`block border border-border-light rounded-lg p-4 transition-colors ${
+                              resource.pdfUrl
+                                ? 'hover:bg-background-page hover:border-primary-light cursor-pointer'
+                                : 'opacity-75 cursor-not-allowed pointer-events-none'
+                            }`}
+                          >
+                            <h4 className="text-lg font-semibold text-content-headingSecondary mb-2">
+                              {resource.name}
+                            </h4>
+                            {resource.pdfUrl && (
+                              <span className="inline-flex items-center gap-2 text-primary-main group-hover:text-primary-dark font-medium text-sm">
+                                <FileText className="h-4 w-4" />
+                                View PDF
+                              </span>
+                            )}
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-content-tertiary text-center py-6">
+                        No genetic resources for this center.
+                      </p>
+                    );
+                  })()}
                 </div>
 
                 {/* Experiments Section */}
