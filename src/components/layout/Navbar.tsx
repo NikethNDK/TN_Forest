@@ -67,10 +67,18 @@ const Navbar: React.FC = () => {
 
   const navLinkHoverClass = "px-4 py-3 text-base font-medium transition-colors duration-200 hover:opacity-80";
 
-  const shopButtonStyle = {
-    backgroundColor: colors.accent.main, // Lime accent for pop
-    color: colors.primary.darkest, // Dark text on lime
-  };
+  const cp = theme.contentPalette;
+  const shopButtonStyle = cp
+    ? { 
+        backgroundColor: cp.shopButtonBg || cp.buttonBg, 
+        color: cp.shopButtonText || cp.buttonText 
+      }
+    : { backgroundColor: colors.accent.main, color: colors.primary.darkest };
+  const dropdownBg = cp?.bgPaper ?? colors.background.paper;
+  const dropdownItemColor = cp?.textSecondary ?? colors.text.secondary;
+  const dropdownItemHoverBg = cp?.primaryLightest ?? colors.primary.lightest;
+  const dropdownItemHoverColor = cp?.heading ?? colors.text.headingSecondary;
+  const dropdownTertiary = cp?.textTertiary ?? colors.text.tertiary;
 
   return (
     <nav 
@@ -113,34 +121,29 @@ const Navbar: React.FC = () => {
                 </button>
                 
                 {isDivisionsOpen && (
-                  <div 
+                  <div
                     className="absolute left-0 mt-2 w-80 rounded-md shadow-lg py-1 z-50"
-                    style={{ backgroundColor: colors.background.paper }}
+                    style={{ backgroundColor: dropdownBg }}
                   >
                     {divisions.map((division: Division) => (
                       <Link
                         key={division.id}
                         to={`/divisions/${division.slug}`}
                         className="block px-4 py-3 text-sm transition-colors duration-200 hover:opacity-80"
-                        style={{ 
-                          color: colors.text.secondary,
-                        }}
+                        style={{ color: dropdownItemColor }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = colors.primary.lightest;
-                          e.currentTarget.style.color = colors.text.headingSecondary;
+                          e.currentTarget.style.backgroundColor = dropdownItemHoverBg;
+                          e.currentTarget.style.color = dropdownItemHoverColor;
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = colors.text.secondary;
+                          e.currentTarget.style.color = dropdownItemColor;
                         }}
                         onClick={() => setIsDivisionsOpen(false)}
                       >
                         <div className="font-medium">{division.name}</div>
                         {division.description && (
-                          <div 
-                            className="text-xs mt-1"
-                            style={{ color: colors.text.tertiary }}
-                          >
+                          <div className="text-xs mt-1" style={{ color: dropdownTertiary }}>
                             {division.description}
                           </div>
                         )}
@@ -171,21 +174,21 @@ const Navbar: React.FC = () => {
                 {isGeneticResourcesOpen && (
                   <div
                     className="absolute left-0 mt-2 w-72 rounded-md shadow-lg py-1 z-50"
-                    style={{ backgroundColor: colors.background.paper }}
+                    style={{ backgroundColor: dropdownBg }}
                   >
                     {GENETIC_RESOURCE_TYPES.map((item) => (
                       <Link
                         key={item.slug}
                         to={`/genetic-resources?type=${item.slug}`}
                         className="block px-4 py-3 text-sm transition-colors duration-200 hover:opacity-80"
-                        style={{ color: colors.text.secondary }}
+                        style={{ color: dropdownItemColor }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = colors.primary.lightest;
-                          e.currentTarget.style.color = colors.text.headingSecondary;
+                          e.currentTarget.style.backgroundColor = dropdownItemHoverBg;
+                          e.currentTarget.style.color = dropdownItemHoverColor;
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = colors.text.secondary;
+                          e.currentTarget.style.color = dropdownItemColor;
                         }}
                         onClick={() => setIsGeneticResourcesOpen(false)}
                       >

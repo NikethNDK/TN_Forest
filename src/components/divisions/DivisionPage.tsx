@@ -10,6 +10,7 @@ import { subscribeToDivision } from '../../services/firebase/divisionService';
 import { subscribeToResearchCenters } from '../../services/firebase/researchCenterService';
 import { subscribeToExperiments } from '../../services/firebase/experimentService';
 import { subscribeToGeneticResources } from '../../services/firebase/geneticResourceService';
+import { useDivisionTheme } from '../../providers/DivisionThemeProvider';
 
 export type DivisionStatItem = {
   value: string;
@@ -87,19 +88,20 @@ interface OverviewWithFacilitiesProps {
   overview: React.ReactNode;
   facilityCategories?: FacilityCategory[];
   onCategoryClick: (categoryId: string) => void;
+  contentPalette?: import('../../config/divisionThemes').DivisionContentPalette;
 }
 
-const OverviewWithFacilities: React.FC<OverviewWithFacilitiesProps> = ({ 
-  overview, 
-  facilityCategories, 
-  onCategoryClick 
+const OverviewWithFacilities: React.FC<OverviewWithFacilitiesProps> = ({
+  overview,
+  facilityCategories,
+  onCategoryClick,
+  contentPalette: cp,
 }) => {
   const processedOverview = useMemo(() => {
     if (!facilityCategories || facilityCategories.length === 0) {
       return overview;
     }
 
-    // Create facility category cards component
     const facilityCards = (
       <div key="facility-categories" className="mb-8 border-t border-border-light pt-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -108,14 +110,15 @@ const OverviewWithFacilities: React.FC<OverviewWithFacilitiesProps> = ({
               key={category.id}
               onClick={() => onCategoryClick(category.id)}
               className="bg-background-paper rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow duration-200 text-left border-2 border-border-light hover:border-primary-light group"
+              style={cp ? { backgroundColor: cp.bgPaper, borderColor: cp.border } : undefined}
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-primary-main group-hover:text-content-headingSecondary">
+                <h3 className="text-xl font-semibold text-primary-main group-hover:text-content-headingSecondary" style={cp ? { color: cp.primary } : undefined}>
                   {category.title}
                 </h3>
-                <ExternalLink className="h-5 w-5 text-content-muted group-hover:text-primary-main transition-colors" />
+                <ExternalLink className="h-5 w-5 text-content-muted group-hover:text-primary-main transition-colors" style={cp ? { color: cp.textTertiary } : undefined} />
               </div>
-              <p className="text-sm text-content-secondary mt-2">Click to view details</p>
+              <p className="text-sm text-content-secondary mt-2" style={cp ? { color: cp.textSecondary } : undefined}>Click to view details</p>
             </button>
           ))}
         </div>
@@ -148,12 +151,14 @@ const OverviewWithFacilities: React.FC<OverviewWithFacilitiesProps> = ({
     };
 
     return processElement(overview);
-  }, [overview, facilityCategories, onCategoryClick]);
+  }, [overview, facilityCategories, onCategoryClick, cp]);
 
   return <>{processedOverview}</>;
 };
 
 const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
+  const { theme } = useDivisionTheme();
+  const cp = theme.contentPalette;
   const [selectedCenter, setSelectedCenter] = useState<ResearchCenter | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [division, setDivision] = useState<Division | null>(null);
@@ -350,9 +355,59 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
     }
   };
 
+  const wrapperStyle = cp ? {
+    ['--cp-primary' as string]: cp.primary,
+    ['--cp-primary-hover' as string]: cp.primaryHover,
+    ['--cp-primary-light' as string]: cp.primaryLight,
+    ['--cp-primary-lightest' as string]: cp.primaryLightest,
+    ['--cp-heading' as string]: cp.heading,
+    ['--cp-heading-secondary' as string]: cp.headingSecondary,
+    ['--cp-text' as string]: cp.text,
+    ['--cp-text-secondary' as string]: cp.textSecondary,
+    ['--cp-text-tertiary' as string]: cp.textTertiary,
+    ['--cp-border' as string]: cp.border,
+    ['--cp-bg-paper' as string]: cp.bgPaper,
+    ['--cp-bg-page' as string]: cp.bgPage,
+    ['--cp-bg-muted' as string]: cp.bgMuted,
+    ['--cp-button-bg' as string]: cp.buttonBg,
+    ['--cp-button-text' as string]: cp.buttonText,
+  } as React.CSSProperties : undefined;
+
   return (
-    <div className="py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="py-12" style={cp ? { backgroundColor: cp.bgPage } : undefined} data-division-content-palette={cp ? '1' : undefined}>
+      {cp && (
+        <style>{`
+          [data-division-content-palette="1"] .text-content-headingSecondary,
+          [data-division-content-palette="1"] .text-content-heading { color: var(--cp-heading) !important; }
+          [data-division-content-palette="1"] .text-content-primary { color: var(--cp-text) !important; }
+          [data-division-content-palette="1"] .text-content-secondary { color: var(--cp-text-secondary) !important; }
+          [data-division-content-palette="1"] .text-content-tertiary,
+          [data-division-content-palette="1"] .text-content-muted { color: var(--cp-text-tertiary) !important; }
+          [data-division-content-palette="1"] .text-primary-main { color: var(--cp-primary) !important; }
+          [data-division-content-palette="1"] .text-primary-dark { color: var(--cp-primary-hover) !important; }
+          [data-division-content-palette="1"] .bg-primary-lighter { background-color: var(--cp-primary-light) !important; }
+          [data-division-content-palette="1"] .bg-primary-lightest { background-color: var(--cp-primary-lightest) !important; }
+          [data-division-content-palette="1"] .bg-background-paper { background-color: var(--cp-bg-paper) !important; }
+          [data-division-content-palette="1"] .bg-background-page { background-color: var(--cp-bg-page) !important; }
+          [data-division-content-palette="1"] .bg-background-muted { background-color: var(--cp-bg-muted) !important; }
+          [data-division-content-palette="1"] .border-primary-light,
+          [data-division-content-palette="1"] .border-border-light,
+          [data-division-content-palette="1"] .border-border-default { border-color: var(--cp-border) !important; }
+          [data-division-content-palette="1"] .hover\\:border-primary-light:hover,
+          [data-division-content-palette="1"] .hover\\:border-primary-light:focus { border-color: var(--cp-primary) !important; }
+          [data-division-content-palette="1"] .hover\\:bg-primary-lightest:hover { background-color: var(--cp-primary-lightest) !important; }
+          [data-division-content-palette="1"] .hover\\:text-primary-main:hover { color: var(--cp-primary) !important; }
+          [data-division-content-palette="1"] .hover\\:bg-interactive-primaryDefault:hover,
+          [data-division-content-palette="1"] .bg-interactive-primaryDefault { background-color: var(--cp-button-bg) !important; }
+          [data-division-content-palette="1"] .hover\\:text-interactive-primaryText:hover,
+          [data-division-content-palette="1"] .text-interactive-primaryText { color: var(--cp-button-text) !important; }
+          [data-division-content-palette="1"] .text-forest-olive { color: var(--cp-primary) !important; }
+          [data-division-content-palette="1"] .border-primary-main { border-color: var(--cp-primary) !important; }
+          [data-division-content-palette="1"] .hover\:bg-primary-main:hover { background-color: var(--cp-primary) !important; }
+          [data-division-content-palette="1"] .focus\:ring-primary-main:focus { --tw-ring-color: var(--cp-primary) !important; }
+        `}</style>
+      )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={wrapperStyle}>
         {/* Page Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-content-headingSecondary mb-6">
@@ -772,10 +827,11 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                 </div>
               </div>
             ) : (
-              <OverviewWithFacilities 
+              <OverviewWithFacilities
                 overview={config.overview}
                 facilityCategories={config.facilityCategories}
                 onCategoryClick={setOpenCategoryId}
+                contentPalette={cp}
               />
             )}
           </div>

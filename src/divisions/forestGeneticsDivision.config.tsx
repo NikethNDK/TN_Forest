@@ -34,7 +34,7 @@ export const forestGeneticsDivisionConfig: ForestGeneticsDivisionConfig = {
       <div className="bg-white rounded-lg shadow-lg p-8">
         {/* Background Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
-          <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
+          <h3 className="text-2xl font-semibold text-gray-700 mb-4 text-center">
             Background
           </h3>
           <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -53,7 +53,7 @@ export const forestGeneticsDivisionConfig: ForestGeneticsDivisionConfig = {
 
         {/* Mission Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
-          <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
+          <h3 className="text-2xl font-semibold text-gray-700 mb-4 text-center">
             Mission & Objectives
           </h3>
           <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
@@ -81,7 +81,7 @@ export const forestGeneticsDivisionConfig: ForestGeneticsDivisionConfig = {
 
         {/* Research Areas Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
-          <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
+          <h3 className="text-2xl font-semibold text-gray-700 mb-4 text-center">
             Key Research Areas
           </h3>
           <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">

@@ -1,16 +1,19 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { 
+import {
   subscribeToGlobalGalleryImages,
-  subscribeToDivisionGalleryImages 
+  subscribeToDivisionGalleryImages
 } from '../services/firebase/galleryImageService';
 import { subscribeToDivision } from '../services/firebase/divisionService';
 import type { GalleryImage, Division } from '../types';
 import { getOptimizedImageUrl } from '../utils/imageOptimization';
+import { useDivisionTheme } from '../providers/DivisionThemeProvider';
 
 const Gallery: React.FC = () => {
   const { divisionSlug } = useParams<{ divisionSlug?: string }>();
+  const { theme } = useDivisionTheme();
+  const cp = theme.contentPalette;
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [division, setDivision] = useState<Division | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,8 +108,26 @@ const Gallery: React.FC = () => {
   const selectedImage = selectedImageIndex !== null ? images[selectedImageIndex] : null;
 
   return (
-    <div className="min-h-screen bg-background-paper py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background-paper py-12" style={cp ? { backgroundColor: cp.bgPaper } : undefined} data-division-content-palette={cp ? '1' : undefined}>
+      {cp && (
+        <style>{`
+          [data-division-content-palette="1"] .text-content-headingSecondary,
+          [data-division-content-palette="1"] .text-content-heading { color: var(--cp-heading) !important; }
+          [data-division-content-palette="1"] .text-content-primary { color: var(--cp-text) !important; }
+          [data-division-content-palette="1"] .text-content-secondary { color: var(--cp-text-secondary) !important; }
+          [data-division-content-palette="1"] .text-content-tertiary,
+          [data-division-content-palette="1"] .text-content-muted { color: var(--cp-text-tertiary) !important; }
+          [data-division-content-palette="1"] .bg-background-paper { background-color: var(--cp-bg-paper) !important; }
+          [data-division-content-palette="1"] .bg-background-muted { background-color: var(--cp-bg-muted) !important; }
+        `}</style>
+      )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={cp ? {
+        ['--cp-heading' as string]: cp.heading,
+        ['--cp-text-secondary' as string]: cp.textSecondary,
+        ['--cp-text-tertiary' as string]: cp.textTertiary,
+        ['--cp-bg-paper' as string]: cp.bgPaper,
+        ['--cp-bg-muted' as string]: cp.bgMuted,
+      } as React.CSSProperties : undefined}>
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-content-headingSecondary mb-6">
             {division ? `${division.name} Gallery` : 'Gallery'}
