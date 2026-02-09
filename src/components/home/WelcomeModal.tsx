@@ -50,7 +50,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-primary-main to-accent-dark p-4 md:p-5 flex items-center justify-between">
+            <div className="bg-gradient-hero p-4 md:p-5 flex items-center justify-between">
               <h2 className="text-lg md:text-xl font-bold text-content-inverse flex items-center">
                 <Info className="h-5 w-5 md:h-6 md:w-6 mr-2" />
                 <span className="hidden sm:inline">Welcome to TamilNadu Forest Department's Research Wing</span>
