@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X, ShoppingCart } from 'lucide-react';
 import { divisions } from '../../data/mockData';
 import type { Division } from '../../types';
 import { colors } from '../../config/colors';
+import { GENETIC_RESOURCE_TYPES } from '../../config/geneticResourceTypes';
 import { useDivisionTheme } from '../../providers/DivisionThemeProvider';
 
 interface NavItem {
@@ -15,7 +16,9 @@ const Navbar: React.FC = () => {
   const { theme } = useDivisionTheme();
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isDivisionsOpen, setIsDivisionsOpen] = useState<boolean>(false);
+  const [isGeneticResourcesOpen, setIsGeneticResourcesOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const geneticResourcesDropdownRef = useRef<HTMLDivElement>(null);
 
   const navItems: NavItem[] = [
     { name: 'Home', path: '/' },
@@ -32,22 +35,30 @@ const Navbar: React.FC = () => {
     setIsDivisionsOpen(!isDivisionsOpen);
   };
 
+  const toggleGeneticResources = (): void => {
+    setIsGeneticResourcesOpen(!isGeneticResourcesOpen);
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsDivisionsOpen(false);
+      }
+      if (geneticResourcesDropdownRef.current && !geneticResourcesDropdownRef.current.contains(target)) {
+        setIsGeneticResourcesOpen(false);
       }
     };
 
-    if (isDivisionsOpen) {
+    if (isDivisionsOpen || isGeneticResourcesOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isDivisionsOpen]);
+  }, [isDivisionsOpen, isGeneticResourcesOpen]);
 
   // Inline styles using division theme
   const navLinkStyle = {
@@ -146,6 +157,44 @@ const Navbar: React.FC = () => {
               >
                 About
               </Link>
+
+              {/* Genetic Resources Dropdown */}
+              <div className="relative" ref={geneticResourcesDropdownRef}>
+                <button
+                  onClick={toggleGeneticResources}
+                  className={`${navLinkHoverClass} flex items-center`}
+                  style={navLinkStyle}
+                >
+                  Genetic Resources
+                  <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${isGeneticResourcesOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isGeneticResourcesOpen && (
+                  <div
+                    className="absolute left-0 mt-2 w-72 rounded-md shadow-lg py-1 z-50"
+                    style={{ backgroundColor: colors.background.paper }}
+                  >
+                    {GENETIC_RESOURCE_TYPES.map((item) => (
+                      <Link
+                        key={item.slug}
+                        to={`/genetic-resources?type=${item.slug}`}
+                        className="block px-4 py-3 text-sm transition-colors duration-200 hover:opacity-80"
+                        style={{ color: colors.text.secondary }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = colors.primary.lightest;
+                          e.currentTarget.style.color = colors.text.headingSecondary;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent';
+                          e.currentTarget.style.color = colors.text.secondary;
+                        }}
+                        onClick={() => setIsGeneticResourcesOpen(false)}
+                      >
+                        <div className="font-medium">{item.label}</div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               <Link
                 to="/publication"
@@ -232,6 +281,27 @@ const Navbar: React.FC = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {division.name}
+                  </Link>
+                ))}
+              </div>
+
+              {/* Mobile Genetic Resources */}
+              <div className="pt-2">
+                <div 
+                  className="px-4 py-3 text-base font-medium"
+                  style={{ color: theme.navbarText }}
+                >
+                  Genetic Resources
+                </div>
+                {GENETIC_RESOURCE_TYPES.map((item) => (
+                  <Link
+                    key={item.slug}
+                    to={`/genetic-resources?type=${item.slug}`}
+                    className="block px-8 py-2 rounded-md text-sm transition-colors duration-200 hover:opacity-80"
+                    style={{ color: theme.navbarText, opacity: 0.9 }}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.label}
                   </Link>
                 ))}
               </div>

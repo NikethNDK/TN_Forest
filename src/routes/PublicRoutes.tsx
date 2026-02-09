@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import Home from '../pages/Home';
 import About from '../pages/About';
+import GeneticResourcesPage from '../pages/GeneticResourcesPage';
 import Publication from '../pages/Publication';
 import ContactUs from '../pages/ContactUs';
 import Divisions from '../pages/Divisions';
@@ -22,6 +23,7 @@ export const publicRoutes = (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
+          <Route path="/genetic-resources" element={<GeneticResourcesPage />} />
           <Route path="/publication" element={<Publication />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/gallery" element={<Gallery />} />
