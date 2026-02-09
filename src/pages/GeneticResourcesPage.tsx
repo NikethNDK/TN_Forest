@@ -123,7 +123,7 @@ const GeneticResourcesPage: React.FC = () => {
             <p className="text-content-secondary">No genetic resources found for this type.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((division, divIndex) => {
               const isExpanded = expandedDivisions.has(divIndex);
               const showAccordion = useAccordion;
@@ -131,7 +131,7 @@ const GeneticResourcesPage: React.FC = () => {
               return (
                 <div
                   key={division.divisionId}
-                  className="bg-background-paper rounded-lg shadow overflow-hidden"
+                  className="bg-background-paper rounded-lg shadow overflow-hidden h-full flex flex-col"
                 >
                   {showAccordion ? (
                     <button

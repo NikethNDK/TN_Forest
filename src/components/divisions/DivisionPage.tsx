@@ -544,18 +544,18 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                   })()}
                 </div>
 
-                {/* Experiments Section */}
-                <div className="bg-background-paper rounded-lg shadow-lg p-8">
+                {/* Experiments Section - Temporarily Commented Out */}
+                {/* <div className="bg-background-paper rounded-lg shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-content-headingSecondary mb-6 flex items-center">
                     <TreePine className="h-6 w-6 mr-3" />
                     Experiments
                   </h3>
                   
                   {/* Table View for All Research Centers */}
-                  {selectedCenter.experiments && selectedCenter.experiments.length > 0 ? (
+                  {/* {selectedCenter.experiments && selectedCenter.experiments.length > 0 ? (
                     <>
                       {/* Pagination Logic */}
-                      {(() => {
+                      {/* {(() => {
                         const totalPages = Math.ceil(selectedCenter.experiments.length / EXPERIMENTS_PER_PAGE);
                         const startIndex = (currentPage - 1) * EXPERIMENTS_PER_PAGE;
                         const endIndex = startIndex + EXPERIMENTS_PER_PAGE;
@@ -566,17 +566,17 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                         return (
                           <>
                             {/* Pagination Info */}
-                            <div className="mb-4 text-sm text-content-secondary">
+                            {/* <div className="mb-4 text-sm text-content-secondary">
                               Showing {startItem}-{endItem} of {selectedCenter.experiments.length} experiments
                             </div>
 
                             {/* Experiments List */}
-                            <div className="space-y-3">
+                            {/* <div className="space-y-3">
                               {paginatedExperiments.map((experiment) => (
                                 <div key={experiment.id} className="border border-border-light rounded-lg overflow-hidden">
                                   <div className="flex items-center p-4 hover:bg-background-page transition-colors">
                                     {/* Experiment Image or Center Image */}
-                                    {getExperimentImage(experiment, selectedCenter) && (
+                                    {/* {getExperimentImage(experiment, selectedCenter) && (
                                       <div className="w-20 h-20 rounded-lg overflow-hidden shadow-md border border-border-light flex-shrink-0 mr-4">
                                         <img
                                           src={getExperimentImage(experiment, selectedCenter) || ''}
@@ -586,7 +586,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                       </div>
                                     )}
                                     {/* Experiment Info */}
-                                    <div className="flex-1">
+                                    {/* <div className="flex-1">
                                       <h4 className="text-lg font-semibold text-content-headingSecondary mb-1">
                                         {experiment.title}
                                       </h4>
@@ -595,7 +595,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                       </p>
                                     </div>
                                     {/* View PDF Button */}
-                                    {(experiment.pdfUrl || experiment.pdfPath) && (
+                                    {/* {(experiment.pdfUrl || experiment.pdfPath) && (
                                       <button
                                         onClick={() => handleViewPDF(experiment.pdfUrl, experiment.pdfPath)}
                                         className="bg-interactive-primaryDefault hover:bg-interactive-primaryHover text-interactive-primaryText px-6 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex-shrink-0"
@@ -609,16 +609,16 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                             </div>
 
                             {/* Pagination Controls */}
-                            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                            {/* <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                               {/* Page Info */}
-                              <div className="text-sm text-content-secondary">
+                              {/* <div className="text-sm text-content-secondary">
                                 Page {currentPage} of {totalPages}
                               </div>
 
                               {/* Pagination Buttons */}
-                              <div className="flex items-center gap-2">
+                              {/* <div className="flex items-center gap-2">
                                 {/* Previous Button */}
-                                <button
+                                {/* <button
                                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                   disabled={currentPage === 1}
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
@@ -632,7 +632,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                 </button>
 
                                 {/* Page Number Buttons */}
-                                <div className="flex items-center gap-1">
+                                {/* <div className="flex items-center gap-1">
                                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
                                     // Show first page, last page, current page, and pages around current
                                     const showPage = 
@@ -665,7 +665,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                                 </div>
 
                                 {/* Next Button */}
-                                <button
+                                {/* <button
                                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                   disabled={currentPage === totalPages}
                                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2 ${
@@ -688,7 +688,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
                       No experiments available for this research center.
                     </div>
                   )}
-                </div>
+                </div> */}
 
                 {/* Center Contact Info and Map */}
                 <div className="space-y-6">
