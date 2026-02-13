@@ -9,12 +9,13 @@ export const GENETIC_RESOURCE_TYPES = [
   { slug: 'pt', label: 'PT (Progeny Trial)', matchNames: ['progeny trial', 'porgeny trial'] },
   { slug: 'cso', label: 'CSO (Clonal Seed Orchard)', matchNames: ['clonal seed orchard'] },
   { slug: 'cb', label: 'CB (Clonal Bank)', matchNames: ['clonal bank'] },
-  { slug: 'gb', label: 'GB (Germplasm Bank)', matchNames: ['germplasam bank'] }
+  { slug: 'gb', label: 'GB (Germplasm Bank)', matchNames: ['germplasm bank'] },
+  { slug: 'spa', label: 'SPA (Seed Production Area)', matchNames: ['seed production area'] }
 ] as const;
 
 export type GeneticResourceTypeSlug = (typeof GENETIC_RESOURCE_TYPES)[number]['slug'];
 
-const VALID_SLUGS: GeneticResourceTypeSlug[] = ['sso', 'so', 'pt', 'cso', 'cb', 'gb'];
+const VALID_SLUGS: GeneticResourceTypeSlug[] = ['sso', 'so', 'pt', 'cso', 'cb', 'gb', 'spa'];
 
 export function getTypeBySlug(slug: string): (typeof GENETIC_RESOURCE_TYPES)[number] | undefined {
   return GENETIC_RESOURCE_TYPES.find((t) => t.slug === slug);

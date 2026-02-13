@@ -20,13 +20,6 @@ const Navbar: React.FC = () => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const geneticResourcesDropdownRef = useRef<HTMLDivElement>(null);
 
-  const navItems: NavItem[] = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
-    { name: 'Publication', path: '/publication' },
-    { name: 'Contact Us', path: '/contact' }
-  ];
-
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
   };

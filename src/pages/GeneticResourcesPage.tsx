@@ -36,7 +36,7 @@ const GeneticResourcesPage: React.FC = () => {
   const [data, setData] = useState<DivisionCenterResources[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedDivisions, setExpandedDivisions] = useState<Set<number>>(new Set([0]));
+  const [expandedDivisions, setExpandedDivisions] = useState<Set<number>>(new Set());
 
   const filtered = useMemo(() => filterByType(data, typeSlug), [data, typeSlug]);
   const useAccordion = filtered.length > 3;
@@ -68,7 +68,7 @@ const GeneticResourcesPage: React.FC = () => {
     if (filtered.length <= 3) {
       setExpandedDivisions(new Set(filtered.map((_, i) => i)));
     } else {
-      setExpandedDivisions(new Set([0]));
+      setExpandedDivisions(new Set());
     }
   }, [filtered.length]);
 
@@ -123,7 +123,7 @@ const GeneticResourcesPage: React.FC = () => {
             <p className="text-content-secondary">No genetic resources found for this type.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ${useAccordion ? 'items-start' : ''}`}>
             {filtered.map((division, divIndex) => {
               const isExpanded = expandedDivisions.has(divIndex);
               const showAccordion = useAccordion;
@@ -131,7 +131,7 @@ const GeneticResourcesPage: React.FC = () => {
               return (
                 <div
                   key={division.divisionId}
-                  className="bg-background-paper rounded-lg shadow overflow-hidden h-full flex flex-col"
+                  className={`bg-background-paper rounded-lg shadow overflow-hidden flex flex-col ${useAccordion ? '' : 'h-full'}`}
                 >
                   {showAccordion ? (
                     <button
