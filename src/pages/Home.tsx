@@ -4,6 +4,7 @@ import RotatingImageStrip from '../components/home/RotatingImageStrip';
 import NewsAndInfoSection from '../components/home/NewsAndInfoSection';
 import ImageCarousel from '../components/home/ImageCarousel';
 import ShopPreviewSection from '../components/home/ShopPreviewSection';
+import GeneticResourcesSection from '../components/home/GeneticResourcesSection';
 import LinksCarousel from '../components/home/LinksCarousel';
 import WelcomeModal from '../components/home/WelcomeModal';
 import RotatingConveyor from '../components/home/RotatingConveyor';
@@ -137,6 +138,8 @@ const Home: React.FC = () => {
 
       {/* Shop preview - full width */}
       <ShopPreviewSection />
+      {/* Genetic Resources - full width */}
+      <GeneticResourcesSection />
       {/* Gallery Highlights - Full width, normal scroll (sticky stops here) */}
       <ImageCarousel scope="global" />
       <LinksCarousel />
