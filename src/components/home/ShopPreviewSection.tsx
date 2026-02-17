@@ -58,25 +58,26 @@ const ShopPreviewSection: React.FC = () => {
 
   if (error && products.length === 0) {
     return (
-      <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-forest-cream">
+      <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-shop-preview-bg">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <ShoppingBag className="h-6 w-6 text-forest-olive" />
-            <span className="text-forest-olive font-semibold text-sm uppercase tracking-wide">
+            <ShoppingBag className="h-6 w-6 text-home-heading-secondary" />
+            <span className="text-home-heading-secondary font-semibold text-sm uppercase tracking-wide">
               Forest Products
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-content-heading mb-2">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-home-heading mb-2">
             Our Eco-Store
           </h2>
-          <p className="text-center text-content-secondary text-sm mb-6">
+          <div className="w-32 h-1 bg-gradient-gold rounded-full mx-auto mb-6" />
+          <p className="text-center text-home-text-secondary text-sm mb-6">
             Seeds and bio fertilizers from the Tamil Nadu Forest Department.
           </p>
-          <p className="text-center text-content-tertiary text-sm mb-6">Unable to load products.</p>
+          <p className="text-center text-home-text-secondary text-sm mb-6">Unable to load products.</p>
           <div className="text-center">
             <Link
               to="/shop"
-              className="inline-flex items-center bg-gradient-hero hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
+              className="inline-flex items-center bg-shop-button-bg hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
             >
               <ShoppingBag className="h-5 w-5 mr-2" />
               Visit Shop
@@ -89,22 +90,22 @@ const ShopPreviewSection: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-forest-cream">
+      <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-shop-preview-bg">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <ShoppingBag className="h-6 w-6 text-forest-olive" />
-            <span className="text-forest-olive font-semibold text-sm uppercase tracking-wide">
+            <ShoppingBag className="h-6 w-6 text-home-heading-secondary" />
+            <span className="text-home-heading-secondary font-semibold text-sm uppercase tracking-wide">
               Forest Products
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-content-heading mb-2">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-home-heading mb-2">
             Our Eco-Store
           </h2>
-          <p className="text-center text-content-secondary text-sm mb-6 sm:mb-8">
+          <p className="text-center text-home-text-secondary text-sm mb-6 sm:mb-8">
             Seeds and bio fertilizers from the Tamil Nadu Forest Department.
           </p>
           <div className="flex justify-center py-12">
-            <Loader2 className="h-10 w-10 animate-spin text-primary-main" />
+            <Loader2 className="h-10 w-10 animate-spin text-home-heading" />
           </div>
         </div>
       </section>
@@ -113,25 +114,26 @@ const ShopPreviewSection: React.FC = () => {
 
   if (products.length === 0) {
     return (
-      <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-forest-cream">
+      <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-shop-preview-bg">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <ShoppingBag className="h-6 w-6 text-forest-olive" />
-            <span className="text-forest-olive font-semibold text-sm uppercase tracking-wide">
+            <ShoppingBag className="h-6 w-6 text-home-heading-secondary" />
+            <span className="text-home-heading-secondary font-semibold text-sm uppercase tracking-wide">
               Forest Products
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-content-heading mb-2">
+          <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-home-heading mb-2">
             Our Eco-Store
           </h2>
-          <p className="text-center text-content-secondary text-sm mb-6">
+          <div className="w-32 h-1 bg-gradient-gold rounded-full mx-auto mb-6" />
+          <p className="text-center text-home-text-secondary text-sm mb-6">
             Seeds and bio fertilizers from the Tamil Nadu Forest Department.
           </p>
-          <p className="text-center text-content-tertiary text-sm mb-6">Store coming soon.</p>
+          <p className="text-center text-home-text-secondary text-sm mb-6">Store coming soon.</p>
           <div className="text-center">
             <Link
               to="/shop"
-              className="inline-flex items-center bg-gradient-hero hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
+              className="inline-flex items-center bg-shop-button-bg hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
             >
               <ShoppingBag className="h-5 w-5 mr-2" />
               Visit Shop
@@ -143,19 +145,19 @@ const ShopPreviewSection: React.FC = () => {
   }
 
   return (
-    <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-forest-cream">
+    <section id="shop" className="py-16 px-4 sm:px-6 lg:px-8 bg-shop-preview-bg">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <ShoppingBag className="h-6 w-6 text-forest-olive" />
-          <span className="text-forest-olive font-semibold text-sm uppercase tracking-wide">
+          <ShoppingBag className="h-6 w-6 text-home-heading-secondary" />
+          <span className="text-home-heading-secondary font-semibold text-sm uppercase tracking-wide">
             Forest Products
           </span>
         </div>
-        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-content-heading mb-2">
+        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-center text-home-heading mb-2">
           Our Eco-Store
         </h2>
-        <div className="w-32 h-1 bg-gradient-to-r from-primary-main to-accent-light mx-auto mb-6 sm:mb-8" />
-        <p className="text-center text-content-secondary text-sm mb-6 sm:mb-8">
+        <div className="w-32 h-1 bg-gradient-gold rounded-full mx-auto mb-6 sm:mb-8" />
+        <p className="text-center text-home-text-secondary text-sm mb-6 sm:mb-8">
           Seeds and bio fertilizers from the Tamil Nadu Forest Department.
         </p>
 
@@ -168,7 +170,7 @@ const ShopPreviewSection: React.FC = () => {
         <div className="text-center mt-6 sm:mt-8">
           <Link
             to="/shop"
-            className="inline-flex items-center bg-gradient-hero hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
+            className="inline-flex items-center bg-shop-button-bg hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
           >
             <ShoppingBag className="h-5 w-5 mr-2" />
             Visit Shop

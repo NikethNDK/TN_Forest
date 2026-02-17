@@ -11,10 +11,10 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <DivisionThemeProvider>
-      <div className="min-h-screen bg-background-page">
+      <div className="min-h-screen">
         <Header />
         <Navbar />
-        <main className="bg-background-page">
+        <main className="min-h-screen">
           {children}
         </main>
         <Footer />

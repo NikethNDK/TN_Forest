@@ -116,7 +116,8 @@ export const colors = {
   // ---------------------------------------------------------------------------
   background: {
     default: '#fffef0',
-    page: '#f8fafc',
+    page: '#ffffff',
+    homeBody: '#f3f4f6',
     paper: '#ffffff',
     subtle: '#f9fafb',
     muted: '#f3f4f6',
@@ -216,14 +217,16 @@ export const colors = {
   // ---------------------------------------------------------------------------
   components: {
     navbar: {
-      background: lime[300],
+      background: '#36281b',
       text: forestGreen[950],
       textHover: forestGreen[200],
       mobileMenu: forestGreen[800],
+      shopButtonBg: '#a79c82',
+      shopButtonText: '#ffffff',
     },
     footer: {
       background: 'rgba(20, 51, 20, 0.9)',
-      overlay: 'rgba(115, 72, 48, 0.9)',
+      overlay: 'rgba(154, 147, 141, 0.85)', // #9a938d with opacity so footer bg image shows through
       text: '#ffffff',
       textSecondary: 'rgba(255, 254, 240, 0.8)',
       icon: '#fcd34d',
@@ -295,9 +298,38 @@ export const colors = {
   forestTeal: '#0f766e',
 
   // ---------------------------------------------------------------------------
+  // NEWS & EVENTS TICKER — Recent Events / Latest News component (header + body).
+  // ---------------------------------------------------------------------------
+  newsEventsTicker: {
+    header: '#8b7a66',
+    body: '#f4f6f3',
+  },
+
+  // ---------------------------------------------------------------------------
   // FOREST CREAM — Shop section background (solid cream).
   // ---------------------------------------------------------------------------
   forestCream: '#fef9c3',
+
+  // ---------------------------------------------------------------------------
+  // SHOP PREVIEW — Home page shop preview section background.
+  // ---------------------------------------------------------------------------
+  shopPreviewBg: '#c7c3c0',
+
+  // ---------------------------------------------------------------------------
+  // MISSION & VISION — Home page Our Mission / Our Vision card background.
+  // ---------------------------------------------------------------------------
+  missionVisionCardBg: '#ddd5c8',
+
+  // ---------------------------------------------------------------------------
+  // HOME PAGE — Text and headings to match the warm, earthy page palette.
+  // ---------------------------------------------------------------------------
+  home: {
+    heading: '#36281b',       // warm dark brown (navbar tone)
+    headingSecondary: '#4a4238',  // card titles (Mission/Vision)
+    text: '#3d3832',         // body text
+    textSecondary: '#5c5549',    // secondary / muted
+    cardBorder: '#a79c82',   // shop preview card top border (matches shop button)
+  },
 } as const;
 
 // =============================================================================

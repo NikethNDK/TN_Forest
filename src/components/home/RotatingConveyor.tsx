@@ -59,7 +59,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
 
   if (items.length === 0) {
     return (
-      <div className={`text-center py-8 ${isDark ? 'text-white/70' : 'text-content-tertiary'}`}>
+      <div className={`text-center py-8 ${isDark ? 'text-white/70' : 'text-home-text-secondary'}`}>
         <p>No {itemType === 'news' ? 'news' : 'events'} available yet.</p>
       </div>
     );
@@ -108,9 +108,9 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
           return (
             <div
               key={`${item.id || index}-${Math.floor(index / items.length)}`}
-              className={`group ${isDark ? 'py-3 border-b border-white/10 hover:bg-white/10 transition-colors cursor-pointer rounded' : ''}`}
+              className={`group ${isDark ? 'py-3 border-b border-white/10 hover:bg-white/10 transition-colors cursor-pointer rounded' : 'py-3 rounded transition-colors cursor-pointer hover:bg-news-events-ticker-header/10 border-b border-home-card-border/30'}`}
             >
-              <p className={`text-xs mb-1 flex items-center ${isRightAligned ? 'justify-end' : ''} ${isDark ? 'text-white/70' : 'text-content-tertiary'}`}>
+              <p className={`text-xs mb-1 flex items-center ${isRightAligned ? 'justify-end' : ''} ${isDark ? 'text-white/70' : 'text-home-text-secondary'}`}>
                 {isRightAligned ? (
                   <>
                     {item.date} <Calendar className="h-3 w-3 ml-1" />
@@ -121,10 +121,10 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
                   </>
                 )}
               </p>
-              <h3 className={`font-bold mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} transition-colors ${isDark ? 'text-white group-hover:text-white/90' : `text-content-headingSecondary ${isNews ? 'group-hover:text-primary-main' : 'group-hover:text-accent-darker'}`}`}>
+              <h3 className={`font-bold mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} transition-colors ${isDark ? 'text-white group-hover:text-white/90' : 'text-home-heading-secondary group-hover:text-home-heading'}`}>
                 {item.title}
               </h3>
-              <p className={`text-xs xl:text-sm mb-2 ${isRightAligned ? 'text-right' : ''} line-clamp-2 ${isDark ? 'text-white/80' : 'text-content-secondary'}`}>
+              <p className={`text-xs xl:text-sm mb-2 ${isRightAligned ? 'text-right' : ''} line-clamp-2 ${isDark ? 'text-white/80' : 'text-home-text-secondary'}`}>
                 {item.excerpt}
               </p>
               {(item.link || item.pdfUrl) && (
@@ -132,7 +132,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
                   href={item.link || item.pdfUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={`text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''} ${isDark ? 'text-white hover:text-white/90' : 'text-content-link hover:text-accent-darker'}`}
+                  className={`text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''} ${isDark ? 'text-white hover:text-white/90' : 'text-home-heading hover:text-home-heading/90'}`}
                 >
                   {item.pdfUrl && !item.link ? (
                     isRightAligned ? (
@@ -161,7 +161,7 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({ items, itemType, is
               )}
               {isRightAligned && <div className="clear-both"></div>}
               {index < duplicatedItems.length - 1 && !isDark && (
-                <hr className="mt-6 border-border-light" />
+                <hr className="mt-6 border-home-card-border/40" />
               )}
             </div>
           );

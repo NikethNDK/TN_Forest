@@ -46,19 +46,19 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
         >
           {/* Modal Container - Smaller size, stops event propagation */}
           <div 
-            className="bg-background-paper rounded-2xl shadow-2xl max-w-xl w-full max-h-[75vh] overflow-hidden flex flex-col pointer-events-auto transform transition-all"
+            className="bg-background-home-body rounded-2xl shadow-2xl max-w-xl w-full max-h-[75vh] overflow-hidden flex flex-col pointer-events-auto transform transition-all"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="bg-gradient-hero p-4 md:p-5 flex items-center justify-between">
-              <h2 className="text-lg md:text-xl font-bold text-content-inverse flex items-center">
+            <div className="bg-home-heading p-4 md:p-5 flex items-center justify-between">
+              <h2 className="text-lg md:text-xl font-bold text-white flex items-center">
                 <Info className="h-5 w-5 md:h-6 md:w-6 mr-2" />
                 <span className="hidden sm:inline">Welcome to TamilNadu Forest Department's Research Wing</span>
                 <span className="sm:hidden">Welcome</span>
               </h2>
               <button
                 onClick={handleClose}
-                className="text-content-inverse hover:opacity-80 transition-colors p-1.5 rounded-full hover:bg-background-paper hover:bg-opacity-20 flex-shrink-0"
+                className="text-white hover:opacity-80 transition-colors p-1.5 rounded-full hover:bg-white/20 flex-shrink-0"
                 aria-label="Close modal"
               >
                 <X className="h-5 w-5" />
@@ -68,19 +68,19 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 md:p-6">
               {/* Shop Information Section */}
-              <div className="bg-gradient-to-br from-primary-lightest to-accent-lightest rounded-xl p-4 md:p-5 mb-4 border-l-4 border-border-primary">
+              <div className="bg-mission-vision-card-bg rounded-xl p-4 md:p-5 mb-4 border-l-4 border-home-card-border">
                 <div className="flex items-center mb-3">
-                  <ShoppingBag className="h-5 w-5 text-primary-main mr-2" />
-                  <h3 className="text-lg font-bold text-content-heading">Explore Our Forest Products Eco-Store</h3>
+                  <ShoppingBag className="h-5 w-5 text-home-heading mr-2" />
+                  <h3 className="text-lg font-bold text-home-heading">Explore Our Forest Products Eco-Store</h3>
                 </div>
-                <p className="text-sm text-content-primary mb-3 leading-relaxed">
+                <p className="text-sm text-home-text mb-3 leading-relaxed">
                   Discover high-quality seeds, saplings, and bio-fertilizers directly from our research centers. 
                   {/* All products are backed by our scientific research, ensuring the best 
                   quality for your afforestation and cultivation projects. */}
                 </p>
                 <button
                   onClick={handleShopNavigation}
-                  className="bg-interactive-secondaryDefault hover:bg-interactive-secondaryHover text-interactive-secondaryText font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center shadow-lg text-sm"
+                  className="bg-shop-button-bg hover:opacity-90 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center shadow-lg text-sm"
                 >
                   Visit Eco-Store
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -159,7 +159,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
       {showFloatingIcon && (
         <button
           onClick={handleFloatingIconClick}
-          className="fixed bottom-6 right-6 bg-lightBlue-main hover:bg-lightBlue-dark text-lightBlue-lightest p-4 rounded-full shadow-2xl z-40 transition-all duration-300 hover:scale-110 flex items-center justify-center"
+          className="fixed bottom-6 right-6 bg-home-heading hover:opacity-90 text-white p-4 rounded-full shadow-2xl z-40 transition-all duration-300 hover:scale-110 flex items-center justify-center"
           aria-label="Open welcome modal"
         >
           <Info className="h-6 w-6" />

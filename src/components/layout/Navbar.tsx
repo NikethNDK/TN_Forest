@@ -66,7 +66,7 @@ const Navbar: React.FC = () => {
         backgroundColor: cp.shopButtonBg || cp.buttonBg, 
         color: cp.shopButtonText || cp.buttonText 
       }
-    : { backgroundColor: colors.accent.main, color: colors.primary.darkest };
+    : { backgroundColor: colors.components.navbar.shopButtonBg, color: colors.components.navbar.shopButtonText };
   const dropdownBg = cp?.bgPaper ?? colors.background.paper;
   const dropdownItemColor = cp?.textSecondary ?? colors.text.secondary;
   const dropdownItemHoverBg = cp?.primaryLightest ?? colors.primary.lightest;

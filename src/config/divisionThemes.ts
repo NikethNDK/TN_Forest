@@ -49,7 +49,7 @@ export interface DivisionTheme {
 export const defaultTheme: DivisionTheme = {
   headerBg: colors.background.page,
   headerText: colors.text.heading,
-  navbarBg: colors.primary.main,
+  navbarBg: colors.components.navbar.background,
   navbarText: colors.text.inverse,
   footerBg: colors.components.footer.background,
   footerOverlay: colors.components.footer.overlay,

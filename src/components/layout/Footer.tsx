@@ -5,6 +5,8 @@ import { incrementVisitorCount, subscribeToVisitorCount } from '../../services/f
 import type { ContactLocation } from '../../types';
 import { useDivisionTheme } from '../../providers/DivisionThemeProvider';
 
+const FOOTER_BG_IMAGE_OPTIONS = ['/footer-image.jpeg'];
+
 // Function to format the date and time
 const formatDateTime = (date: Date): string => {
   const options: Intl.DateTimeFormatOptions = {
@@ -24,6 +26,24 @@ const Footer: React.FC = () => {
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
   const [visitors, setVisitors] = useState<number>(0);
   const [footerLocation, setFooterLocation] = useState<ContactLocation | null>(null);
+  const [footerBgImage, setFooterBgImage] = useState<string | null>(null);
+
+  // Resolve footer background image (try common extensions so it works regardless of file type)
+  useEffect(() => {
+    let cancelled = false;
+    const tryNext = (index: number) => {
+      if (cancelled || index >= FOOTER_BG_IMAGE_OPTIONS.length) return;
+      const src = FOOTER_BG_IMAGE_OPTIONS[index];
+      const img = new Image();
+      img.onload = () => {
+        if (!cancelled) setFooterBgImage(src);
+      };
+      img.onerror = () => tryNext(index + 1);
+      img.src = src;
+    };
+    tryNext(0);
+    return () => { cancelled = true; };
+  }, []);
 
   // Update current time every second
   useEffect(() => {
@@ -80,9 +100,9 @@ const Footer: React.FC = () => {
 
   return (
     <footer 
-      className="relative bg-cover bg-center"
+      className="relative bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: 'url(https://www.shutterstock.com/image-vector/silhouette-forest-isolated-on-white-260nw-2479974867.jpg)',
+        ...(footerBgImage ? { backgroundImage: `url(${footerBgImage})` } : {}),
         color: theme.footerText,
       }}
     > 

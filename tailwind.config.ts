@@ -11,6 +11,11 @@ export default {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
   ],
+  safelist: [
+    'bg-background-home-body',
+    'bg-news-events-ticker-header',
+    'bg-news-events-ticker-body',
+  ],
   theme: {
     extend: {
       colors: {
@@ -19,6 +24,8 @@ export default {
         'forest-olive': colors.forestOlive,
         'forest-teal': colors.forestTeal,
         'forest-cream': colors.forestCream,
+        'shop-preview-bg': colors.shopPreviewBg,
+        'mission-vision-card-bg': colors.missionVisionCardBg,
         primary: colors.primary,
         accent: colors.accent,
         background: { DEFAULT: colors.background.default, ...colors.background },
@@ -33,10 +40,13 @@ export default {
         form: colors.components.form,
         badge: colors.components.badge,
         lightBlue: colors.lightBlue,
+        newsEventsTicker: colors.newsEventsTicker,
+        home: colors.home,
+        'shop-button-bg': colors.components.navbar.shopButtonBg,
       },
       backgroundImage: {
         'gradient-cream': colors.gradients.cream,
-        'gradient-hero': colors.gradients.hero,
+        'gradient-hero': colors.gradients.hero, 
         'gradient-gold': colors.gradients.gold,
       },
       boxShadow: {
