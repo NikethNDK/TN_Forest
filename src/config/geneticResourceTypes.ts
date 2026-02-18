@@ -5,7 +5,7 @@
 
 export const GENETIC_RESOURCE_TYPES = [
   { slug: 'sso', label: 'SSO (Seedling Seed Orchard)', matchNames: ['seedling seed orchard'] },
-  { slug: 'so', label: 'SO (Seed Stand)', matchNames: ['seed stand'] },
+  { slug: 'ss', label: 'SS (Seed Stand)', matchNames: ['seed stand'] },
   { slug: 'pt', label: 'PT (Progeny Trial)', matchNames: ['progeny trial', 'porgeny trial'] },
   { slug: 'cso', label: 'CSO (Clonal Seed Orchard)', matchNames: ['clonal seed orchard'] },
   { slug: 'cb', label: 'CB (Clonal Bank)', matchNames: ['clonal bank'] },

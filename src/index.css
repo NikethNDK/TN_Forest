@@ -165,6 +165,15 @@ nav {
     z-index: 3 !important;
   }
   
+  /* Hide horizontal scrollbar (e.g. genetic resources carousel) */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
   /* Links carousel scroll animation */
   @keyframes scroll {
     0% {
