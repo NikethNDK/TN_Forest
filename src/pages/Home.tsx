@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Newspaper, Calendar } from 'lucide-react';
 import RotatingImageStrip from '../components/home/RotatingImageStrip';
 import NewsAndInfoSection from '../components/home/NewsAndInfoSection';
@@ -11,9 +11,49 @@ import RotatingConveyor from '../components/home/RotatingConveyor';
 import { subscribeToNews, subscribeToEvents } from '../services/firebase/newsEventService';
 import type { NewsItem, Event } from '../types';
 
+const HERO_SHRINK_SCROLL_THRESHOLD = 100;
+const CHROME_HEIGHT_FALLBACK = 180;
+const HERO_SHRINK_DURATION_MS = 350;
+
+type Rect = { top: number; left: number; width: number; height: number };
+
+type HeroPhase = 'expanded' | 'shrinking' | 'shrunk' | 'expanding';
+
+const roundRect = (r: DOMRect): Rect => ({
+  top: Math.round(r.top),
+  left: Math.round(r.left),
+  width: Math.round(r.width),
+  height: Math.round(r.height),
+});
+
+const getFullViewportRect = (): Rect => {
+  const chromeHeight =
+    parseFloat(
+      getComputedStyle(document.documentElement).getPropertyValue('--chrome-height')
+    ) || CHROME_HEIGHT_FALLBACK;
+  const top = Math.round(chromeHeight);
+  return {
+    top,
+    left: 0,
+    width: window.innerWidth,
+    height: Math.round(window.innerHeight - chromeHeight),
+  };
+};
+
 const Home: React.FC = () => {
   const [latestNews, setLatestNews] = useState<NewsItem[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
+  const [heroPhase, setHeroPhase] = useState<HeroPhase>('expanded');
+  const [heroAnimation, setHeroAnimation] = useState<{ from: Rect; to: Rect | null } | null>(null);
+  const heroWrapperRef = useRef<HTMLDivElement>(null);
+  const placeholderRef = useRef<HTMLDivElement>(null);
+  const gridCarouselRef = useRef<HTMLDivElement>(null);
+  const heroPhaseRef = useRef<HeroPhase>(heroPhase);
+  const transitionEndHandledRef = useRef(false);
+
+  useEffect(() => {
+    heroPhaseRef.current = heroPhase;
+  }, [heroPhase]);
 
   useEffect(() => {
     const unsubscribeNews = subscribeToNews(
@@ -40,6 +80,112 @@ const Home: React.FC = () => {
     };
   }, []);
 
+  // Desktop-only scroll listener: read phase from ref so effect stays stable
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    let rafId: number | null = null;
+
+    const handleScroll = (): void => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const scrollY = window.scrollY;
+        const phase = heroPhaseRef.current;
+        if (phase === 'shrinking' || phase === 'expanding') return;
+        if (scrollY < HERO_SHRINK_SCROLL_THRESHOLD) {
+          if (phase === 'shrunk') {
+            const rect = gridCarouselRef.current?.getBoundingClientRect();
+            if (rect) {
+              transitionEndHandledRef.current = false;
+              setHeroAnimation({ from: roundRect(rect), to: null });
+              setHeroPhase('expanding');
+            }
+          }
+          return;
+        }
+        if (phase === 'expanded') {
+          const rect = heroWrapperRef.current?.getBoundingClientRect();
+          if (rect) {
+            transitionEndHandledRef.current = false;
+            setHeroAnimation({ from: roundRect(rect), to: null });
+            setHeroPhase('shrinking');
+          }
+        }
+      });
+    };
+
+    const attachScroll = (): void => {
+      handleScroll();
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    };
+    const detachScroll = (): void => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId != null) cancelAnimationFrame(rafId);
+      setHeroPhase('expanded');
+      setHeroAnimation(null);
+    };
+
+    const handleMediaChange = (): void => {
+      if (mq.matches) attachScroll();
+      else detachScroll();
+    };
+
+    if (mq.matches) attachScroll();
+    mq.addEventListener('change', handleMediaChange);
+    return () => {
+      mq.removeEventListener('change', handleMediaChange);
+      if (mq.matches) {
+        window.removeEventListener('scroll', handleScroll);
+        if (rafId != null) cancelAnimationFrame(rafId);
+      }
+    };
+  }, []);
+
+  // After phase becomes shrinking/expanding, set animation target so transition runs
+  useEffect(() => {
+    if (heroPhase !== 'shrinking' && heroPhase !== 'expanding') return;
+    const id = requestAnimationFrame(() => {
+      if (heroPhase === 'shrinking' && placeholderRef.current) {
+        const rect = placeholderRef.current.getBoundingClientRect();
+        setHeroAnimation((prev) => (prev ? { ...prev, to: roundRect(rect) } : null));
+      } else if (heroPhase === 'expanding') {
+        setHeroAnimation((prev) => (prev ? { ...prev, to: getFullViewportRect() } : null));
+      }
+    });
+    return () => cancelAnimationFrame(id);
+  }, [heroPhase]);
+
+  const heroHeightStyle: React.CSSProperties = {
+    height: `calc(100vh - var(--chrome-height, ${CHROME_HEIGHT_FALLBACK}px))`,
+    minHeight: `calc(100vh - var(--chrome-height, ${CHROME_HEIGHT_FALLBACK}px))`,
+  };
+
+  const heroFixedStyle = (rect: Rect): React.CSSProperties => ({
+    position: 'fixed',
+    zIndex: 40,
+    top: rect.top,
+    left: rect.left,
+    width: rect.width,
+    height: rect.height,
+    transition: `top ${HERO_SHRINK_DURATION_MS}ms ease-out, left ${HERO_SHRINK_DURATION_MS}ms ease-out, width ${HERO_SHRINK_DURATION_MS}ms ease-out, height ${HERO_SHRINK_DURATION_MS}ms ease-out`,
+  });
+
+  const handleHeroTransitionEnd = (e: React.TransitionEvent): void => {
+    if (e.propertyName !== 'height' && e.propertyName !== 'width') return;
+    if (transitionEndHandledRef.current) return;
+    if (heroPhase === 'shrinking') {
+      transitionEndHandledRef.current = true;
+      setHeroPhase('shrunk');
+      setHeroAnimation(null);
+      return;
+    }
+    if (heroPhase === 'expanding') {
+      transitionEndHandledRef.current = true;
+      setHeroPhase('expanded');
+      setHeroAnimation(null);
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <WelcomeModal latestNews={latestNews} events={events} />
@@ -52,9 +198,25 @@ const Home: React.FC = () => {
         <NewsAndInfoSection latestNews={latestNews} events={events} />
       </div>
 
-      {/* Desktop Layout - 3-column with sticky sidebars */}
+      {/* Desktop Layout - scroll-shrink hero then 3-column grid */}
       <div className="hidden lg:block">
-        {/* Sticky zone container - sidebars are sticky within this container */}
+        {heroPhase !== 'shrunk' && (
+          <div
+            ref={heroPhase === 'expanding' ? undefined : heroWrapperRef}
+            className="flex flex-col w-full overflow-hidden"
+            style={
+              (heroPhase === 'shrinking' || heroPhase === 'expanding') && heroAnimation
+                ? heroFixedStyle(heroAnimation.to ?? heroAnimation.from)
+                : heroHeightStyle
+            }
+            onTransitionEnd={handleHeroTransitionEnd}
+          >
+            <div className="flex-1 min-h-0 w-full">
+              <RotatingImageStrip fillHeight />
+            </div>
+          </div>
+        )}
+
         <div className="relative">
           <div className="grid grid-cols-12 gap-4 xl:gap-6 px-4 xl:px-6 py-6">
             {/* Left Sidebar - Recent Events (Sticky) */}
@@ -74,18 +236,25 @@ const Home: React.FC = () => {
               </div>
             </div>
 
-            {/* Center Column - Carousel + Content */}
+            {/* Center Column - Carousel when shrunk (unless expanding), placeholder otherwise */}
             <div className="col-span-8 xl:col-span-6 bg-background-home-body rounded-2xl px-4 xl:px-6 py-6">
-              {/* Carousel */}
-              <div className="mb-8">
-                <RotatingImageStrip />
-              </div>
+              {heroPhase === 'shrunk' ? (
+                <div ref={gridCarouselRef} className="mb-8">
+                  <RotatingImageStrip />
+                </div>
+              ) : (
+                <div
+                  ref={placeholderRef}
+                  className="mb-8 h-72 xl:h-[400px] w-full invisible"
+                  aria-hidden="true"
+                />
+              )}
 
-              {/* Center Text Content - colors match reference, original copy kept */}
+              {/* Center Text Content */}
               <div className="text-center py-8 xl:py-10 px-2 lg:px-4 max-w-4xl mx-auto">
                 <div className="mb-8">
                   <h1 className="text-2xl xl:text-3xl 2xl:text-4xl font-serif font-bold text-home-heading mb-6">
-                    Tamil Nadu Forest Research Department
+                    Tamil Nadu Forest Department - Research Wing
                   </h1>
                   <div className="w-24 h-1 bg-gradient-gold rounded-full mx-auto mb-8"></div>
                 </div>

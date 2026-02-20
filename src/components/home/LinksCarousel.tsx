@@ -151,9 +151,10 @@ const LinksCarousel: React.FC = () => {
             ref={contentRef}
             className="flex gap-4"
             style={{
-              animation: singleSetWidth > 0 
-                ? `scrollLeft ${animationDuration}s linear infinite`
-                : 'none',
+              animationName: singleSetWidth > 0 ? 'scrollLeft' : 'none',
+              animationDuration: singleSetWidth > 0 ? `${animationDuration}s` : '0s',
+              animationTimingFunction: 'linear',
+              animationIterationCount: 'infinite',
               animationPlayState: isPaused ? 'paused' : 'running',
               willChange: 'transform',
               width: 'fit-content'

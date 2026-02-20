@@ -3,8 +3,19 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { subscribeToSliderImages } from '../../services/firebase/sliderImageService';
 import { getOptimizedImageUrl } from '../../utils/imageOptimization';
 
-const RotatingImageStrip: React.FC = () => {
+const HEIGHT_DEFAULT =
+  'h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px]';
+const HEIGHT_FILL = 'h-full min-h-0';
+
+interface RotatingImageStripProps {
+  fillHeight?: boolean;
+}
+
+const RotatingImageStrip: React.FC<RotatingImageStripProps> = ({
+  fillHeight = false,
+}) => {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const heightClass = fillHeight ? HEIGHT_FILL : HEIGHT_DEFAULT;
   const [images, setImages] = useState<string[]>([]);
 
   // Subscribe to slider images from Firebase
@@ -56,7 +67,9 @@ const RotatingImageStrip: React.FC = () => {
   // Show placeholder if no images
   if (images.length === 0) {
     return (
-      <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-cream overflow-hidden rounded-lg shadow-elevated flex items-center justify-center">
+      <section
+        className={`relative w-full ${heightClass} bg-gradient-cream overflow-hidden rounded-lg shadow-elevated flex items-center justify-center`}
+      >
         <div className="text-content-heading text-center">
           <p className="text-lg">No slider images available</p>
         </div>
@@ -65,7 +78,9 @@ const RotatingImageStrip: React.FC = () => {
   }
 
   return (
-    <section className="relative w-full h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px] bg-gradient-cream overflow-hidden rounded-lg shadow-elevated">
+    <section
+      className={`relative w-full ${heightClass} bg-gradient-cream overflow-hidden rounded-lg shadow-elevated`}
+    >
       <div className="relative w-full h-full">
         <div className="absolute inset-0 flex items-center justify-center z-10">
           <img
