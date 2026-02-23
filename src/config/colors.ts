@@ -221,12 +221,12 @@ export const colors = {
       text: forestGreen[950],
       textHover: forestGreen[200],
       mobileMenu: forestGreen[800],
-      shopButtonBg: '#a79c82',
+      shopButtonBg: '#5f7447',
       shopButtonText: '#ffffff',
     },
     footer: {
       background: 'rgba(20, 51, 20, 0.9)',
-      overlay: 'rgba(154, 147, 141, 0.85)', // #9a938d with opacity so footer bg image shows through
+      overlay: 'rgba(54, 40, 27, 0.85)', // #9a938d with opacity so footer bg image shows through
       text: '#ffffff',
       textSecondary: 'rgba(255, 254, 240, 0.8)',
       icon: '#fcd34d',
@@ -302,7 +302,7 @@ export const colors = {
   // ---------------------------------------------------------------------------
   newsEventsTicker: {
     header: '#8b7a66',
-    body: '#f4f6f3',
+    body: '#d8d3ca',
   },
 
   // ---------------------------------------------------------------------------
@@ -313,12 +313,12 @@ export const colors = {
   // ---------------------------------------------------------------------------
   // SHOP PREVIEW — Home page shop preview section background.
   // ---------------------------------------------------------------------------
-  shopPreviewBg: '#c7c3c0',
+  shopPreviewBg: '#d8d3ca',
 
   // ---------------------------------------------------------------------------
   // MISSION & VISION — Home page Our Mission / Our Vision card background.
   // ---------------------------------------------------------------------------
-  missionVisionCardBg: '#ddd5c8',
+  missionVisionCardBg: '#d8d3ca',
 
   // ---------------------------------------------------------------------------
   // HOME PAGE — Text and headings to match the warm, earthy page palette.

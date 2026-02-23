@@ -14,7 +14,7 @@ const LinksCarousel: React.FC = () => {
     { 
       title: "Tamil Nadu Forest Department", 
       url: "https://forests.tn.gov.in", 
-      icon: "https://fsi.nic.in/img/resources/logo-hindi.png" 
+      icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwuUO0IJCPFlVe1pGmBrXqigS1rU9bFOTRKw&s" 
     },
     { 
       title: "Ministry of Environment, Forest and Climate Change", 
@@ -49,7 +49,7 @@ const LinksCarousel: React.FC = () => {
     { 
       title: "Tamil Nadu Agricultural University", 
       url: "https://tnau.ac.in", 
-      icon: "https://tnau.ac.in/wp-content/uploads/2022/11/logo_tnau_main.jpg" 
+      icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Lfng8r-iR74ArNLtbOibDcRdRzRY5mJQ2w&s" 
     }
   ];
 
@@ -95,7 +95,7 @@ const LinksCarousel: React.FC = () => {
     : scrollDuration;
 
   return (
-    <section className="py-8 sm:py-12 bg-gradient-to-r from-primary-lightest to-accent-lightest overflow-hidden">
+    <section className="py-8 sm:py-12 overflow-hidden" style={{ backgroundColor: '#ededed' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-center text-content-heading mb-6 sm:mb-8">
           Important & Useful Links

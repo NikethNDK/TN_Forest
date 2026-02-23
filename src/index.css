@@ -64,13 +64,13 @@ nav {
   background-color: #8b7a66 !important;
 }
 .bg-news-events-ticker-body {
-  background-color: #f4f6f3 !important;
+  background-color: #d8d3ca !important;
 }
 .bg-shop-preview-bg {
-  background-color: #c7c3c0 !important;
+  background-color: #d8d3ca !important;
 }
 .bg-mission-vision-card-bg {
-  background-color: #ddd5c8 !important;
+  background-color: #d8d3ca !important;
 }
 
 /* Home page text/headings — warm earthy palette */
@@ -79,7 +79,7 @@ nav {
 .text-home-text { color: #3d3832 !important; }
 .text-home-text-secondary { color: #5c5549 !important; }
 .border-home-card-border { border-color: #a79c82 !important; }
-.bg-shop-button-bg { background-color: #a79c82 !important; }
+.bg-shop-button-bg { background-color: #5f7447 !important; }
 .bg-home-heading { background-color: #36281b !important; }
 
 .hover\:text-green-200:hover {

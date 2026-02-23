@@ -79,7 +79,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
   // Empty state
   if (images.length === 0) {
     return (
-      <section id="gallery" className={`py-16 px-4 ${scope === 'global' ? 'bg-background' : ''}`}>
+      <section id="gallery" className="py-16 px-4" style={scope === 'global' ? { backgroundColor: '#d8d3ca' } : undefined}>
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center gap-2 mb-4">
             <Camera className="h-6 w-6 text-forest-olive" />
@@ -102,7 +102,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
   }
 
   return (
-    <section id="gallery" className={`py-16 px-4 ${scope === 'global' ? 'bg-background' : ''}`}>
+    <section id="gallery" className="py-16 px-4" style={scope === 'global' ? { backgroundColor: '#d8d3ca' } : undefined}>
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">

@@ -97,7 +97,8 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({
               )}
             </p>
             <h3
-              className={`font-bold mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} transition-colors ${isDark ? 'text-white group-hover:text-white/90' : 'text-home-heading-secondary group-hover:text-home-heading'}`}
+              className={`font-bold mb-2 text-sm xl:text-base ${isRightAligned ? 'text-right' : ''} transition-colors ${isDark ? 'text-white group-hover:text-white/90' : 'group-hover:opacity-90'}`}
+              style={!isDark ? { color: '#37281b' } : undefined}
             >
               {item.title}
             </h3>

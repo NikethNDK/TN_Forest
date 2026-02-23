@@ -18,7 +18,7 @@ const NewsAndInfoSection: React.FC<NewsAndInfoSectionProps> = ({ latestNews, eve
         {/* Mobile Layout Only - Stacked (no sticky behavior) */}
         <div className="space-y-8">
           {/* Center Text Content - colors match reference, original copy kept */}
-          <div className="text-center py-16 px-4 lg:px-8 bg-background leaf-pattern rounded-2xl max-w-4xl mx-auto">
+          <div className="text-center py-16 px-4 lg:px-8 leaf-pattern rounded-2xl max-w-4xl mx-auto" style={{ backgroundColor: '#ededed' }}>
             <div className="mb-8">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-home-heading mb-6">
                 Tamil Nadu Forest Research Department

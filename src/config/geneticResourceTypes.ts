@@ -4,18 +4,18 @@
  */
 
 export const GENETIC_RESOURCE_TYPES = [
-  { slug: 'sso', label: 'SSO (Seedling Seed Orchard)', matchNames: ['seedling seed orchard'] },
+  { slug: 'spa', label: 'SPA (Seed Production Area)', matchNames: ['seed production area'] },
   { slug: 'ss', label: 'SS (Seed Stand)', matchNames: ['seed stand'] },
-  { slug: 'pt', label: 'PT (Progeny Trial)', matchNames: ['progeny trial', 'porgeny trial'] },
+  { slug: 'sso', label: 'SSO (Seedling Seed Orchard)', matchNames: ['seedling seed orchard'] },
   { slug: 'cso', label: 'CSO (Clonal Seed Orchard)', matchNames: ['clonal seed orchard'] },
-  { slug: 'cb', label: 'CB (Clonal Bank)', matchNames: ['clonal bank'] },
+  { slug: 'pt', label: 'PT (Progeny Trial)', matchNames: ['progeny trial', 'porgeny trial'] },
   { slug: 'gb', label: 'GB (Germplasm Bank)', matchNames: ['germplasm bank'] },
-  { slug: 'spa', label: 'SPA (Seed Production Area)', matchNames: ['seed production area'] }
+  { slug: 'cb', label: 'CB (Clonal Bank)', matchNames: ['clonal bank'] },
 ] as const;
 
 export type GeneticResourceTypeSlug = (typeof GENETIC_RESOURCE_TYPES)[number]['slug'];
 
-const VALID_SLUGS: GeneticResourceTypeSlug[] = ['sso', 'so', 'pt', 'cso', 'cb', 'gb', 'spa'];
+const VALID_SLUGS: GeneticResourceTypeSlug[] = ['spa', 'ss', 'sso', 'cso', 'pt', 'gb', 'cb'];
 
 export function getTypeBySlug(slug: string): (typeof GENETIC_RESOURCE_TYPES)[number] | undefined {
   return GENETIC_RESOURCE_TYPES.find((t) => t.slug === slug);
