@@ -40,15 +40,15 @@ const ContactForm: React.FC = () => {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-form-label mb-2">
+          <label htmlFor="name" className="block text-sm font-medium mb-2" style={{ color: '#37281b' }}>
             Full Name *
           </label>
           <input
             type="text"
             id="name"
             {...register('name')}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
-              errors.name ? 'border-status-error-main' : 'border-border-default'
+            className={`w-full px-4 py-3 border rounded-lg transition-shadow focus:ring-4 focus:ring-[#5f7447]/30 focus:border-[#5f7447] ${
+              errors.name ? 'border-status-error-main' : 'border-gray-300'
             }`}
           />
           {errors.name && (
@@ -56,15 +56,15 @@ const ContactForm: React.FC = () => {
           )}
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-form-label mb-2">
+          <label htmlFor="email" className="block text-sm font-medium mb-2" style={{ color: '#37281b' }}>
             Email Address *
           </label>
           <input
             type="email"
             id="email"
             {...register('email')}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
-              errors.email ? 'border-status-error-main' : 'border-border-default'
+            className={`w-full px-4 py-3 border rounded-lg transition-shadow focus:ring-4 focus:ring-[#5f7447]/30 focus:border-[#5f7447] ${
+              errors.email ? 'border-status-error-main' : 'border-gray-300'
             }`}
           />
           {errors.email && (
@@ -73,31 +73,31 @@ const ContactForm: React.FC = () => {
         </div>
       </div>
       <div>
-        <label htmlFor="subject" className="block text-sm font-medium text-form-label mb-2">
+        <label htmlFor="subject" className="block text-sm font-medium mb-2" style={{ color: '#37281b' }}>
           Subject *
         </label>
         <input
           type="text"
           id="subject"
           {...register('subject')}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
-            errors.subject ? 'border-status-error-main' : 'border-border-default'
-          }`}
+className={`w-full px-4 py-3 border rounded-lg transition-shadow focus:ring-4 focus:ring-[#5f7447]/30 focus:border-[#5f7447] ${
+              errors.subject ? 'border-status-error-main' : 'border-gray-300'
+            }`}
         />
         {errors.subject && (
           <p className="mt-1 text-sm text-status-error-main">{errors.subject.message}</p>
         )}
       </div>
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-form-label mb-2">
+        <label htmlFor="message" className="block text-sm font-medium mb-2" style={{ color: '#37281b' }}>
           Message *
         </label>
         <textarea
           id="message"
           rows={6}
           {...register('message')}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-4 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow ${
-            errors.message ? 'border-status-error-main' : 'border-border-default'
+          className={`w-full px-4 py-3 border rounded-lg transition-shadow focus:ring-4 focus:ring-[#5f7447]/30 focus:border-[#5f7447] ${
+            errors.message ? 'border-status-error-main' : 'border-gray-300'
           }`}
           placeholder="Please provide details about your inquiry (e.g., collaboration proposal, data request, general question)."
         />
@@ -109,7 +109,8 @@ const ContactForm: React.FC = () => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-interactive-secondaryDefault hover:bg-interactive-secondaryHover disabled:bg-interactive-disabled text-interactive-secondaryText disabled:text-interactive-disabledText px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center shadow-lg text-lg"
+        className="w-full px-6 py-3 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center shadow-lg text-lg text-white disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
+        style={{ backgroundColor: '#5f7447' }}
       >
         <Send className="h-5 w-5 mr-3" />
         {isSubmitting ? 'Submitting...' : 'Submit Message'}

@@ -49,7 +49,7 @@ const LinksCarousel: React.FC = () => {
     { 
       title: "Tamil Nadu Agricultural University", 
       url: "https://tnau.ac.in", 
-      icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Lfng8r-iR74ArNLtbOibDcRdRzRY5mJQ2w&s" 
+      icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1Lfng8r-iR74ArNLtbOibDcRdRzRY5mJQ2w&s " 
     }
   ];
 
