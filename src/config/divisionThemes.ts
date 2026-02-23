@@ -43,6 +43,26 @@ export interface DivisionTheme {
   contentPalette?: DivisionContentPalette;
 }
 
+/** Default content palette: warm neutrals + green (#ededed, #d8d3ca, #37281b, #5f7447, #5c5549) */
+const defaultContentPalette: DivisionContentPalette = {
+  primary: '#5f7447',
+  primaryHover: '#4d5f3a',
+  primaryLight: '#d8d3ca',
+  primaryLightest: '#ededed',
+  heading: '#37281b',
+  headingSecondary: '#37281b',
+  text: '#3d3832',
+  textSecondary: '#5c5549',
+  textTertiary: '#6b6359',
+  border: '#d8d3ca',
+  bgPaper: '#ffffff',
+  bgPage: '#ededed',
+  bgMuted: '#d8d3ca',
+  buttonBg: '#5f7447',
+  buttonBgHover: '#4d5f3a',
+  buttonText: '#ffffff',
+};
+
 /**
  * Default theme (used for home page and divisions without specific themes)
  */
@@ -54,6 +74,7 @@ export const defaultTheme: DivisionTheme = {
   footerBg: colors.components.footer.background,
   footerOverlay: colors.components.footer.overlay,
   footerText: colors.components.footer.text,
+  contentPalette: defaultContentPalette,
 };
 
 /** Forest-genetics: only #374151, #ffffff, rgba(55,65,81,0.9) and derived shades */

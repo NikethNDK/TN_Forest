@@ -60,7 +60,7 @@ const About: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background-page">
+    <div className="min-h-screen" style={{ backgroundColor: '#ededed' }}>
       {/* Introductory Banner/Header */}
       <PageBanner
         subtitle="Our Legacy of Science and Stewardship"
@@ -70,35 +70,39 @@ const About: React.FC = () => {
       />
       
       {/* Mission and Vision */}
-      <section className="py-20">
+      <section className="py-20" style={{ backgroundColor: '#d8d3ca' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {missionVisionLoading ? (
             <LoadingSpinner message="Loading mission and vision..." />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Mission */}
-              <div className="bg-background-paper rounded-xl shadow-xl p-10 border-t-4 border-border-primary transition-shadow duration-300 hover:shadow-2xl">
+              <div className="rounded-xl shadow-xl p-10 border-t-4 transition-shadow duration-300 hover:shadow-2xl" style={{ backgroundColor: '#ffffff', borderTopColor: '#5f7447' }}>
                 <div className="flex items-center mb-6">
-                  <Target className="h-10 w-10 p-2 bg-primary-lighter text-primary-main rounded-full mr-3" />
-                  <h2 className="text-2xl font-bold text-content-heading">Our Mission</h2>
+                  <div className="h-10 w-10 p-2 rounded-full mr-3 flex items-center justify-center" style={{ backgroundColor: '#5f7447' }}>
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold" style={{ color: '#37281b' }}>Our Mission</h2>
                 </div>
                 <div 
-                  className="text-content-primary leading-relaxed whitespace-pre-wrap"
-                  style={{ whiteSpace: 'pre-wrap' }}
+                  className="leading-relaxed whitespace-pre-wrap"
+                  style={{ whiteSpace: 'pre-wrap', color: '#5c5549' }}
                 >
                   {missionVision?.mission || 'Mission content will appear here...'}
                 </div>
               </div>
 
               {/* Vision */}
-              <div className="bg-background-paper rounded-xl shadow-xl p-10 border-t-4 border-border-primary transition-shadow duration-300 hover:shadow-2xl">
+              <div className="rounded-xl shadow-xl p-10 border-t-4 transition-shadow duration-300 hover:shadow-2xl" style={{ backgroundColor: '#ffffff', borderTopColor: '#5f7447' }}>
                 <div className="flex items-center mb-6">
-                  <Eye className="h-10 w-10 p-2 bg-primary-lighter text-primary-main rounded-full mr-3" />
-                  <h2 className="text-2xl font-bold text-content-heading">Our Vision</h2>
+                  <div className="h-10 w-10 p-2 rounded-full mr-3 flex items-center justify-center" style={{ backgroundColor: '#5f7447' }}>
+                    <Eye className="h-6 w-6 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold" style={{ color: '#37281b' }}>Our Vision</h2>
                 </div>
                 <div 
-                  className="text-content-primary leading-relaxed whitespace-pre-wrap"
-                  style={{ whiteSpace: 'pre-wrap' }}
+                  className="leading-relaxed whitespace-pre-wrap"
+                  style={{ whiteSpace: 'pre-wrap', color: '#5c5549' }}
                 >
                   {missionVision?.vision || 'Vision content will appear here...'}
                 </div>
@@ -109,7 +113,7 @@ const About: React.FC = () => {
       </section>
 
       {/* Leadership & Governance Section */}
-      <section className="py-20 bg-background-page">
+      <section className="py-20" style={{ backgroundColor: '#ededed' }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             title="Leadership & Governance"
