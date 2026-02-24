@@ -53,7 +53,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
             <div className="bg-home-heading p-4 md:p-5 flex items-center justify-between">
               <h2 className="text-lg md:text-xl font-bold text-white flex items-center">
                 <Info className="h-5 w-5 md:h-6 md:w-6 mr-2" />
-                <span className="hidden sm:inline">Welcome to TamilNadu Forest Department's Research Wing</span>
+                <span className="hidden sm:inline">Welcome to TamilNadu Forest Department's Research Division</span>
                 <span className="sm:hidden">Welcome</span>
               </h2>
               <button

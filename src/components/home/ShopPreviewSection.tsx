@@ -75,6 +75,7 @@ const ShopPreviewSection: React.FC = () => {
           </p>
           <p className="text-center text-home-text-secondary text-sm mb-6">Unable to load products.</p>
           <div className="text-center">
+            <p className="text-home-heading-secondary text-sm font-medium mb-3">More options. More to explore.</p>
             <Link
               to="/shop"
               className="inline-flex items-center bg-shop-button-bg hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
@@ -131,6 +132,7 @@ const ShopPreviewSection: React.FC = () => {
           </p>
           <p className="text-center text-home-text-secondary text-sm mb-6">Store coming soon.</p>
           <div className="text-center">
+            <p className="text-home-heading-secondary text-sm font-medium mb-3">More options. More to explore.</p>
             <Link
               to="/shop"
               className="inline-flex items-center bg-shop-button-bg hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
@@ -168,6 +170,7 @@ const ShopPreviewSection: React.FC = () => {
         </div>
 
         <div className="text-center mt-6 sm:mt-8">
+          <p className="text-home-heading-secondary text-sm font-medium mb-3">More options. More to explore.</p>
           <Link
             to="/shop"
             className="inline-flex items-center bg-shop-button-bg hover:opacity-90 text-white font-semibold px-6 sm:px-8 py-2 sm:py-3 rounded-lg shadow-soft transition-opacity text-sm sm:text-base"
