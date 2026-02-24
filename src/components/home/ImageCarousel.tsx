@@ -88,7 +88,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
             </span>
           </div>
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary-main text-center mb-4">
-            Glimpses of Our Forests
+            Glimpses of Our Research Centres
           </h2>
           <p className="text-content-secondary text-center max-w-2xl mx-auto mb-8">
             Explore the stunning biodiversity and natural beauty of Tamil Nadu&apos;s forests through our curated collection.
@@ -112,7 +112,7 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ scope, divisionSlug }) =>
             </span>
           </div>
           <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary-main mb-4">
-            Glimpses of Our Forests
+            Glimpses of Our Research Centres
           </h2>
           <p className="text-content-secondary max-w-2xl mx-auto">
             Explore the stunning biodiversity and natural beauty of Tamil Nadu&apos;s forests through our curated collection.

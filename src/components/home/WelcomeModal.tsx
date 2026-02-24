@@ -41,7 +41,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
       {/* Modal Overlay - Semi-transparent, allows background interaction */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center p-4 pointer-events-auto"
+          className="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center lg:justify-end p-4 lg:pr-8 pointer-events-auto"
           onClick={handleClose}
         >
           {/* Modal Container - Smaller size, stops event propagation */}

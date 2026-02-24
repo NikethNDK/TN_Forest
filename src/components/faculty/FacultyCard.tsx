@@ -14,8 +14,8 @@ const FacultyCard: React.FC<FacultyCardProps> = ({ member }) => {
       
       {/* Horizontal layout: Image + Content side by side */}
       <div className="flex items-center p-3">
-        {/* Image section - fixed square, centered */}
-        <div className="relative w-28 h-28 flex-shrink-0 rounded-lg bg-gradient-to-br from-primary-lightest via-accent-lightest to-primary-lightest flex items-center justify-center overflow-hidden">
+        {/* Image section - circular frame */}
+        <div className="relative w-28 h-28 flex-shrink-0 rounded-full bg-gradient-to-br from-primary-lightest via-accent-lightest to-primary-lightest flex items-center justify-center overflow-hidden">
           {member.imageUrl ? (
             <img
               src={member.imageUrl}
