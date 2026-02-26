@@ -62,6 +62,18 @@ export const modernNurseryDivisionConfig: ModernNurseryDivisionConfig = {
             </p>
           </div>
         </div> */}
+        {/* Focus Areas Image Section */}
+        <div className="mb-8 border-t border-gray-200 pt-8">
+          <div className="flex justify-center">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
+              <img
+                src="/MND_Focus_Areas.png"
+                alt="Modern Nursery Division Focus Areas"
+                className="w-full h-auto rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
 
         {/* Formation Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
@@ -86,18 +98,6 @@ export const modernNurseryDivisionConfig: ModernNurseryDivisionConfig = {
           </h3>
         </div>
 
-        {/* Focus Areas Image Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
-          <div className="flex justify-center">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
-              <img
-                src="/MND_Focus_Areas.png"
-                alt="Modern Nursery Division Focus Areas"
-                className="w-full h-auto rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
 
         {/* Mission and Bio-fertilizers Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">

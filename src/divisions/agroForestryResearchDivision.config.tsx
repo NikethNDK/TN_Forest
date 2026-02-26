@@ -32,6 +32,19 @@ export const agroForestryResearchDivisionConfig: AgroForestryResearchDivisionCon
   overview: (
     <div className="space-y-8">
       <div className="bg-white rounded-lg shadow-lg p-8">
+        {/* Focus Areas Image Section */}
+        <div className="mb-8 border-t border-gray-200 pt-8">
+          <div className="flex justify-center">
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
+              <img
+                src="/AFRD.png"
+                alt="Agro Forestry Research Division Focus Areas"
+                className="w-full h-auto rounded-lg"
+              />
+            </div>
+          </div>
+        </div>
+        
         {/* Division at Glance Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
@@ -83,18 +96,6 @@ export const agroForestryResearchDivisionConfig: AgroForestryResearchDivisionCon
           </div>
         </div>
 
-        {/* Focus Areas Image Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
-          <div className="flex justify-center">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
-              <img
-                src="/AFRD.png"
-                alt="Agro Forestry Research Division Focus Areas"
-                className="w-full h-auto rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
 
         {/* Major Focusing Areas Section */}
         {/* <div className="mb-8 border-t border-gray-200 pt-8">

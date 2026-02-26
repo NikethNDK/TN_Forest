@@ -42,6 +42,18 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
   overview: (
     <div className="space-y-8">
       <div className="bg-white rounded-lg shadow-lg p-8">
+    {/* Focus Areas Image Section */}
+    <div className="mb-8 border-t border-gray-200 pt-8">
+      <div className="flex justify-center">
+        <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
+          <img
+            src="/SFRI_Home.png"
+            alt="State Forest Research Institute Focus Areas"
+            className="w-full h-auto rounded-lg"
+          />
+        </div>
+      </div>
+    </div>
         {/* Background Section */}
         <div className="mb-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
@@ -96,18 +108,6 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
           </div>
         </div>
 
-        {/* Focus Areas Image Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
-          <div className="flex justify-center">
-            <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
-              <img
-                src="/SFRI_Home.png"
-                alt="State Forest Research Institute Focus Areas"
-                className="w-full h-auto rounded-lg"
-              />
-            </div>
-          </div>
-        </div>
 
         {/* Forest Genetic Resources Tree Park Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
