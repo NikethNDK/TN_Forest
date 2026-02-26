@@ -227,7 +227,7 @@ const Home: React.FC = () => {
                   <div className="flex items-center gap-2 px-4 py-3 bg-news-events-ticker-header">
                     <Calendar className="h-5 w-5 text-white shrink-0" />
                     <h2 className="font-serif font-semibold text-white text-sm">
-                      Recent Events
+                      Upcoming Events
                     </h2>
                   </div>
                   <div className="p-4 xl:p-6 pr-1">
