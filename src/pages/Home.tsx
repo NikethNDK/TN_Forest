@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Newspaper, Calendar } from 'lucide-react';
 import RotatingImageStrip from '../components/home/RotatingImageStrip';
 import NewsAndInfoSection from '../components/home/NewsAndInfoSection';
@@ -259,13 +260,22 @@ const Home: React.FC = () => {
                   <div className="w-24 h-1 bg-gradient-gold rounded-full mx-auto mb-8"></div>
                 </div>
 
-                <p className="text-base xl:text-lg text-home-text leading-relaxed mb-6 max-w-4xl mx-auto">
+                <p className="text-sm xl:text-base text-home-text leading-relaxed mb-6 max-w-4xl mx-auto">
                   Standing at the forefront of ecological innovation and sustainable forestry practices, we advance scientific understanding of our natural heritage through cutting-edge research in forest conservation, biodiversity protection, and climate change adaptation.
                 </p>
 
-                <p className="text-sm xl:text-base text-home-text-secondary leading-relaxed mb-8 max-w-4xl mx-auto">
+                <p className="text-sm xl:text-base text-home-text leading-relaxed mb-6 max-w-4xl mx-auto">
                   Our multidisciplinary team of researchers, and field experts develop evidence-based solutions for forest management, species conservation, and ecosystem restoration across Tamil Nadu's diverse landscapes.
                 </p>
+
+                <div className="flex justify-center mb-8">
+                  <Link
+                    to="/about"
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium text-white bg-shop-button-bg hover:opacity-90 transition-opacity shadow-soft border border-border-default"
+                  >
+                    Learn more about us
+                  </Link>
+                </div>
 
                 {/* Mission & Vision cards */}
                 <div className="space-y-6 text-left">
