@@ -1,7 +1,4 @@
 import React from 'react';
-import { LaboratoryFacilities } from './SFRI/laboratoryFacilities';
-import { OtherFacilities } from './SFRI/otherFacilities';
-import { NotableWorkAndServices } from './SFRI/notableWorkAndServices';
 
 export type DivisionStatItem = {
   value: string;
@@ -184,8 +181,197 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
           </div>
         </div>
 
-        {/* Facility Categories Placeholder - Will be replaced with clickable cards */}
-        <div id="facility-categories-placeholder" className="mb-8 border-t border-gray-200 pt-8"></div>
+        {/* Laboratory Facilities — full section on main page */}
+        <div className="mb-12 border-t-4 border-green-600 pt-10">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-green-800 mb-2">Laboratory Facilities at SFRD</h2>
+            <p className="text-lg text-gray-600 max-w-3xl">
+              SFRI is equipped with state-of-the-art laboratories supporting microbiology, molecular biology, phytochemistry, and tissue culture—enabling cutting-edge research and quality assurance for forestry science.
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 shadow-md border border-green-100">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Microbiology Laboratory</h3>
+              <p className="text-gray-700 mb-4">
+                Supports isolation, identification, and characterisation of forest microbes; soil and plant microbiology; and production of bio-inoculants for nursery and field applications.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/microbiology-1.jpg" alt="Microbiology Laboratory" className="w-full h-auto" />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/microbiology-2.jpg" alt="Microbiology Laboratory" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 shadow-md border border-green-100">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Molecular Laboratory</h3>
+              <p className="text-gray-700 mb-4">
+                Enables DNA fingerprinting, genetic diversity studies, and molecular markers for tree improvement and conservation of forest genetic resources.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/molecular-1.jpg" alt="Molecular Laboratory" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 shadow-md border border-green-100">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Phyto Chemistry Laboratory</h3>
+              <p className="text-gray-700 mb-4">
+                Focuses on extraction, characterisation, and standardisation of bioactive compounds from forest plants for medicinal and industrial applications.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/phytochemistry-1.jpg" alt="Phyto Chemistry Laboratory" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 shadow-md border border-green-100">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Tissue Culture Laboratory</h3>
+              <p className="text-gray-700 mb-4">
+                Supports micropropagation of rare and high-value species, germplasm conservation, and production of quality planting material for research and afforestation programmes.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/tissueculture-1.jpg" alt="Tissue Culture Laboratory" className="w-full h-auto" />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/tissueculture-2.jpg" alt="Tissue Culture Laboratory" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Other Facilities — full section on main page */}
+        <div className="mb-12 border-t-4 border-green-600 pt-10">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-green-800 mb-2">Other Facilities</h2>
+            <p className="text-lg text-gray-600 max-w-3xl">
+              Beyond laboratories, SFRI offers mist chambers, wood seasoning, mechanised tree transplanting, and a heritage forestry library—supporting both research and public services.
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Mist Chamber</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4 ml-2">
+                <li>Provides a controlled high-humidity environment ideal for rooting cuttings and raising delicate seedlings.</li>
+                <li>Reduces transpiration stress, improves survival rates, and ensures uniform rooting—making it highly beneficial for large-scale forestry propagation.</li>
+              </ul>
+              <div className="max-w-xl">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/mistchamber.jpg" alt="Mist Chamber" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Wood Seasoning Unit</h3>
+              <p className="text-gray-700 mb-4">Seasoned wood products for construction and carpentry, reducing warping and improving durability.</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/woodseason.png" alt="Wood Seasoning Unit" className="w-full h-auto" />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/woodseason-1.png" alt="Seasoned Wood Product 1" className="w-full h-auto" />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/woodseason-2.png" alt="Seasoned Wood Product 2" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Mechanized Tree Transplanting</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4 ml-2">
+                <li>The Bobcat machine is available to the public on a rental basis at <strong>Rs. 5,000 per day</strong>.</li>
+                <li>Service is provided upon signing a formal rental agreement. A refundable security deposit of <strong>Rs. 50,000</strong> is collected; a late fee of <strong>Rs. 10,000 per day</strong> applies for delay in return.</li>
+              </ul>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/treetransplant-1.png" alt="Mechanized Tree Transplanting" className="w-full h-auto" />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/treetransplant-2.png" alt="Mechanized Tree Transplanting" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-50 to-white rounded-xl p-6 shadow-md border border-amber-100">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">SFRI Library</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4 ml-2">
+                <li>One of the most valuable and historically rich forestry libraries in Tamil Nadu—a knowledge hub for researchers, scholars, forest officers, and students.</li>
+                <li>Comprehensive collection of <strong>4,108+ books</strong>, plus departmental publications, project reports, seminar proceedings, and monitoring records.</li>
+                <li>Rare, antique, and out-of-print volumes from the <strong>19th and early 20th centuries</strong>—an indispensable resource for forest science in the state.</li>
+              </ul>
+              <div className="max-w-2xl">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/library.png" alt="SFRI Library" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Notable Work and Services — full section on main page */}
+        <div className="mb-12 border-t-4 border-green-600 pt-10">
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-green-800 mb-2">Notable Work &amp; Services</h2>
+            <p className="text-lg text-gray-600 max-w-3xl">
+              SFRI extends its expertise through internships, educational visits, and applied research—including pioneering bamboo-reinforced construction—creating real-world impact and building the next generation of forest scientists.
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Free Internship Programme for Students</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4 ml-2">
+                <li>Hands-on training in microbiology, tissue culture, molecular biology, phytochemistry, and soil science.</li>
+                <li>Access to all major laboratory facilities at SFRI.</li>
+                <li>Guided field visits to understand forestry practices and ecosystem management.</li>
+                <li>Exposure to both research techniques and practical field applications.</li>
+              </ul>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/intern-1.png" alt="Internship Programme" className="w-full h-auto" />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/intern-2.png" alt="Internship Programme" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Educational Visits for College and School Students</h3>
+              <p className="text-gray-700 text-justify leading-relaxed">
+                College and school students are actively encouraged to visit the tree park, medicinal plant garden, nursery, and research plots, as well as key production units such as the vermicomposting unit, wood seasoning unit, and bamboo splitting machinery.
+                These educational visits provide students with an opportunity to learn about forestry practices, silvicultural techniques, and the medicinal value of local and indigenous plants. They also gain exposure to ongoing research experiments, sustainable resource management methods, and the wide array of facilities and field-based activities available in and around SFRI. Such experiential learning fosters curiosity, environmental awareness, and a deeper appreciation for forest ecosystems and conservation science.
+              </p>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-50 to-white rounded-xl p-6 shadow-md border border-green-100">
+              <h3 className="text-xl font-semibold text-green-700 mb-3">Research on Bamboo</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700 mb-4 ml-2">
+                <li>SFRI has pioneered the use of <strong>bamboo as reinforcement material</strong>, partially replacing steel by up to <strong>50%</strong> in construction. Structural slabs were successfully developed and tested.</li>
+                <li>A bamboo hut and a bamboo-reinforced bus shelter at Anna Nagar Stop, Kolapakkam, were constructed using this technology.</li>
+                <li>The bamboo hut is fully furnished with household furniture made entirely from bamboo—showcasing strength, versatility, and sustainability as an eco-friendly construction material.</li>
+              </ul>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/bamboo-1.png" alt="Research on Bamboo" className="w-full h-auto" />
+                </div>
+                <div className="rounded-lg overflow-hidden shadow-md">
+                  <img src="/SFRI/bamboo-2.png" alt="Research on Bamboo" className="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Vision Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
@@ -232,21 +418,4 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
     phone: '+91 44 1234 5681',
     emailDomain: 'tnfrd.gov.in',
   },
-  facilityCategories: [
-    {
-      id: 'laboratory-facilities',
-      title: 'Laboratory facilities at SFRD',
-      content: LaboratoryFacilities,
-    },
-    {
-      id: 'other-facilities',
-      title: 'Other facilities available',
-      content: OtherFacilities,
-    },
-    {
-      id: 'notable-work-and-services',
-      title: 'Notable work and services',
-      content: NotableWorkAndServices,
-    },
-  ],
 };

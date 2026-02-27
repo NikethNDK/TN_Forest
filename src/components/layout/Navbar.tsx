@@ -4,6 +4,7 @@ import { ChevronDown, Menu, X, ShoppingCart } from 'lucide-react';
 import { divisions } from '../../data/mockData';
 import type { Division } from '../../types';
 import { colors } from '../../config/colors';
+import { defaultTheme } from '../../config/divisionThemes';
 import { GENETIC_RESOURCE_TYPES } from '../../config/geneticResourceTypes';
 import { useDivisionTheme } from '../../providers/DivisionThemeProvider';
 
@@ -53,20 +54,18 @@ const Navbar: React.FC = () => {
     };
   }, [isDivisionsOpen, isGeneticResourcesOpen]);
 
-  // Inline styles using division theme
+  // Navbar bar and links always use default theme (no division-specific navbar color)
   const navLinkStyle = {
-    color: theme.navbarText,
+    color: defaultTheme.navbarText,
   };
 
   const navLinkHoverClass = "px-4 py-3 text-base font-medium transition-colors duration-200 hover:opacity-80";
 
   const cp = theme.contentPalette;
-  const shopButtonStyle = cp
-    ? { 
-        backgroundColor: cp.shopButtonBg || cp.buttonBg, 
-        color: cp.shopButtonText || cp.buttonText 
-      }
-    : { backgroundColor: colors.components.navbar.shopButtonBg, color: colors.components.navbar.shopButtonText };
+  const shopButtonStyle = {
+    backgroundColor: colors.components.navbar.shopButtonBg,
+    color: colors.components.navbar.shopButtonText,
+  };
   const dropdownBg = cp?.bgPaper ?? colors.background.paper;
   const dropdownItemColor = cp?.textSecondary ?? colors.text.secondary;
   const dropdownItemHoverBg = cp?.primaryLightest ?? colors.primary.lightest;
@@ -76,7 +75,7 @@ const Navbar: React.FC = () => {
   return (
     <nav 
       className="shadow-lg"
-      style={{ backgroundColor: theme.navbarBg }}
+      style={{ backgroundColor: defaultTheme.navbarBg }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
@@ -85,7 +84,7 @@ const Navbar: React.FC = () => {
             <Link 
               to="/" 
               className="text-2xl font-bold"
-              style={{ color: theme.navbarText }}
+              style={{ color: defaultTheme.navbarText }}
             >
               {/* TNFDRW */}
             </Link>
@@ -228,7 +227,7 @@ const Navbar: React.FC = () => {
             <button
               onClick={toggleMenu}
               className="p-2 rounded-md transition-colors duration-200 hover:opacity-80"
-              style={{ color: theme.navbarText }}
+              style={{ color: defaultTheme.navbarText }}
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -240,12 +239,12 @@ const Navbar: React.FC = () => {
           <div className="md:hidden">
             <div 
               className="px-2 pt-2 pb-3 space-y-1 sm:px-3"
-              style={{ backgroundColor: theme.navbarBg }}
+              style={{ backgroundColor: defaultTheme.navbarBg }}
             >
               <Link
                 to="/"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: theme.navbarText }}
+                style={{ color: defaultTheme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
@@ -254,7 +253,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/about"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: theme.navbarText }}
+                style={{ color: defaultTheme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
@@ -264,7 +263,7 @@ const Navbar: React.FC = () => {
               <div className="pt-2">
                 <div 
                   className="px-4 py-3 text-base font-medium"
-                  style={{ color: theme.navbarText }}
+                  style={{ color: defaultTheme.navbarText }}
                 >
                   Divisions
                 </div>
@@ -273,7 +272,7 @@ const Navbar: React.FC = () => {
                     key={division.id}
                     to={`/divisions/${division.slug}`}
                     className="block px-8 py-2 rounded-md text-sm transition-colors duration-200 hover:opacity-80"
-                    style={{ color: theme.navbarText, opacity: 0.9 }}
+                    style={{ color: defaultTheme.navbarText, opacity: 0.9 }}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {division.name}
@@ -285,7 +284,7 @@ const Navbar: React.FC = () => {
               <div className="pt-2">
                 <div 
                   className="px-4 py-3 text-base font-medium"
-                  style={{ color: theme.navbarText }}
+                  style={{ color: defaultTheme.navbarText }}
                 >
                   Genetic Resources
                 </div>
@@ -294,7 +293,7 @@ const Navbar: React.FC = () => {
                     key={item.slug}
                     to={`/genetic-resources?type=${item.slug}`}
                     className="block px-8 py-2 rounded-md text-sm transition-colors duration-200 hover:opacity-80"
-                    style={{ color: theme.navbarText, opacity: 0.9 }}
+                    style={{ color: defaultTheme.navbarText, opacity: 0.9 }}
                     onClick={() => setIsMenuOpen(false)}
                   >
                     {item.label}
@@ -305,7 +304,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/publication"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: theme.navbarText }}
+                style={{ color: defaultTheme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Publication
@@ -314,7 +313,7 @@ const Navbar: React.FC = () => {
               <Link
                 to="/contact"
                 className="block px-4 py-3 rounded-md text-base font-medium transition-colors duration-200 hover:opacity-80"
-                style={{ color: theme.navbarText }}
+                style={{ color: defaultTheme.navbarText }}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact Us
