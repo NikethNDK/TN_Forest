@@ -113,9 +113,17 @@ export interface CartItem extends ShopProduct {
 }
 
 // Contact Form type
+export type ContactPurpose =
+  | 'Internship'
+  | 'Product Purchase'
+  | 'Lab Visit'
+  | 'Training Programs'
+  | 'Others';
+
 export interface ContactFormData {
   name: string;
   email: string;
+  purpose: ContactPurpose;
   subject: string;
   message: string;
 }

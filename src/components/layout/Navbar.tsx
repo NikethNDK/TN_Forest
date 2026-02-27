@@ -18,8 +18,10 @@ const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isDivisionsOpen, setIsDivisionsOpen] = useState<boolean>(false);
   const [isGeneticResourcesOpen, setIsGeneticResourcesOpen] = useState<boolean>(false);
+  const [isBiodiversityOpen, setIsBiodiversityOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const geneticResourcesDropdownRef = useRef<HTMLDivElement>(null);
+  const biodiversityDropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -33,6 +35,10 @@ const Navbar: React.FC = () => {
     setIsGeneticResourcesOpen(!isGeneticResourcesOpen);
   };
 
+  const toggleBiodiversity = (): void => {
+    setIsBiodiversityOpen(!isBiodiversityOpen);
+  };
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent): void => {
@@ -43,23 +49,26 @@ const Navbar: React.FC = () => {
       if (geneticResourcesDropdownRef.current && !geneticResourcesDropdownRef.current.contains(target)) {
         setIsGeneticResourcesOpen(false);
       }
+      if (biodiversityDropdownRef.current && !biodiversityDropdownRef.current.contains(target)) {
+        setIsBiodiversityOpen(false);
+      }
     };
 
-    if (isDivisionsOpen || isGeneticResourcesOpen) {
+    if (isDivisionsOpen || isGeneticResourcesOpen || isBiodiversityOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isDivisionsOpen, isGeneticResourcesOpen]);
+  }, [isDivisionsOpen, isGeneticResourcesOpen, isBiodiversityOpen]);
 
   // Navbar bar and links always use default theme (no division-specific navbar color)
   const navLinkStyle = {
     color: defaultTheme.navbarText,
   };
 
-  const navLinkHoverClass = "px-4 py-3 text-base font-medium transition-colors duration-200 hover:opacity-80";
+  const navLinkHoverClass = "px-4 py-3 text-sm font-medium transition-colors duration-200 hover:opacity-80";
 
   const cp = theme.contentPalette;
   const shopButtonStyle = {
@@ -74,10 +83,10 @@ const Navbar: React.FC = () => {
 
   return (
     <nav 
-      className="shadow-lg"
+      className="shadow-sm"
       style={{ backgroundColor: defaultTheme.navbarBg }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
           {/* Logo */}
           <div className="flex-shrink-0">
@@ -191,6 +200,57 @@ const Navbar: React.FC = () => {
                 )}
               </div>
               
+              {/* Bio Diversity Information Service Dropdown */}
+              <div className="relative" ref={biodiversityDropdownRef}>
+                <button
+                  onClick={toggleBiodiversity}
+                  className={`${navLinkHoverClass} flex items-center`}
+                  style={navLinkStyle}
+                >
+                  Bio Diversity Information Service
+                  <ChevronDown className={`ml-2 h-4 w-4 transition-transform duration-200 ${isBiodiversityOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isBiodiversityOpen && (
+                  <div
+                    className="absolute left-0 mt-2 w-72 rounded-md shadow-lg py-1 z-50"
+                    style={{ backgroundColor: dropdownBg }}
+                  >
+                    <button
+                      type="button"
+                      className="block w-full text-left px-4 py-3 text-sm transition-colors duration-200 hover:opacity-80"
+                      style={{ color: dropdownItemColor }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = dropdownItemHoverBg;
+                        e.currentTarget.style.color = dropdownItemHoverColor;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = dropdownItemColor;
+                      }}
+                      onClick={() => setIsBiodiversityOpen(false)}
+                    >
+                      <div className="font-medium">Visit Eco labs and Research Center</div>
+                    </button>
+                    <button
+                      type="button"
+                      className="block w-full text-left px-4 py-3 text-sm transition-colors duration-200 hover:opacity-80"
+                      style={{ color: dropdownItemColor }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = dropdownItemHoverBg;
+                        e.currentTarget.style.color = dropdownItemHoverColor;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.color = dropdownItemColor;
+                      }}
+                      onClick={() => setIsBiodiversityOpen(false)}
+                    >
+                      <div className="font-medium">Knowledge Eco Tourism</div>
+                    </button>
+                  </div>
+                )}
+              </div>
+              
               <Link
                 to="/publication"
                 className={navLinkHoverClass}
@@ -299,6 +359,32 @@ const Navbar: React.FC = () => {
                     {item.label}
                   </Link>
                 ))}
+              </div>
+
+              {/* Mobile Bio Diversity Information Service */}
+              <div className="pt-2">
+                <div 
+                  className="px-4 py-3 text-base font-medium"
+                  style={{ color: defaultTheme.navbarText }}
+                >
+                  Bio Diversity Information Service
+                </div>
+                <button
+                  type="button"
+                  className="block w-full text-left px-8 py-2 rounded-md text-sm transition-colors duration-200 hover:opacity-80"
+                  style={{ color: defaultTheme.navbarText, opacity: 0.9 }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Visit Eco labs and Research Center
+                </button>
+                <button
+                  type="button"
+                  className="block w-full text-left px-8 py-2 rounded-md text-sm transition-colors duration-200 hover:opacity-80"
+                  style={{ color: defaultTheme.navbarText, opacity: 0.9 }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Knowledge Eco Tourism
+                </button>
               </div>
               
               <Link

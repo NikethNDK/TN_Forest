@@ -5,9 +5,18 @@ import { z } from 'zod';
 import { Send } from 'lucide-react';
 import type { ContactFormData } from '../../types';
 
+const PURPOSE_OPTIONS = [
+  'Internship',
+  'Product Purchase',
+  'Lab Visit',
+  'Training Programs',
+  'Others',
+] as const;
+
 const contactFormSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be less than 100 characters'),
   email: z.string().email('Please enter a valid email address'),
+  purpose: z.enum(PURPOSE_OPTIONS, { required_error: 'Please select a purpose for your enquiry' }),
   subject: z.string().min(3, 'Subject must be at least 3 characters').max(200, 'Subject must be less than 200 characters'),
   message: z.string().min(10, 'Message must be at least 10 characters').max(1000, 'Message must be less than 1000 characters'),
 });
@@ -71,6 +80,28 @@ const ContactForm: React.FC = () => {
             <p className="mt-1 text-sm text-status-error-main">{errors.email.message}</p>
           )}
         </div>
+      </div>
+      <div>
+        <label htmlFor="purpose" className="block text-sm font-medium mb-2" style={{ color: '#37281b' }}>
+          Purpose of Enquiry *
+        </label>
+        <select
+          id="purpose"
+          {...register('purpose')}
+          className={`w-full px-4 py-3 border rounded-lg transition-shadow focus:ring-4 focus:ring-[#5f7447]/30 focus:border-[#5f7447] ${
+            errors.purpose ? 'border-status-error-main' : 'border-gray-300'
+          }`}
+        >
+          <option value="">Select purpose...</option>
+          {PURPOSE_OPTIONS.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
+        {errors.purpose && (
+          <p className="mt-1 text-sm text-status-error-main">{errors.purpose.message}</p>
+        )}
       </div>
       <div>
         <label htmlFor="subject" className="block text-sm font-medium mb-2" style={{ color: '#37281b' }}>
