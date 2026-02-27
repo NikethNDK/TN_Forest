@@ -181,6 +181,7 @@ export interface NewsItem {
   link?: string;  // Optional link/URL (mutually exclusive with pdfUrl)
   pdfUrl?: string;  // Optional PDF file URL (Firebase Storage)
   pdfPublicId?: string;  // Storage path for PDF deletion
+  blogSlug?: string;  // When set, news card links to /blog/:blogSlug instead of link/pdf
   createdAt?: any;  // Firestore Timestamp
   updatedAt?: any;  // Firestore Timestamp
   order?: number;  // For sorting
@@ -195,9 +196,28 @@ export interface Event {
   link?: string;  // Optional link/URL (mutually exclusive with pdfUrl)
   pdfUrl?: string;  // Optional PDF file URL (Firebase Storage)
   pdfPublicId?: string;  // Storage path for PDF deletion
+  blogSlug?: string;  // When set, event card links to /blog/:blogSlug instead of link/pdf
   createdAt?: any;  // Firestore Timestamp
   updatedAt?: any;  // Firestore Timestamp
   order?: number;  // For sorting
+}
+
+// Blog type (linked to News when "Publish as Blog" is used)
+export interface Blog {
+  id?: string;  // Firestore document ID
+  slug: string;  // Unique, URL-safe; used in /blog/:slug
+  heading: string;
+  featuredImageUrl?: string;
+  featuredImagePublicId?: string;
+  imageTitle?: string;
+  description?: string;  // Optional rich text (HTML)
+  link?: string;  // Mutually exclusive with pdfUrl
+  pdfUrl?: string;
+  pdfPublicId?: string;
+  newsId?: string;  // Back-reference to news doc (when published from Latest News)
+  eventId?: string;  // Legacy: back-reference to events doc
+  createdAt?: any;
+  updatedAt?: any;
 }
 
 // Image Carousel Item type

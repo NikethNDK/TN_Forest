@@ -220,7 +220,7 @@ const Home: React.FC = () => {
 
         <div className="relative">
           <div className="grid grid-cols-12 gap-4 xl:gap-6 px-4 xl:px-6 py-6">
-            {/* Left Sidebar - Recent Events (Sticky) */}
+            {/* Left Sidebar - Upcoming Events (Sticky) */}
             <div className="col-span-2 xl:col-span-3  rounded-2xl px-3 xl:px-4 py-6">
               <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto">
                 <div className="bg-news-events-ticker-body rounded-2xl shadow-elevated overflow-hidden">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Info, ShoppingBag, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import type { NewsItem, Event } from '../../types';
 
 interface WelcomeModalProps {
@@ -32,7 +32,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
     navigate('/shop');
   };
 
-  // Get 2 latest news and 2 latest events
+  // Get 2 latest news and 2 upcoming events
   const displayNews = latestNews.slice(0, 2);
   const displayEvents = events.slice(0, 2);
 
@@ -102,9 +102,17 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                         </p>
                         <h4 className="font-bold text-content-headingSecondary mb-1 text-sm">{news.title}</h4>
                         <p className="text-xs text-content-secondary mb-2 line-clamp-2">{news.excerpt}</p>
-                        {(news.link || news.pdfUrl) && (
-                          <a 
-                            href={news.link || news.pdfUrl} 
+                        {news.blogSlug ? (
+                          <Link
+                            to={`/blog/${news.blogSlug}`}
+                            className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"
+                          >
+                            Read more
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </Link>
+                        ) : (news.link || news.pdfUrl) && (
+                          <a
+                            href={news.link || news.pdfUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"
@@ -119,12 +127,12 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                 </div>
               )} */}
 
-              {/* Recent Events Section */}
+              {/* Upcoming Events Section */}
               {/* {displayEvents.length > 0 && (
                 <div>
                   <h3 className="text-lg font-bold text-content-heading mb-3 flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-accent-darker" />
-                    Recent Events
+                    Upcoming Events
                   </h3>
                   <div className="space-y-3">
                     {displayEvents.map((event, index) => (
@@ -135,8 +143,8 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                         <h4 className="font-bold text-content-headingSecondary mb-1 text-sm">{event.title}</h4>
                         <p className="text-xs text-content-secondary mb-2 line-clamp-2">{event.excerpt}</p>
                         {(event.link || event.pdfUrl) && (
-                          <a 
-                            href={event.link || event.pdfUrl} 
+                          <a
+                            href={event.link || event.pdfUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"

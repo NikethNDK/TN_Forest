@@ -382,7 +382,7 @@ const AdminHome: React.FC = () => {
   const sections = [
     { id: 'slider', label: 'Rotating Images', icon: Image },
     { id: 'news', label: 'Latest News', icon: FileText },
-    { id: 'events', label: 'Latest Events', icon: Calendar },
+    { id: 'events', label: 'Upcoming Events', icon: Calendar },
     { id: 'gallery', label: 'Gallery Carousel', icon: Image },
     // { id: 'links', label: 'Useful Links', icon: LinkIcon },
   ];
@@ -483,7 +483,7 @@ const AdminHome: React.FC = () => {
             onAdd={handleAddEvent}
             onEdit={handleEditEvent}
             onDelete={handleDeleteEvent}
-            title="Latest Events"
+            title="Upcoming Events"
             itemType="event"
             isLoading={isLoadingEvents}
           />

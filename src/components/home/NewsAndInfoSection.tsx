@@ -50,7 +50,7 @@ const NewsAndInfoSection: React.FC<NewsAndInfoSectionProps> = ({ latestNews, eve
             </div>
           </div>
 
-          {/* Recent Events - Mobile */}
+          {/* Upcoming Events - Mobile */}
           <div className="bg-news-events-ticker-body rounded-2xl shadow-elevated overflow-hidden">
             <div className="flex items-center gap-2 px-4 py-3 bg-news-events-ticker-header">
               <Calendar className="h-5 w-5 text-white shrink-0" />
@@ -110,7 +110,7 @@ const NewsAndInfoSection: React.FC<NewsAndInfoSectionProps> = ({ latestNews, eve
             <div className="col-span-2 xl:col-span-3">
               <div className="bg-background-paper shadow-xl rounded-2xl p-6 xl:p-8 border-r-8 border-accent-dark sticky top-8">
                 <h2 className="text-xl xl:text-2xl font-bold text-content-heading mb-6 flex items-center justify-end">
-                  Recent Events
+                  Upcoming Events
                   <span className="w-2 h-8 bg-primary-main ml-3"></span>
                 </h2>
                 <div className="pl-2">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Calendar } from 'lucide-react';
 import type { NewsItem, Event } from '../../types';
 
@@ -107,7 +108,19 @@ const RotatingConveyor: React.FC<RotatingConveyorProps> = ({
             >
               {item.excerpt}
             </p>
-            {(item.link || item.pdfUrl) && (
+            {itemType === 'news' && (item as NewsItem).blogSlug && (
+              <Link
+                to={`/blog/${(item as NewsItem).blogSlug}`}
+                className={`text-xs xl:text-sm font-semibold inline-flex items-center ${isRightAligned ? 'float-right' : ''} ${isDark ? 'text-white hover:text-white/90' : 'text-home-heading hover:text-home-heading/90'}`}
+              >
+                {isRightAligned ? (
+                  <> <span className="mr-1 group-hover:mr-2 transition-all">←</span> Read more </>
+                ) : (
+                  <> Read more <span className="ml-1 group-hover:ml-2 transition-all">→</span> </>
+                )}
+              </Link>
+            )}
+            {!(itemType === 'news' && (item as NewsItem).blogSlug) && (item.link || item.pdfUrl) && (
               <a
                 href={item.link || item.pdfUrl || '#'}
                 target="_blank"

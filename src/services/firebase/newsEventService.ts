@@ -47,6 +47,7 @@ export const getAllNews = async (): Promise<NewsItem[]> => {
         link: data.link || undefined,
         pdfUrl: data.pdfUrl || undefined,
         pdfPublicId: data.pdfPublicId || undefined,
+        blogSlug: data.blogSlug || undefined,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
         order: data.order
@@ -81,6 +82,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | null> => {
       link: data.link || undefined,
       pdfUrl: data.pdfUrl || undefined,
       pdfPublicId: data.pdfPublicId || undefined,
+      blogSlug: data.blogSlug || undefined,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
       order: data.order
@@ -104,6 +106,7 @@ export const addNewsItem = async (news: Omit<NewsItem, 'id' | 'createdAt' | 'upd
       link: news.link?.trim() || '',
       pdfUrl: news.pdfUrl?.trim() || '',
       pdfPublicId: news.pdfPublicId?.trim() || '',
+      blogSlug: news.blogSlug?.trim() || '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       order: Date.now() // Use timestamp for ordering
@@ -122,7 +125,7 @@ export const addNewsItem = async (news: Omit<NewsItem, 'id' | 'createdAt' | 'upd
  */
 export const updateNewsItem = async (
   id: string,
-  updates: Partial<Pick<NewsItem, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId'>>
+  updates: Partial<Pick<NewsItem, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId' | 'blogSlug'>>
 ): Promise<void> => {
   try {
     const newsRef = doc(db, NEWS_COLLECTION, id);
@@ -147,6 +150,9 @@ export const updateNewsItem = async (
     }
     if (updates.pdfPublicId !== undefined) {
       updateData.pdfPublicId = updates.pdfPublicId.trim() || '';
+    }
+    if (updates.blogSlug !== undefined) {
+      updateData.blogSlug = updates.blogSlug.trim() || '';
     }
     
     await updateDoc(newsRef, updateData);
@@ -206,6 +212,7 @@ export const subscribeToNews = (
             link: data.link || undefined,
             pdfUrl: data.pdfUrl || undefined,
             pdfPublicId: data.pdfPublicId || undefined,
+            blogSlug: data.blogSlug || undefined,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             order: data.order
@@ -252,6 +259,7 @@ export const getAllEvents = async (): Promise<Event[]> => {
         link: data.link || undefined,
         pdfUrl: data.pdfUrl || undefined,
         pdfPublicId: data.pdfPublicId || undefined,
+        blogSlug: data.blogSlug || undefined,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
         order: data.order
@@ -286,6 +294,7 @@ export const getEventById = async (id: string): Promise<Event | null> => {
       link: data.link || undefined,
       pdfUrl: data.pdfUrl || undefined,
       pdfPublicId: data.pdfPublicId || undefined,
+      blogSlug: data.blogSlug || undefined,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
       order: data.order
@@ -309,6 +318,7 @@ export const addEventItem = async (event: Omit<Event, 'id' | 'createdAt' | 'upda
       link: event.link?.trim() || '',
       pdfUrl: event.pdfUrl?.trim() || '',
       pdfPublicId: event.pdfPublicId?.trim() || '',
+      blogSlug: event.blogSlug?.trim() || '',
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       order: Date.now() // Use timestamp for ordering
@@ -327,7 +337,7 @@ export const addEventItem = async (event: Omit<Event, 'id' | 'createdAt' | 'upda
  */
 export const updateEventItem = async (
   id: string,
-  updates: Partial<Pick<Event, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId'>>
+  updates: Partial<Pick<Event, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId' | 'blogSlug'>>
 ): Promise<void> => {
   try {
     const eventRef = doc(db, EVENTS_COLLECTION, id);
@@ -352,6 +362,9 @@ export const updateEventItem = async (
     }
     if (updates.pdfPublicId !== undefined) {
       updateData.pdfPublicId = updates.pdfPublicId.trim() || '';
+    }
+    if (updates.blogSlug !== undefined) {
+      updateData.blogSlug = updates.blogSlug.trim() || '';
     }
     
     await updateDoc(eventRef, updateData);
@@ -411,6 +424,7 @@ export const subscribeToEvents = (
             link: data.link || undefined,
             pdfUrl: data.pdfUrl || undefined,
             pdfPublicId: data.pdfPublicId || undefined,
+            blogSlug: data.blogSlug || undefined,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt,
             order: data.order
