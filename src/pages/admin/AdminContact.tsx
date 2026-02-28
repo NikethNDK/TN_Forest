@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, MapPin, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit, Trash2, MapPin, ArrowUp, ArrowDown, Mail } from 'lucide-react';
 import {
   subscribeToContactLocations,
   addContactLocation,
@@ -9,6 +9,12 @@ import {
   unsetFooterLocation,
   swapContactLocationOrder
 } from '../../services/firebase/contactService';
+import {
+  getContactFormRecipients,
+  addContactFormRecipient,
+  deleteContactFormRecipient,
+  type ContactFormRecipientFromApi
+} from '../../services/api/shopApi';
 import type { ContactLocation } from '../../types';
 import Modal from '../../components/admin/Modal';
 import { useToast, ToastContainer } from '../../components/admin/Toast';
@@ -37,6 +43,15 @@ const AdminContact: React.FC = () => {
   const [pendingFooterLocationId, setPendingFooterLocationId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Contact form email recipients (Django API)
+  const [recipients, setRecipients] = useState<ContactFormRecipientFromApi[]>([]);
+  const [defaultAdminEmail, setDefaultAdminEmail] = useState<string>('');
+  const [loadingRecipients, setLoadingRecipients] = useState(true);
+  const [errorRecipients, setErrorRecipients] = useState<string | null>(null);
+  const [recipientForm, setRecipientForm] = useState({ email: '', display_name: '' });
+  const [savingRecipient, setSavingRecipient] = useState(false);
+  const [deletingRecipientId, setDeletingRecipientId] = useState<number | null>(null);
+
   // Subscribe to real-time updates
   useEffect(() => {
     setLoading(true);
@@ -59,6 +74,28 @@ const AdminContact: React.FC = () => {
     return () => {
       unsubscribe();
     };
+  }, []);
+
+  // Fetch contact-form recipients and default admin email (Django API)
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingRecipients(true);
+    setErrorRecipients(null);
+    getContactFormRecipients()
+      .then((res) => {
+        if (cancelled) return;
+        setRecipients(res.recipients);
+        setDefaultAdminEmail(res.default_admin_email || '');
+        setLoadingRecipients(false);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : 'Failed to load email recipients';
+        setErrorRecipients(msg);
+        setLoadingRecipients(false);
+        showToast(msg, 'error');
+      });
+    return () => { cancelled = true; };
   }, []);
 
   const handleAdd = () => {
@@ -254,6 +291,62 @@ const AdminContact: React.FC = () => {
   };
 
   const footerLocation = locations.find(l => l.showInFooter);
+  const handleAddRecipient = async () => {
+    const email = recipientForm.email.trim();
+    if (!email) {
+      showToast('Please enter an email address', 'error');
+      return;
+    }
+    const normalized = email.toLowerCase();
+    const alreadyAdded = recipients.some((r) => r.email.toLowerCase() === normalized);
+    if (alreadyAdded) {
+      showToast('This email is already in the recipients list', 'error');
+      return;
+    }
+    try {
+      setSavingRecipient(true);
+      setErrorRecipients(null);
+      const added = await addContactFormRecipient({
+        email,
+        display_name: recipientForm.display_name.trim() || undefined,
+      });
+      setRecipients((prev) => [...prev, added]);
+      setRecipientForm({ email: defaultAdminEmail || '', display_name: '' });
+      showToast('Recipient added successfully', 'success');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to add recipient';
+      setErrorRecipients(msg);
+      showToast(msg, 'error');
+    } finally {
+      setSavingRecipient(false);
+    }
+  };
+
+  const handleDeleteRecipient = (r: ContactFormRecipientFromApi) => {
+    if (r.id == null) return;
+    confirmation.confirm(
+      {
+        title: 'Remove recipient',
+        message: `Remove ${r.email} from Contact Us email recipients?`,
+        variant: 'danger',
+      },
+      async () => {
+        setDeletingRecipientId(r.id);
+        try {
+          setErrorRecipients(null);
+          await deleteContactFormRecipient(r.id as number);
+          setRecipients((prev) => prev.filter((x) => x.id !== r.id));
+          showToast('Recipient removed', 'success');
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Failed to remove recipient';
+          setErrorRecipients(msg);
+          showToast(msg, 'error');
+        } finally {
+          setDeletingRecipientId(null);
+        }
+      }
+    );
+  };
 
   if (loading) {
     return (
@@ -497,6 +590,98 @@ const AdminContact: React.FC = () => {
               <EmptyState message='No locations yet. Click "Add Location" to create one.' icon={<MapPin className="h-8 w-8" />} />
             )}
           </div>
+        </div>
+
+        {/* Contact Us form – email recipients */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-green-900 flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Contact Us Form – Email Recipients
+            </h2>
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Emails that receive submissions from the Contact Us form. The admin email is always included.
+          </p>
+
+          {loadingRecipients ? (
+            <LoadingSpinner message="Loading recipients…" />
+          ) : (
+            <>
+              {errorRecipients && <ErrorMessage message={errorRecipients} className="mb-4" />}
+
+              <div className="space-y-4 mb-6">
+                <div className="flex flex-wrap items-end gap-3">
+                  <FormField label="Email" required className="flex-1 min-w-[200px]">
+                    <input
+                      type="email"
+                      value={recipientForm.email}
+                      onChange={(e) => setRecipientForm((prev) => ({ ...prev, email: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder={defaultAdminEmail || 'e.g., admin@example.com'}
+                      disabled={savingRecipient}
+                    />
+                  </FormField>
+                  <FormField label="Display name (optional)" className="flex-1 min-w-[160px]">
+                    <input
+                      type="text"
+                      value={recipientForm.display_name}
+                      onChange={(e) => setRecipientForm((prev) => ({ ...prev, display_name: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="e.g., Main Office"
+                      disabled={savingRecipient}
+                    />
+                  </FormField>
+                  <button
+                    onClick={handleAddRecipient}
+                    disabled={savingRecipient}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Plus className="h-4 w-4" />
+                    {savingRecipient ? 'Adding…' : 'Add recipient'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                {recipients.length === 0 ? (
+                  <EmptyState
+                    message="No recipients yet. Add an email above to receive Contact Us submissions."
+                    icon={<Mail className="h-8 w-8" />}
+                  />
+                ) : (
+                  recipients.map((r) => (
+                    <div
+                      key={r.id ?? `system-${r.email}`}
+                      className="flex items-center justify-between border border-gray-200 rounded-lg p-3 hover:bg-gray-50"
+                    >
+                      <div>
+                        <span className="font-medium text-gray-900">{r.email}</span>
+                        {r.display_name && (
+                          <span className="ml-2 text-sm text-gray-500">({r.display_name})</span>
+                        )}
+                        {(r.is_system ?? r.id == null) && (
+                          <span className="ml-2 bg-green-100 text-green-800 px-2 py-0.5 rounded text-xs font-medium">
+                            Default
+                          </span>
+                        )}
+                      </div>
+                      {(r.is_system ?? r.id == null) ? null : (
+                        <button
+                          onClick={() => handleDeleteRecipient(r)}
+                          disabled={deletingRecipientId === r.id}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          title="Remove recipient"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Footer Preview */}

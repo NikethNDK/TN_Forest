@@ -329,6 +329,7 @@ export interface ContactConcernPayload {
   name: string;
   email: string;
   phone?: string;
+  purpose?: string;
   subject?: string;
   message: string;
 }
@@ -337,6 +338,48 @@ export interface ContactConcernPayload {
 export async function submitContactConcern(payload: ContactConcernPayload): Promise<{ id: number; message: string }> {
   const { data } = await publicShopClient.post<{ id: number; message: string }>('/api/notifications/contact/', payload);
   return data;
+}
+
+// --- Contact form recipients (admin; who receives Contact Us emails) ---
+
+export interface ContactFormRecipientFromApi {
+  id: number | null;
+  email: string;
+  display_name: string;
+  order: number;
+  created_at: string | null;
+  is_system?: boolean;
+}
+
+export interface ContactFormRecipientsResponse {
+  recipients: ContactFormRecipientFromApi[];
+  default_admin_email: string;
+}
+
+/** List contact-form recipients and default admin email from server. Requires auth (main admin). */
+export async function getContactFormRecipients(): Promise<ContactFormRecipientsResponse> {
+  const { data } = await shopClient.get<ContactFormRecipientsResponse>('/api/notifications/contact-form-recipients/');
+  return data;
+}
+
+/** Add a contact-form recipient. Requires auth (main admin). */
+export async function addContactFormRecipient(payload: {
+  email: string;
+  display_name?: string;
+  order?: number;
+}): Promise<ContactFormRecipientFromApi> {
+  const { data } = await shopClient.post<ContactFormRecipientFromApi>('/api/notifications/contact-form-recipients/', {
+    email: payload.email.trim(),
+    display_name: payload.display_name?.trim() ?? '',
+    order: payload.order ?? 0,
+  });
+  return data;
+}
+
+/** Remove a contact-form recipient. Requires auth (main admin). No-op if id is null (system admin). */
+export async function deleteContactFormRecipient(id: number): Promise<void> {
+  if (id == null) return;
+  await shopClient.delete(`/api/notifications/contact-form-recipients/${id}/`);
 }
 
 // --- Custom order request (e.g. bio-fertilizer) — public ---

@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Send } from 'lucide-react';
 import { submitContactConcern } from '../../services/api/shopApi';
+import { useToast, ToastContainer } from '../admin/Toast';
 
 const PURPOSE_OPTIONS = [
   'Internship',
@@ -24,6 +25,7 @@ const contactFormSchema = z.object({
 type ContactFormSchema = z.infer<typeof contactFormSchema>;
 
 const ContactForm: React.FC = () => {
+  const { toasts, showToast, removeToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -38,19 +40,23 @@ const ContactForm: React.FC = () => {
       await submitContactConcern({
         name: data.name,
         email: data.email,
-        subject: data.subject || data.purpose,
+        purpose: data.purpose,
+        subject: data.subject,
         message: data.message,
       });
-      alert('Thank you for your message! We will get back to you soon.');
+      showToast('Thank you for your message! We will get back to you soon.', 'success');
       reset();
     } catch (error) {
       console.error('Error submitting form:', error);
-      alert('There was an error submitting your message. Please try again.');
+      const msg = error instanceof Error ? error.message : 'There was an error submitting your message. Please try again.';
+      showToast(msg, 'error');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <>
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-2" style={{ color: '#37281b' }}>
@@ -151,6 +157,7 @@ className={`w-full px-4 py-3 border rounded-lg transition-shadow focus:ring-4 fo
         {isSubmitting ? 'Submitting...' : 'Submit Message'}
       </button>
     </form>
+    </>
   );
 };
 
