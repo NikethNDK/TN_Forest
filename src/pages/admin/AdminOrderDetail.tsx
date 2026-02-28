@@ -19,16 +19,44 @@ import {
   Loader2,
   AlertTriangle,
 } from 'lucide-react';
-import { getOrderById, updateOrderStatus } from '../../services/firebase/orderService';
-import { sendOrderAcceptedEmail } from '../../services/emailService';
-import type { CheckoutOrder } from '../../types';
-import { Timestamp } from 'firebase/firestore';
+import { getOrderById, acceptOrder, declineOrder } from '../../services/api/shopApi';
+import type { OrderFromApi } from '../../services/api/shopApi';
+
+/** Map API order to UI shape (deliveryDetails, items with name/price/quantity/unit). */
+function mapOrderToDisplay(api: OrderFromApi) {
+  return {
+    id: String(api.id),
+    status: api.status,
+    totalAmount: Number(api.total_amount),
+    transactionId: api.transaction_id,
+    deliveryDetails: {
+      name: api.delivery_name,
+      email: api.delivery_email,
+      phone: api.delivery_phone ?? '',
+      address: api.delivery_address,
+      city: api.delivery_city,
+      state: api.delivery_state,
+      pincode: api.delivery_pincode,
+    },
+    items: api.items.map((it, idx) => ({
+      id: it.id,
+      name: it.product_name,
+      quantity: it.quantity,
+      unit: it.unit ?? '',
+      price: Number(it.price),
+      imageIcon: undefined as string | undefined,
+    })),
+    createdAt: api.created_at,
+  };
+}
+
+type OrderDisplay = ReturnType<typeof mapOrderToDisplay>;
 
 const AdminOrderDetail: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   
-  const [order, setOrder] = useState<CheckoutOrder | null>(null);
+  const [order, setOrder] = useState<OrderDisplay | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,22 +64,19 @@ const AdminOrderDetail: React.FC = () => {
 
   useEffect(() => {
     const fetchOrder = async () => {
-      if (!orderId) {
+      const id = orderId ? parseInt(orderId, 10) : NaN;
+      if (!orderId || Number.isNaN(id)) {
         setError('Order ID not provided');
         setIsLoading(false);
         return;
       }
 
       try {
-        const fetchedOrder = await getOrderById(orderId);
-        if (!fetchedOrder) {
-          setError('Order not found');
-        } else {
-          setOrder(fetchedOrder);
-        }
+        const apiOrder = await getOrderById(id);
+        setOrder(mapOrderToDisplay(apiOrder));
       } catch (err) {
         console.error('Error fetching order:', err);
-        setError('Failed to load order details');
+        setError('Order not found or failed to load.');
       } finally {
         setIsLoading(false);
       }
@@ -60,55 +85,23 @@ const AdminOrderDetail: React.FC = () => {
     fetchOrder();
   }, [orderId]);
 
-  const formatDate = (timestamp: any): string => {
+  const formatDate = (timestamp: string | undefined): string => {
     if (!timestamp) return 'N/A';
-    
-    // Handle Firestore Timestamp
-    if (timestamp instanceof Timestamp) {
-      return timestamp.toDate().toLocaleString('en-IN', {
-        dateStyle: 'full',
-        timeStyle: 'short',
-      });
-    }
-    
-    // Handle regular Date or timestamp
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleString('en-IN', {
-      dateStyle: 'full',
-      timeStyle: 'short',
-    });
+    return new Date(timestamp).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' });
   };
 
   const handleAcceptOrder = async () => {
     if (!order || !orderId) return;
+    const id = parseInt(orderId, 10);
+    if (Number.isNaN(id)) return;
     
     setIsProcessing(true);
     setActionMessage(null);
 
     try {
-      // Update order status in Firestore
-      await updateOrderStatus(orderId, 'accepted');
-
-      // Send confirmation email to user
-      const emailResult = await sendOrderAcceptedEmail({
-        orderId,
-        items: order.items,
-        totalAmount: order.totalAmount,
-        deliveryDetails: order.deliveryDetails,
-        transactionId: order.transactionId,
-        orderDate: formatDate(order.createdAt),
-      });
-
-      if (emailResult.success) {
-        setActionMessage({ type: 'success', message: 'Order accepted and confirmation email sent to customer!' });
-      } else {
-        setActionMessage({ type: 'success', message: 'Order accepted but email notification failed. Please contact customer manually.' });
-      }
-
-      // Redirect to admin home after short delay
-      setTimeout(() => {
-        navigate('/admin');
-      }, 2000);
+      await acceptOrder(id);
+      setActionMessage({ type: 'success', message: 'Order accepted and confirmation email sent to customer!' });
+      setTimeout(() => navigate('/admin'), 2000);
     } catch (err) {
       console.error('Error accepting order:', err);
       setActionMessage({ type: 'error', message: 'Failed to accept order. Please try again.' });
@@ -119,20 +112,16 @@ const AdminOrderDetail: React.FC = () => {
 
   const handleDeclineOrder = async () => {
     if (!order || !orderId) return;
+    const id = parseInt(orderId, 10);
+    if (Number.isNaN(id)) return;
     
     setIsProcessing(true);
     setActionMessage(null);
 
     try {
-      // Update order status in Firestore
-      await updateOrderStatus(orderId, 'declined');
-
-      setActionMessage({ type: 'success', message: 'Order declined. Refund will be processed within 2-3 business days.' });
-
-      // Redirect to admin home after short delay
-      setTimeout(() => {
-        navigate('/admin');
-      }, 2000);
+      await declineOrder(id);
+      setActionMessage({ type: 'success', message: 'Order declined. Customer has been notified. Refund will be processed within 2-3 business days.' });
+      setTimeout(() => navigate('/admin'), 2000);
     } catch (err) {
       console.error('Error declining order:', err);
       setActionMessage({ type: 'error', message: 'Failed to decline order. Please try again.' });

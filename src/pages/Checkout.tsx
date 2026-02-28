@@ -21,8 +21,7 @@ import {
 } from 'lucide-react';
 import type { CheckoutDeliveryDetails } from '../types';
 import { useCart } from '../hooks/useCart';
-import { sendOrderEmailToAdmin } from '../services/emailService';
-import { createOrder } from '../services/firebase/orderService';
+import { createOrder } from '../services/api/shopApi';
 
 // ============ VALIDATION & SANITIZATION UTILITIES ============
 
@@ -321,17 +320,8 @@ const Checkout: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Generate order ID using crypto for better randomness
-      const randomPart = Array.from(crypto.getRandomValues(new Uint8Array(6)))
-        .map(b => b.toString(36))
-        .join('')
-        .toUpperCase()
-        .slice(0, 9);
-      const newOrderId = `ORD-${Date.now()}-${randomPart}`;
-      
       const totalAmount = getTotalPrice();
 
-      // Sanitize data before sending
       const sanitizedDeliveryDetails = {
         name: sanitizeText(deliveryDetails.name, 100),
         email: deliveryDetails.email.trim().slice(0, 100),
@@ -344,34 +334,26 @@ const Checkout: React.FC = () => {
 
       const sanitizedTransactionId = transactionId.replace(/[^a-zA-Z0-9\-]/g, '').slice(0, 30);
 
-      // Save order to Firestore
-      try {
-        await createOrder(newOrderId, {
-          items: cart,
-          totalAmount,
-          deliveryDetails: sanitizedDeliveryDetails,
-          transactionId: sanitizedTransactionId,
-        });
-      } catch (orderError) {
-        console.warn('Failed to save order to database:', orderError);
-        // Continue with email even if database save fails
-      }
-
-      // Send email notification to admin
-      const emailResult = await sendOrderEmailToAdmin({
-        orderId: newOrderId,
-        items: cart,
-        totalAmount,
-        deliveryDetails: sanitizedDeliveryDetails,
-        transactionId: sanitizedTransactionId,
+      const order = await createOrder({
+        items: cart.map((item) => ({
+          product_id: typeof item.id === 'number' ? item.id : undefined,
+          product_name: item.name,
+          quantity: item.quantity,
+          unit: item.unit ?? '',
+          price: item.price,
+        })),
+        total_amount: totalAmount.toFixed(2),
+        delivery_name: sanitizedDeliveryDetails.name,
+        delivery_email: sanitizedDeliveryDetails.email,
+        delivery_phone: sanitizedDeliveryDetails.phone,
+        delivery_address: sanitizedDeliveryDetails.address,
+        delivery_city: sanitizedDeliveryDetails.city,
+        delivery_state: sanitizedDeliveryDetails.state,
+        delivery_pincode: sanitizedDeliveryDetails.pincode,
+        transaction_id: sanitizedTransactionId,
       });
 
-      if (!emailResult.success) {
-        // Log only non-sensitive error info
-        console.warn('Email notification failed');
-      }
-
-      setOrderId(newOrderId);
+      setOrderId(String(order.id));
       setOrderPlaced(true);
       clearCart();
     } catch (error) {

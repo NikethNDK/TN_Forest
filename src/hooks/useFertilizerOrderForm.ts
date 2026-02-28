@@ -5,6 +5,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { createCustomOrder } from '../services/api/shopApi';
 import type { FertilizerOrderFormData, PickupLocation, ShopProduct } from '../types';
 
 // Default pickup locations (research centers)
@@ -53,7 +54,7 @@ export interface UseFertilizerOrderFormReturn {
     value: FertilizerOrderFormData[K]
   ) => void;
   handleTransportationChange: (value: string) => void;
-  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void | Promise<void>;
   closeToast: () => void;
   isFormValid: () => boolean;
 }
@@ -80,7 +81,7 @@ export const useFertilizerOrderForm = (options?: UseFertilizerOrderFormOptions):
     }
   }, []);
 
-  const handleSubmit = useCallback((e: React.FormEvent<HTMLFormElement>): void => {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     
     // Validate form
@@ -114,19 +115,30 @@ export const useFertilizerOrderForm = (options?: UseFertilizerOrderFormOptions):
       }
     }
 
-    // Fallback: Show toast message (old behavior)
+    // Submit to backend so admin receives email; then show toast
+    const productName = options?.availableFertilizers?.find(f => f.id === selectedFertilizer)?.name ?? selectedFertilizer;
+    const itemsSummary = `Product: ${productName}\nQuantity: ${quantity}\nTransport: ${transportation}\nAddress: ${address}`;
+    const details = `Bio-fertilizer order request. ${transportation === 'yes' ? 'Customer needs delivery.' : 'Customer will pick up.'}`;
+    try {
+      await createCustomOrder({
+        customer_name: name,
+        customer_email: email,
+        customer_phone: phone,
+        details,
+        items_summary: itemsSummary,
+      });
+    } catch (err) {
+      console.error('Failed to submit custom order:', err);
+      alert('Submission failed. Please try again or contact us directly.');
+      return;
+    }
+
     setShowToast(true);
-    
-    // Reset form after 5 seconds
     setTimeout(() => {
       setFormData(INITIAL_FORM_DATA);
       setNearestLocation(null);
     }, 5000);
-    
-    // Hide toast after 5 seconds
-    setTimeout(() => {
-      setShowToast(false);
-    }, 5000);
+    setTimeout(() => setShowToast(false), 5000);
   }, [formData, options]);
 
   const closeToast = useCallback((): void => {

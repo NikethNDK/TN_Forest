@@ -1,13 +1,14 @@
 /**
  * Shop backend API client (Django TN_Forest_Shop).
  * Uses axios with Firebase ID token for Authorization: Bearer.
+ * Public client (no auth) for checkout and contact form.
  */
 
 import axios, { AxiosError } from 'axios';
 import { getIdToken } from '../firebase/authService';
 import type { ShopDivision } from '../../types';
 
-const getBaseUrl = (): string => {
+export const getShopApiBaseUrl = (): string => {
   const url = import.meta.env.VITE_SHOP_API_URL;
   if (!url || typeof url !== 'string') {
     throw new Error('VITE_SHOP_API_URL is not set. Add it to your .env file.');
@@ -15,7 +16,15 @@ const getBaseUrl = (): string => {
   return url.replace(/\/$/, '');
 };
 
+const getBaseUrl = getShopApiBaseUrl;
+
 const shopClient = axios.create({
+  baseURL: getBaseUrl(),
+  headers: { 'Content-Type': 'application/json' },
+});
+
+/** Client for public endpoints (no auth): order create, contact form */
+const publicShopClient = axios.create({
   baseURL: getBaseUrl(),
   headers: { 'Content-Type': 'application/json' },
 });
@@ -242,4 +251,106 @@ export async function updateProduct(id: number, payload: UpdateProductPayload): 
 
 export async function deleteProduct(id: number): Promise<void> {
   await shopClient.delete(`/api/inventory/products/${id}/`);
+}
+
+// --- Orders (POST create is public; list/detail/accept/decline require auth) ---
+
+export interface CreateOrderPayload {
+  items: { product_id?: number; product_name: string; quantity: number; unit?: string; price: string | number }[];
+  total_amount: string;
+  delivery_name: string;
+  delivery_email: string;
+  delivery_phone?: string;
+  delivery_address: string;
+  delivery_city: string;
+  delivery_state: string;
+  delivery_pincode: string;
+  transaction_id?: string;
+}
+
+export interface OrderItemApi {
+  id: number;
+  product_name: string;
+  quantity: number;
+  unit: string;
+  price: string;
+}
+
+export interface OrderFromApi {
+  id: number;
+  status: string;
+  total_amount: string;
+  transaction_id: string;
+  delivery_name: string;
+  delivery_email: string;
+  delivery_phone: string;
+  delivery_address: string;
+  delivery_city: string;
+  delivery_state: string;
+  delivery_pincode: string;
+  created_at: string;
+  updated_at: string;
+  items: OrderItemApi[];
+}
+
+/** Create order (guest or auth). No token required. */
+export async function createOrder(payload: CreateOrderPayload): Promise<OrderFromApi> {
+  const { data } = await publicShopClient.post<OrderFromApi>('/api/orders/', payload);
+  return data;
+}
+
+/** List orders (admin). Requires auth. */
+export async function getOrders(): Promise<OrderFromApi[]> {
+  const { data } = await shopClient.get<OrderFromApi[]>('/api/orders/');
+  return data;
+}
+
+/** Get order by id (admin). Requires auth. */
+export async function getOrderById(id: number): Promise<OrderFromApi> {
+  const { data } = await shopClient.get<OrderFromApi>(`/api/orders/${id}/`);
+  return data;
+}
+
+/** Accept order and send customer email (admin). Requires auth. */
+export async function acceptOrder(id: number): Promise<OrderFromApi> {
+  const { data } = await shopClient.post<OrderFromApi>(`/api/orders/${id}/accept/`);
+  return data;
+}
+
+/** Decline order and send customer email (admin). Requires auth. */
+export async function declineOrder(id: number): Promise<OrderFromApi> {
+  const { data } = await shopClient.post<OrderFromApi>(`/api/orders/${id}/decline/`);
+  return data;
+}
+
+// --- Contact form (public) ---
+
+export interface ContactConcernPayload {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+}
+
+/** Submit Contact Us form. No auth required. */
+export async function submitContactConcern(payload: ContactConcernPayload): Promise<{ id: number; message: string }> {
+  const { data } = await publicShopClient.post<{ id: number; message: string }>('/api/notifications/contact/', payload);
+  return data;
+}
+
+// --- Custom order request (e.g. bio-fertilizer) — public ---
+
+export interface CustomOrderPayload {
+  customer_name: string;
+  customer_email: string;
+  customer_phone?: string;
+  details: string;
+  items_summary?: string;
+}
+
+/** Submit custom order request. No auth. Admin is notified by email. */
+export async function createCustomOrder(payload: CustomOrderPayload): Promise<{ id: number; message: string }> {
+  const { data } = await publicShopClient.post<{ id: number; message: string }>('/api/orders/custom/', payload);
+  return data;
 }

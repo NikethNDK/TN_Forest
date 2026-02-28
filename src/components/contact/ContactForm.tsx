@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Send } from 'lucide-react';
-import type { ContactFormData } from '../../types';
+import { submitContactConcern } from '../../services/api/shopApi';
 
 const PURPOSE_OPTIONS = [
   'Internship',
@@ -35,8 +35,12 @@ const ContactForm: React.FC = () => {
 
   const onSubmit = async (data: ContactFormSchema): Promise<void> => {
     try {
-      // In a real application, this would send data to an API endpoint
-      console.log('Form submitted:', data);
+      await submitContactConcern({
+        name: data.name,
+        email: data.email,
+        subject: data.subject || data.purpose,
+        message: data.message,
+      });
       alert('Thank you for your message! We will get back to you soon.');
       reset();
     } catch (error) {
