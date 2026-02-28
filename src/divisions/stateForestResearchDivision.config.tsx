@@ -49,6 +49,16 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
             className="w-full h-auto rounded-lg"
           />
         </div>
+        </div>
+    </div>
+    {/* Buggy image - below focus area */}
+    <div className="mb-8 flex justify-center">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full">
+        <img
+          src="/front.jpeg"
+          alt="Battery-operated buggy at Forest Genetic Resources Tree Park"
+          className="w-full h-auto rounded-lg"
+        />
       </div>
     </div>
         {/* Background Section */}
@@ -143,7 +153,15 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
             Details of the Park
           </h3>
-          <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4">
+          <div className="flex flex-col md:flex-row md:items-start gap-6">
+            <div className="flex-shrink-0 md:max-w-md">
+              <img
+                src="/buggy.jpeg"
+                alt="Forest Genetic Resources Tree Park - Kolapakkam, Chennai"
+                className="w-full h-auto rounded-lg shadow-md"
+              />
+            </div>
+            <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-4 flex-1">
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li><strong>Open Hours:</strong> 9:00 a.m. to 5:30 p.m. (Tuesday - weekly holiday)</li>
               <li><strong>Entry fee:</strong> Rs. 20 per person</li>
@@ -155,6 +173,7 @@ export const stateForestResearchDivisionConfig: StateForestResearchDivisionConfi
               </li>
               <li>Newly introduced battery-operated buggy cart service (11-seater)</li>
             </ul>
+            </div>
           </div>
         </div>
 
