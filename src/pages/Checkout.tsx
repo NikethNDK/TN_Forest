@@ -166,6 +166,7 @@ const Checkout: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [orderPlaced, setOrderPlaced] = useState<boolean>(false);
   const [orderId, setOrderId] = useState<string>('');
+  const [orderNo, setOrderNo] = useState<string>('');
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -354,6 +355,7 @@ const Checkout: React.FC = () => {
       });
 
       setOrderId(String(order.id));
+      setOrderNo(order.order_no ?? `#${order.id}`);
       setOrderPlaced(true);
       clearCart();
     } catch (error) {
@@ -383,8 +385,9 @@ const Checkout: React.FC = () => {
             </p>
             
             <div className="bg-primary-lightest rounded-lg p-4 mb-6">
-              <p className="text-sm text-content-secondary mb-1">Your Order ID</p>
-              <p className="text-xl font-bold text-content-headingSecondary">{orderId}</p>
+              <p className="text-sm text-content-secondary mb-1">Your order number</p>
+              <p className="text-xl font-bold text-content-headingSecondary font-mono">{orderNo || orderId}</p>
+              <p className="text-xs text-content-tertiary mt-1">Quote this for any support or queries.</p>
             </div>
 
             <div className="bg-status-info-lightest rounded-lg p-4 mb-8">

@@ -278,6 +278,7 @@ export interface OrderItemApi {
 
 export interface OrderFromApi {
   id: number;
+  order_no?: string | null;
   status: string;
   total_amount: string;
   transaction_id: string;
@@ -299,9 +300,12 @@ export async function createOrder(payload: CreateOrderPayload): Promise<OrderFro
   return data;
 }
 
-/** List orders (admin). Requires auth. */
-export async function getOrders(): Promise<OrderFromApi[]> {
-  const { data } = await shopClient.get<OrderFromApi[]>('/api/orders/');
+/** List orders (admin). Requires auth. Optional search filters by order_no (partial match). */
+export async function getOrders(params?: { search?: string }): Promise<OrderFromApi[]> {
+  const config = params?.search?.trim()
+    ? { params: { search: params.search.trim() } }
+    : {};
+  const { data } = await shopClient.get<OrderFromApi[]>('/api/orders/', config);
   return data;
 }
 
