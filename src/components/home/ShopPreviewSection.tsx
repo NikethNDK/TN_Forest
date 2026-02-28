@@ -8,6 +8,25 @@ import ShopPreviewCard from './ShopPreviewCard';
 
 const PREVIEW_LIMIT = 4;
 
+/** When server is available: show only these product names (exact match, case-insensitive). */
+const PREVIEW_PRODUCT_NAMES = [
+  'Azospirillum',
+  'Phosphobacteria',
+  'Tectona Grandis',
+  'Melia dubia',
+];
+
+/** Filter to listed names in order (for server response). */
+function filterToPreviewNames(fetchedProducts: ShopProduct[]): ShopProduct[] {
+  return PREVIEW_PRODUCT_NAMES.reduce<ShopProduct[]>((acc, name) => {
+    const found = fetchedProducts.find(
+      (p) => p.name.trim().toLowerCase() === name.toLowerCase()
+    );
+    if (found) acc.push(found);
+    return acc;
+  }, []);
+}
+
 const ShopPreviewSection: React.FC = () => {
   const [products, setProducts] = useState<ShopProduct[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,17 +36,15 @@ const ShopPreviewSection: React.FC = () => {
     let cancelled = false;
     let firestoreUnsubscribe: (() => void) | null = null;
 
-    const setFirstFour = (list: ShopProduct[]) => {
-      if (!cancelled) {
-        setProducts(list.slice(0, PREVIEW_LIMIT));
-        setError(null);
-        setIsLoading(false);
-      }
-    };
-
     const tryFirestore = () => {
       firestoreUnsubscribe = subscribeToShopProducts(
-        (fetchedProducts) => setFirstFour(fetchedProducts),
+        (fetchedProducts) => {
+          if (!cancelled) {
+            setProducts(fetchedProducts.slice(0, PREVIEW_LIMIT));
+            setError(null);
+            setIsLoading(false);
+          }
+        },
         (err) => {
           if (!cancelled) {
             console.error('Error fetching shop preview products:', err);
@@ -38,10 +55,12 @@ const ShopPreviewSection: React.FC = () => {
       );
     };
 
-    getPublicProducts({ page_size: PREVIEW_LIMIT })
+    // Try server first; when available show the listed products. Else fallback to Firestore (first 4).
+    getPublicProducts({ page_size: 20 })
       .then((fetchedProducts) => {
         if (!cancelled) {
-          setProducts(fetchedProducts);
+          const filtered = filterToPreviewNames(fetchedProducts);
+          setProducts(filtered);
           setError(null);
           setIsLoading(false);
         }
