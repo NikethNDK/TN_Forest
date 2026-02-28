@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, GitBranch, Package, Menu, X, LogOut } from 'lucide-react';
+import { LayoutDashboard, GitBranch, Package, Menu, X, LogOut, Inbox, CheckCircle } from 'lucide-react';
 import { signOutUser } from '../../services/firebase/authService';
 
 const StoreSidebar: React.FC = () => {
@@ -21,6 +21,9 @@ const StoreSidebar: React.FC = () => {
   const isOverviewActive = location.pathname === '/admin/shop' || location.pathname === '/admin/shop/';
   const isDivisionsActive = location.pathname === '/admin/shop/divisions';
   const isProductsActive = location.pathname === '/admin/shop/products';
+  const isOrdersActive = location.pathname.startsWith('/admin/shop/orders');
+  const isRequestsActive = location.pathname.startsWith('/admin/shop/orders/requests');
+  const isConfirmedActive = location.pathname.startsWith('/admin/shop/orders/confirmed');
 
   return (
     <>
@@ -87,6 +90,36 @@ const StoreSidebar: React.FC = () => {
           >
             <Package className="h-5 w-5" />
             <span className="font-medium">Products</span>
+          </Link>
+
+          <Link
+            to="/admin/shop/orders/requests"
+            onClick={() => setIsOpen(false)}
+            className={`
+              flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+              ${isRequestsActive || (isOrdersActive && !isConfirmedActive)
+                ? 'bg-green-700 text-lime-400'
+                : 'text-green-100 hover:bg-green-800 hover:text-white'
+              }
+            `}
+          >
+            <Inbox className="h-5 w-5" />
+            <span className="font-medium">Requested orders</span>
+          </Link>
+
+          <Link
+            to="/admin/shop/orders/confirmed"
+            onClick={() => setIsOpen(false)}
+            className={`
+              flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+              ${isConfirmedActive
+                ? 'bg-green-700 text-lime-400'
+                : 'text-green-100 hover:bg-green-800 hover:text-white'
+              }
+            `}
+          >
+            <CheckCircle className="h-5 w-5" />
+            <span className="font-medium">Confirmed orders</span>
           </Link>
 
           <div className="pt-4 border-t border-green-800 mt-4 space-y-2">

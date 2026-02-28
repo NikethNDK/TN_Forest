@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Package,
   User,
@@ -22,10 +22,11 @@ import {
 import { getOrderById, acceptOrder, declineOrder } from '../../services/api/shopApi';
 import type { OrderFromApi } from '../../services/api/shopApi';
 
-/** Map API order to UI shape (deliveryDetails, items with name/price/quantity/unit). */
+/** Map API order to UI shape (deliveryDetails, items with name/price/quantity/unit, orderNo). */
 function mapOrderToDisplay(api: OrderFromApi) {
   return {
     id: String(api.id),
+    orderNo: api.order_no ?? `#${api.id}`,
     status: api.status,
     totalAmount: Number(api.total_amount),
     transactionId: api.transaction_id,
@@ -55,6 +56,7 @@ type OrderDisplay = ReturnType<typeof mapOrderToDisplay>;
 const AdminOrderDetail: React.FC = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [order, setOrder] = useState<OrderDisplay | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -101,7 +103,8 @@ const AdminOrderDetail: React.FC = () => {
     try {
       await acceptOrder(id);
       setActionMessage({ type: 'success', message: 'Order accepted and confirmation email sent to customer!' });
-      setTimeout(() => navigate('/admin'), 2000);
+      const isFromEcoStore = location.pathname.startsWith('/admin/shop');
+      setTimeout(() => navigate(isFromEcoStore ? '/admin/shop/orders/confirmed' : '/admin'), 2000);
     } catch (err) {
       console.error('Error accepting order:', err);
       setActionMessage({ type: 'error', message: 'Failed to accept order. Please try again.' });
@@ -121,7 +124,8 @@ const AdminOrderDetail: React.FC = () => {
     try {
       await declineOrder(id);
       setActionMessage({ type: 'success', message: 'Order declined. Customer has been notified. Refund will be processed within 2-3 business days.' });
-      setTimeout(() => navigate('/admin'), 2000);
+      const isFromEcoStore = location.pathname.startsWith('/admin/shop');
+      setTimeout(() => navigate(isFromEcoStore ? '/admin/shop/orders/confirmed' : '/admin'), 2000);
     } catch (err) {
       console.error('Error declining order:', err);
       setActionMessage({ type: 'error', message: 'Failed to decline order. Please try again.' });
@@ -144,6 +148,7 @@ const AdminOrderDetail: React.FC = () => {
 
   // Error state
   if (error) {
+    const backTo = location.pathname.startsWith('/admin/shop') ? '/admin/shop/orders/requests' : '/admin';
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -151,10 +156,10 @@ const AdminOrderDetail: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-800 mb-2">Error</h2>
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => navigate('/admin')}
+            onClick={() => navigate(backTo)}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            Back to Admin
+            {backTo.includes('/shop') ? 'Back to Requested orders' : 'Back to Admin'}
           </button>
         </div>
       </div>
@@ -165,24 +170,38 @@ const AdminOrderDetail: React.FC = () => {
     return null;
   }
 
-  const { deliveryDetails, items, totalAmount, transactionId, status, createdAt } = order;
+  const { deliveryDetails, items, totalAmount, transactionId, status, createdAt, orderNo } = order;
+
+  const isFromEcoStore = location.pathname.startsWith('/admin/shop');
+  const backHref = isFromEcoStore
+    ? status === 'pending'
+      ? '/admin/shop/orders/requests'
+      : '/admin/shop/orders/confirmed'
+    : '/admin';
+  const backLabel = isFromEcoStore
+    ? status === 'pending'
+      ? 'Back to Requested orders'
+      : 'Back to Confirmed orders'
+    : 'Back to Dashboard';
 
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <button
-          onClick={() => navigate('/admin')}
+          onClick={() => navigate(backHref)}
           className="flex items-center text-green-700 hover:text-green-800 font-medium mb-4"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
-          Back to Dashboard
+          {backLabel}
         </button>
         <h1 className="text-2xl font-bold text-gray-800 flex items-center">
           <Package className="h-7 w-7 mr-3 text-green-600" />
           Order Details
         </h1>
-        <p className="text-gray-500 mt-1">Order ID: <span className="font-mono font-semibold">{orderId}</span></p>
+        <p className="text-gray-500 mt-1">
+          Order number: <span className="font-mono font-semibold text-gray-800">{orderNo}</span>
+        </p>
       </div>
 
       {/* Action Message */}
