@@ -76,6 +76,7 @@ const Shop: React.FC = () => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    replaceCart,
     getTotalPrice,
     getCartItemCount,
   } = useCart();
@@ -89,20 +90,13 @@ const Shop: React.FC = () => {
    * Handle fertilizer form checkout - adds to cart and navigates to checkout
    */
   const handleFertilizerCheckout = useCallback((data: FertilizerCheckoutData) => {
-    // Clear existing cart and add the fertilizer order
-    clearCart();
-    
-    // Add product to cart with specified quantity
-    // We need to add it multiple times or modify the cart item directly
     const cartItem = {
       ...data.product,
+      id: data.product.id,
       quantity: data.quantity,
     };
-    
-    // Store the cart item directly in localStorage for checkout
-    localStorage.setItem('tnforest_shop_cart', JSON.stringify([cartItem]));
-    
-    // Navigate to checkout with pre-filled delivery details
+    replaceCart([cartItem]);
+
     navigate('/checkout', {
       state: {
         prefillData: {
@@ -114,7 +108,7 @@ const Shop: React.FC = () => {
         fromFertilizerForm: true,
       },
     });
-  }, [clearCart, navigate]);
+  }, [replaceCart, navigate]);
 
   const fertilizerForm = useFertilizerOrderForm({
     onCheckout: handleFertilizerCheckout,

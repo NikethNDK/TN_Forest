@@ -45,6 +45,7 @@ export interface UseCartReturn {
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, newQuantity: number) => void;
   clearCart: () => void;
+  replaceCart: (items: CartItem[]) => void;
   getTotalPrice: () => number;
   getCartItemCount: () => number;
 }
@@ -98,6 +99,10 @@ export const useCart = (): UseCartReturn => {
     setCart([]);
   }, []);
 
+  const replaceCart = useCallback((items: CartItem[]): void => {
+    setCart(Array.isArray(items) ? items : []);
+  }, []);
+
   const getTotalPrice = useCallback((): number => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   }, [cart]);
@@ -112,6 +117,7 @@ export const useCart = (): UseCartReturn => {
     removeFromCart,
     updateQuantity,
     clearCart,
+    replaceCart,
     getTotalPrice,
     getCartItemCount,
   };
