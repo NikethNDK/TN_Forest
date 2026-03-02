@@ -255,7 +255,7 @@ const Home: React.FC = () => {
               <div className="text-center py-8 xl:py-10 px-2 lg:px-4 max-w-4xl mx-auto">
                 <div className="mb-8">
                   <h1 className="text-2xl xl:text-3xl 2xl:text-4xl font-serif font-bold text-home-heading mb-6">
-                    Tamil Nadu Forest Department - Research Wind
+                    Tamil Nadu Forest Department - Research Wing
                   </h1>
                   <div className="w-24 h-1 bg-gradient-gold rounded-full mx-auto mb-8"></div>
                 </div>
