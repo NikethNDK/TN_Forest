@@ -98,7 +98,7 @@ export interface ShopProduct {
   price: number;
   category: 'Seeds' | 'Bio Fertilizers';
   stock: number; // Quantity available (0 = out of stock)
-  unit: string; // "packets", "kg", "liters", etc.
+  unit: string; // "kg", "packets", "liters", etc.
   imageUrl?: string; // Cloudinary URL
   imagePublicId?: string; // Cloudinary public ID for deletion
   imageIcon?: string; // Emoji fallback

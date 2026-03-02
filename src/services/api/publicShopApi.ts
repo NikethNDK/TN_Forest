@@ -44,7 +44,7 @@ function mapToShopProduct(raw: PublicProductRaw): ShopProduct {
     price: parseFloat(raw.price) || 0,
     category: (raw.category === 'Bio Fertilizers' ? 'Bio Fertilizers' : 'Seeds') as ShopProduct['category'],
     stock: raw.stock,
-    unit: 'packets',
+    unit: 'kg',
     imageUrl: raw.image_url ?? undefined,
     imagePublicId: raw.image_public_id ?? undefined,
     imageIcon: raw.image_icon ?? undefined,

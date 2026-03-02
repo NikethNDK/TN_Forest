@@ -37,7 +37,7 @@ const transformDocumentToShopProduct = (docId: string, data: any): ShopProduct =
     price: data.price || 0,
     category: data.category || 'Seeds',
     stock: data.stock || 0,
-    unit: data.unit || 'packets',
+    unit: data.unit || 'kg',
     imageUrl: data.imageUrl || undefined,
     imagePublicId: data.imagePublicId || undefined,
     imageIcon: data.imageIcon || undefined,
