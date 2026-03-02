@@ -174,16 +174,21 @@ const BioFertilizerOrderForm: React.FC<BioFertilizerOrderFormProps> = ({
               <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted" />
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 id="quantity"
                 required
                 value={formData.quantity}
-                onChange={(e) => updateFormField('quantity', e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === '' || /^\d+$/.test(v)) updateFormField('quantity', v);
+                }}
                 className="w-full pl-10 pr-4 py-3 border border-form-inputBorder rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow text-content-primary"
-                placeholder="Enter quantity (e.g., 50 kgs, 100 liters)"
+                placeholder="e.g. 50"
               />
             </div>
             <p className="mt-1 text-xs text-content-tertiary">
-              Please specify the quantity you need (in kgs or liters)
+              Numbers only (no units or letters)
             </p>
           </div>
 

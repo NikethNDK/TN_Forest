@@ -26,7 +26,7 @@ const Header: React.FC = () => {
             className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold leading-tight"
             style={{ color: headerText }}
           >
-            TAMIL NADU FOREST DEPARTMENT - RESEARCH DIVISION
+            TAMIL NADU FOREST DEPARTMENT - RESEARCH WING
           </h1>
           <p
             className="text-[0.65rem] sm:text-xs md:text-sm mt-0.5 sm:mt-1 max-w-2xl"

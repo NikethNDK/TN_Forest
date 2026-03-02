@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, Shield, Leaf } from 'lucide-react';
 import { signIn } from '../../services/firebase/authService';
 import { getCurrentUser } from '../../services/firebase/authService';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -13,13 +14,17 @@ const AdminLogin: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const nextPath = location.search && new URLSearchParams(location.search).get('next');
+  const redirectTo =
+    nextPath && nextPath.startsWith('/admin') ? nextPath : '/admin';
+
   // Check if user is already logged in
   useEffect(() => {
     const user = getCurrentUser();
     if (user) {
-      navigate('/admin');
+      navigate(redirectTo, { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +33,7 @@ const AdminLogin: React.FC = () => {
 
     try {
       await signIn(formData.email, formData.password);
-      // Navigation will happen automatically via AdminLayout auth check
-      navigate('/admin');
+      navigate(redirectTo, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
     } finally {

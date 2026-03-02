@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import StoreSidebar from '../../../components/admin/StoreSidebar';
 import { onAuthStateChange, isAuthenticatedAdmin } from '../../../services/firebase/authService';
 import { LoadingSpinner } from '../../../components/common';
@@ -7,6 +7,7 @@ import type { User } from 'firebase/auth';
 
 const AdminShopLayout: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -22,13 +23,14 @@ const AdminShopLayout: React.FC = () => {
         }
       } else {
         setIsAuthenticated(false);
-        navigate('/login/admin');
+        const next = encodeURIComponent(location.pathname);
+        navigate(`/login/admin?next=${next}`);
       }
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   if (isLoading) {
     return (
