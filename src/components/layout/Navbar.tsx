@@ -215,7 +215,7 @@ const Navbar: React.FC = () => {
                     className="absolute left-0 mt-2 w-72 rounded-md shadow-lg py-1 z-50"
                     style={{ backgroundColor: dropdownBg }}
                   >
-                    <button
+                    {/* <button
                       type="button"
                       className="block w-full text-left px-4 py-3 text-sm transition-colors duration-200 hover:opacity-80"
                       style={{ color: dropdownItemColor }}
@@ -230,9 +230,9 @@ const Navbar: React.FC = () => {
                       onClick={() => setIsBiodiversityOpen(false)}
                     >
                       <div className="font-medium">Visit Eco labs and Research Center</div>
-                    </button>
-                    <button
-                      type="button"
+                    </button> */}
+                    <Link
+                      to="/knowledge-eco-tourism"
                       className="block w-full text-left px-4 py-3 text-sm transition-colors duration-200 hover:opacity-80"
                       style={{ color: dropdownItemColor }}
                       onMouseEnter={(e) => {
@@ -246,7 +246,7 @@ const Navbar: React.FC = () => {
                       onClick={() => setIsBiodiversityOpen(false)}
                     >
                       <div className="font-medium">Knowledge Eco Tourism</div>
-                    </button>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -377,14 +377,14 @@ const Navbar: React.FC = () => {
                 >
                   Visit Eco labs and Research Center
                 </button>
-                <button
-                  type="button"
+                <Link
+                  to="/knowledge-eco-tourism"
                   className="block w-full text-left px-8 py-2 rounded-md text-sm transition-colors duration-200 hover:opacity-80"
                   style={{ color: defaultTheme.navbarText, opacity: 0.9 }}
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Knowledge Eco Tourism
-                </button>
+                </Link>
               </div>
               
               <Link

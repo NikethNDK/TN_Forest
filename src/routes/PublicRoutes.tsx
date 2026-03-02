@@ -15,6 +15,7 @@ import IndustrialWoodResearchDivision from '../pages/IndustrialWoodResearchDivis
 import AgroForestryResearchDivision from '../pages/AgroForestryResearchDivision';
 import Gallery from '../pages/Gallery';
 import BlogPost from '../pages/BlogPost';
+import KnowledgeEcoTourism from '../pages/KnowledgeEcoTourism';
 
 export const publicRoutes = (
   <Route
@@ -26,6 +27,7 @@ export const publicRoutes = (
           <Route path="/about" element={<About />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/genetic-resources" element={<GeneticResourcesPage />} />
+          <Route path="/knowledge-eco-tourism" element={<KnowledgeEcoTourism />} />
           <Route path="/publication" element={<Publication />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/gallery" element={<Gallery />} />
