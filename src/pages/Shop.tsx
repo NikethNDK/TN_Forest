@@ -27,7 +27,7 @@ import { useCart } from '../hooks/useCart';
 import { useFertilizerOrderForm, FertilizerCheckoutData } from '../hooks/useFertilizerOrderForm';
 
 /** When true, fetch from server DB and fall back to Firestore on error. When false, use Firestore only. */
-const USE_SERVER_DB = false;
+const USE_SERVER_DB = true;
 
 const ITEMS_PER_PAGE = 12;
 
