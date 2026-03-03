@@ -42,6 +42,7 @@ export const getAllSliderImages = async (): Promise<SliderImage[]> => {
         url: data.url || '',
         publicId: data.publicId || '',
         order: data.order || 0,
+        title: data.title || undefined,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt
       });
@@ -72,6 +73,7 @@ export const getSliderImageById = async (id: string): Promise<SliderImage | null
       url: data.url || '',
       publicId: data.publicId || '',
       order: data.order || 0,
+      title: data.title || undefined,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt
     };
@@ -95,13 +97,16 @@ export const addSliderImage = async (
       : -1;
     
     const imagesRef = collection(db, SLIDER_IMAGES_COLLECTION);
-    const newImage = {
+    const newImage: Record<string, unknown> = {
       url: image.url.trim(),
       publicId: image.publicId.trim(),
       order: maxOrder + 1,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     };
+    if (image.title != null && image.title.trim() !== '') {
+      newImage.title = image.title.trim();
+    }
     
     const docRef = await addDoc(imagesRef, newImage);
     return docRef.id;
@@ -136,6 +141,25 @@ export const updateSliderImage = async (
   } catch (error) {
     console.error('Error updating slider image:', error);
     throw new Error('Failed to update slider image');
+  }
+};
+
+/**
+ * Update a slider image's title
+ */
+export const updateSliderImageTitle = async (
+  id: string,
+  title: string
+): Promise<void> => {
+  try {
+    const imageRef = doc(db, SLIDER_IMAGES_COLLECTION, id);
+    await updateDoc(imageRef, {
+      title: title.trim(),
+      updatedAt: Timestamp.now()
+    });
+  } catch (error) {
+    console.error('Error updating slider image title:', error);
+    throw new Error('Failed to update slider image title');
   }
 };
 
@@ -233,6 +257,7 @@ export const subscribeToSliderImages = (
             url: data.url || '',
             publicId: data.publicId || '',
             order: data.order || 0,
+            title: data.title || undefined,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt
           });

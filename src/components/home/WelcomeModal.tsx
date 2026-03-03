@@ -17,7 +17,11 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
 
   useEffect(() => {
     const alreadySeen = sessionStorage.getItem(STORAGE_KEY);
-    if (!alreadySeen) setIsOpen(true);
+    if (!alreadySeen) {
+      setIsOpen(true);
+    } else {
+      setShowFloatingIcon(true);
+    }
   }, []);
 
   const handleClose = (): void => {

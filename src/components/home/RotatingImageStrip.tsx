@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { subscribeToSliderImages } from '../../services/firebase/sliderImageService';
 import { getOptimizedImageUrl } from '../../utils/imageOptimization';
+import type { SliderImage } from '../../types';
 
 const HEIGHT_DEFAULT =
   'h-44 sm:h-52 md:h-60 lg:h-72 xl:h-[400px]';
@@ -14,7 +15,7 @@ interface RotatingImageStripProps {
 const RotatingImageStrip: React.FC<RotatingImageStripProps> = ({
   fillHeight = false,
 }) => {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<SliderImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -25,13 +26,10 @@ const RotatingImageStrip: React.FC<RotatingImageStripProps> = ({
   useEffect(() => {
     const unsub = subscribeToSliderImages(
       (list) => {
-        const urls = list
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-          .map((i) => i.url);
-
-        setImages(urls);
+        const sorted = [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        setImages(sorted);
         setCurrentIndex((prev) =>
-          urls.length && prev >= urls.length ? 0 : prev
+          sorted.length && prev >= sorted.length ? 0 : prev
         );
       },
       (err) => console.error('Slider images:', err)
@@ -76,7 +74,7 @@ const RotatingImageStrip: React.FC<RotatingImageStripProps> = ({
 
     const nextIndex = (currentIndex + 1) % n;
     const img = new Image();
-    img.src = getOptimizedImageUrl(images[nextIndex], 1200);
+    img.src = getOptimizedImageUrl(images[nextIndex].url, 1200);
   }, [currentIndex, images, n]);
 
   if (images.length === 0) {
@@ -93,8 +91,9 @@ const RotatingImageStrip: React.FC<RotatingImageStripProps> = ({
     );
   }
 
+  const currentImage = images[currentIndex];
   const currentImageUrl = getOptimizedImageUrl(
-    images[currentIndex],
+    currentImage.url,
     1200
   );
 
@@ -108,7 +107,7 @@ const RotatingImageStrip: React.FC<RotatingImageStripProps> = ({
         <img
           key={currentIndex}
           src={currentImageUrl}
-          alt={`Nursery Image ${currentIndex + 1}`}
+          alt={currentImage.title || `Nursery Image ${currentIndex + 1}`}
           className={`w-full h-full object-cover transition-opacity duration-700 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
@@ -119,6 +118,15 @@ const RotatingImageStrip: React.FC<RotatingImageStripProps> = ({
 
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+
+        {/* Title overlay (optional) */}
+        {currentImage.title && (
+          <div className="absolute bottom-12 left-4 right-4 z-20 pointer-events-none">
+            <p className="text-white text-sm sm:text-base font-medium drop-shadow-lg line-clamp-2">
+              {currentImage.title}
+            </p>
+          </div>
+        )}
 
         {/* Prev button */}
         <button

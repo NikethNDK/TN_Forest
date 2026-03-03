@@ -31,7 +31,8 @@ import {
   subscribeToSliderImages,
   addSliderImage,
   deleteSliderImage,
-  reorderSliderImages
+  reorderSliderImages,
+  updateSliderImageTitle
 } from '../../services/firebase/sliderImageService';
 import {
   subscribeToGalleryImages,
@@ -65,16 +66,18 @@ const AdminHome: React.FC = () => {
   const [deletingImageId, setDeletingImageId] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingImage, setEditingImage] = useState<ExistingImageForEdit | null>(null);
+  const [editingSliderImage, setEditingSliderImage] = useState<SliderImage | null>(null);
   const confirmation = useConfirmation();
 
   // Slider Images
-  const handleSliderImageAdd = async (imagePath: string, publicId?: string) => {
+  const handleSliderImageAdd = async (imagePath: string, publicId?: string, title?: string) => {
     if (imagePath && publicId) {
       try {
         await addSliderImage({
           url: imagePath,
           publicId: publicId,
-          order: sliderImages.length
+          order: sliderImages.length,
+          title: title?.trim() || undefined
         });
         toast.success('Slider image added successfully');
       } catch (error) {
@@ -374,6 +377,30 @@ const AdminHome: React.FC = () => {
     setEditingImage(null);
   };
 
+  // Slider image edit (title)
+  const handleSliderImageEdit = (image: SliderImage) => {
+    if (!image.id) return;
+    setEditingSliderImage(image);
+  };
+
+  const handleSliderEditModalConfirm = async (images: ExistingImageForEdit[]) => {
+    if (images.length > 0) {
+      const image = images[0];
+      try {
+        await updateSliderImageTitle(image.id, image.title);
+        toast.success('Slider image title updated successfully');
+      } catch (error) {
+        console.error('Error updating slider image title:', error);
+        toast.error('Failed to update slider image title');
+      }
+    }
+    setEditingSliderImage(null);
+  };
+
+  const handleSliderEditModalCancel = () => {
+    setEditingSliderImage(null);
+  };
+
   // Useful Links
   const handleLinksChange = (links: ImportantLink[]) => {
     setHomeContent({ ...homeContent, usefulLinks: links });
@@ -402,9 +429,10 @@ const AdminHome: React.FC = () => {
             <div className="bg-white rounded-lg shadow-lg p-6">
               <div className="mb-4">
                 <ImageUploader
-                  onImageChange={(url, publicId) => handleSliderImageAdd(url, publicId)}
+                  onImageChange={(url, publicId, title) => handleSliderImageAdd(url, publicId, title)}
                   directory="tn-forest/images/slider"
                   label="Add New Slider Image"
+                  requireTitle={true}
                 />
               </div>
               {isLoadingSliderImages ? (
@@ -417,12 +445,24 @@ const AdminHome: React.FC = () => {
                     <div key={image.id || index} className="relative group">
                       <img
                         src={getOptimizedImageUrl(image.url, 200)}
-                        alt={`Slider ${index + 1}`}
+                        alt={image.title || `Slider ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
                         loading="lazy"
                         decoding="async"
                       />
+                      {image.title && (
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 rounded-b-lg">
+                          <span className="text-xs text-white truncate block">{image.title}</span>
+                        </div>
+                      )}
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleSliderImageEdit(image)}
+                          className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                          title="Edit title"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
                         <button
                           onClick={() => handleSliderImageMove(index, 'up')}
                           disabled={index === 0}
@@ -459,6 +499,14 @@ const AdminHome: React.FC = () => {
               confirmText={confirmation.confirmText}
               cancelText={confirmation.cancelText}
               variant={confirmation.variant}
+            />
+            <GalleryUploadModal
+              isOpen={!!editingSliderImage}
+              mode="edit"
+              images={[]}
+              existingImages={editingSliderImage ? [{ id: editingSliderImage.id!, url: editingSliderImage.url, title: editingSliderImage.title || '' }] : []}
+              onConfirm={handleSliderEditModalConfirm}
+              onCancel={handleSliderEditModalCancel}
             />
           </div>
         );

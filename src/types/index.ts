@@ -274,6 +274,7 @@ export interface SliderImage {
   url: string; // Cloudinary secure URL
   publicId: string; // Cloudinary public ID for deletion
   order: number; // Display order
+  title?: string; // Optional title/caption for the image
   createdAt?: any; // Firestore Timestamp
   updatedAt?: any; // Firestore Timestamp
 }
