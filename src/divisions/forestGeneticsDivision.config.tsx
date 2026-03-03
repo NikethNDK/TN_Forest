@@ -67,7 +67,7 @@ export const forestGeneticsDivisionConfig: ForestGeneticsDivisionConfig = {
         </div>
 
         {/* Focus Areas Image Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
+        {/* <div className="mb-8 border-t border-gray-200 pt-8">
           <div className="flex justify-center">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-md">
               <img
@@ -77,7 +77,7 @@ export const forestGeneticsDivisionConfig: ForestGeneticsDivisionConfig = {
               />
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Research Areas Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
