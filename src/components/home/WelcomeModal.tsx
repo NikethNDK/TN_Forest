@@ -16,12 +16,12 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const alreadySeen = localStorage.getItem(STORAGE_KEY);
+    const alreadySeen = sessionStorage.getItem(STORAGE_KEY);
     if (!alreadySeen) setIsOpen(true);
   }, []);
 
   const handleClose = (): void => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    sessionStorage.setItem(STORAGE_KEY, 'true');
     setIsOpen(false);
     setShowFloatingIcon(true);
   };

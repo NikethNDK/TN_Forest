@@ -21,7 +21,7 @@ const NewsAndInfoSection: React.FC<NewsAndInfoSectionProps> = ({ latestNews, eve
           <div className="text-center py-16 px-4 lg:px-8 leaf-pattern rounded-2xl max-w-4xl mx-auto" style={{ backgroundColor: '#ededed' }}>
             <div className="mb-8">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-bold text-home-heading mb-6">
-                Tamil Nadu Forest Research Department
+                Tamil Nadu Forest Department - Research Wing
               </h1>
               <div className="w-24 h-1 bg-gradient-gold rounded-full mx-auto mb-8"></div>
             </div>
@@ -96,7 +96,7 @@ const NewsAndInfoSection: React.FC<NewsAndInfoSectionProps> = ({ latestNews, eve
               <div className="text-center py-4 xl:py-6 px-4">
                 <div className="mb-8">
                   <h1 className="text-3xl xl:text-4xl 2xl:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-dark via-primary-main to-accent-dark mb-6">
-                    Tamil Nadu Forest Research Department
+                    Tamil Nadu Forest Department - Research Wing
                   </h1>
                   <div className="w-32 h-1 bg-gradient-to-r from-primary-main to-accent-light mx-auto mb-8"></div>
                 </div>

@@ -90,7 +90,7 @@ const ShopPreviewSection: React.FC = () => {
           </h2>
           <div className="w-32 h-1 bg-gradient-gold rounded-full mx-auto mb-6" />
           <p className="text-center text-home-text-secondary text-sm mb-6">
-            Seeds and bio fertilizers from the Tamil Nadu Forest Department.
+            Seeds and bio fertilizers from the Tamil Nadu Forest Department Research Wing.
           </p>
           <p className="text-center text-home-text-secondary text-sm mb-6">Unable to load products.</p>
           <div className="text-center">
@@ -122,7 +122,7 @@ const ShopPreviewSection: React.FC = () => {
             Our Eco-Store
           </h2>
           <p className="text-center text-home-text-secondary text-sm mb-6 sm:mb-8">
-            Seeds and bio fertilizers from the Tamil Nadu Forest Department.
+            Seeds and bio fertilizers from the Tamil Nadu Forest Department Research Wing.
           </p>
           <div className="flex justify-center py-12">
             <Loader2 className="h-10 w-10 animate-spin text-home-heading" />
@@ -147,7 +147,7 @@ const ShopPreviewSection: React.FC = () => {
           </h2>
           <div className="w-32 h-1 bg-gradient-gold rounded-full mx-auto mb-6" />
           <p className="text-center text-home-text-secondary text-sm mb-6">
-            Seeds and bio fertilizers from the Tamil Nadu Forest Department.
+            Seeds and bio fertilizers from the Tamil Nadu Forest Department Research Wing.
           </p>
           <p className="text-center text-home-text-secondary text-sm mb-6">Store coming soon.</p>
           <div className="text-center">
@@ -179,7 +179,7 @@ const ShopPreviewSection: React.FC = () => {
         </h2>
         <div className="w-32 h-1 bg-gradient-gold rounded-full mx-auto mb-6 sm:mb-8" />
         <p className="text-center text-home-text-secondary text-sm mb-6 sm:mb-8">
-          Seeds and bio fertilizers from the Tamil Nadu Forest Department.
+          Seeds and bio fertilizers from the Tamil Nadu Forest Department Research Wing.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
