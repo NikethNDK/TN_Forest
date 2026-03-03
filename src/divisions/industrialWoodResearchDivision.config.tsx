@@ -120,7 +120,7 @@ export const industrialWoodResearchDivisionConfig: IndustrialWoodResearchDivisio
         </div>
 
         {/* Administrative Set Up Section - Placeholder */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
+        {/* <div className="mb-8 border-t border-gray-200 pt-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
             2. Administrative Set Up
           </h3>
@@ -129,12 +129,12 @@ export const industrialWoodResearchDivisionConfig: IndustrialWoodResearchDivisio
               [Administrative set up content placeholder]
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* Vision Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
           <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
-            3. Vision and Mission of the Division
+            2. Vision and Mission of the Division
           </h3>
           <div className="mb-6">
             <h4 className="text-xl font-semibold text-green-600 mb-4 text-center">Vision</h4>

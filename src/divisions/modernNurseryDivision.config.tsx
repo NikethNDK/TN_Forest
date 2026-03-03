@@ -91,13 +91,6 @@ export const modernNurseryDivisionConfig: ModernNurseryDivisionConfig = {
           </div>
         </div>
 
-        {/* Administrative History Section */}
-        <div className="mb-8 border-t border-gray-200 pt-8">
-          <h3 className="text-2xl font-semibold text-green-700 mb-4 text-center">
-            Administrative Setup
-          </h3>
-        </div>
-
 
         {/* Mission and Bio-fertilizers Section */}
         <div className="mb-8 border-t border-gray-200 pt-8">
