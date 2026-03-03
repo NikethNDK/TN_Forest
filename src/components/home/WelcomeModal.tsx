@@ -8,17 +8,20 @@ interface WelcomeModalProps {
   events: Event[];
 }
 
+const STORAGE_KEY = 'welcomeModalSeen';
+
 const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [showFloatingIcon, setShowFloatingIcon] = useState<boolean>(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Show modal on page load
-    setIsOpen(true);
+    const alreadySeen = localStorage.getItem(STORAGE_KEY);
+    if (!alreadySeen) setIsOpen(true);
   }, []);
 
   const handleClose = (): void => {
+    localStorage.setItem(STORAGE_KEY, 'true');
     setIsOpen(false);
     setShowFloatingIcon(true);
   };

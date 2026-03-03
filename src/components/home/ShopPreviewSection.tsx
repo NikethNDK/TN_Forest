@@ -56,7 +56,7 @@ const ShopPreviewSection: React.FC = () => {
     };
 
     // Try server first; when available show the listed products. Else fallback to Firestore (first 4).
-    getPublicProducts({ page_size: 20 })
+    getPublicProducts({ page_size: 50 })
       .then((fetchedProducts) => {
         if (!cancelled) {
           const filtered = filterToPreviewNames(fetchedProducts);
