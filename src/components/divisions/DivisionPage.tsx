@@ -854,7 +854,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
         </div>
 
         {/* Toll Free Number Box */}
-        <div className="mt-16 bg-background-muted rounded-lg shadow-lg p-8 border-2 border-border-default">
+        {/* <div className="mt-16 bg-background-muted rounded-lg shadow-lg p-8 border-2 border-border-default">
           <div className="flex flex-col md:flex-row items-center justify-center gap-4">
             <Phone className="h-8 w-8 text-primary-main" />
             <div className="text-center md:text-left">
@@ -867,7 +867,7 @@ const DivisionPage: React.FC<DivisionPageProps> = ({ config }) => {
               </a>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Division Statistics */}
         {/* <div className="mt-8 bg-primary-dark rounded-lg p-8">
