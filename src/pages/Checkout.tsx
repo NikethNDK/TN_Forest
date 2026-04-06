@@ -22,6 +22,7 @@ import {
 import type { CheckoutDeliveryDetails } from '../types';
 import { useCart } from '../hooks/useCart';
 import { createOrder } from '../services/api/shopApi';
+import { formatCartMoney, formatCartQtyForDisplay } from '../utils/cartQuantity';
 
 // ============ VALIDATION & SANITIZATION UTILITIES ============
 
@@ -337,11 +338,9 @@ const Checkout: React.FC = () => {
 
       const order = await createOrder({
         items: cart.map((item) => ({
-          product_id: typeof item.id === 'number' ? item.id : undefined,
-          product_name: item.name,
+          listing_id: Number(item.id),
           quantity: item.quantity,
           unit: item.unit ?? '',
-          price: item.price,
         })),
         total_amount: totalAmount.toFixed(2),
         delivery_name: sanitizedDeliveryDetails.name,
@@ -440,7 +439,7 @@ const Checkout: React.FC = () => {
             <div className="bg-background-paper rounded-xl shadow-lg p-6">
               <h2 className="text-xl font-bold text-content-heading mb-4 flex items-center">
                 <Package className="h-5 w-5 mr-2 text-accent-darker" />
-                Order Summary ({getCartItemCount()} items)
+                Order Summary ({formatCartQtyForDisplay(getCartItemCount())} total qty)
               </h2>
 
               <div className="space-y-4 max-h-64 overflow-y-auto">
@@ -454,12 +453,12 @@ const Checkout: React.FC = () => {
                       <div>
                         <p className="font-medium text-content-headingSecondary">{item.name}</p>
                         <p className="text-sm text-content-tertiary">
-                          {item.quantity} {item.unit} × ₹{item.price}
+                          {formatCartQtyForDisplay(item.quantity)} {item.unit} × ₹{item.price}
                         </p>
                       </div>
                     </div>
-                    <p className="font-bold text-primary-main">
-                      ₹{item.price * item.quantity}
+                    <p className="font-bold text-primary-main tabular-nums">
+                      ₹{formatCartMoney(item.price * item.quantity)}
                     </p>
                   </div>
                 ))}
@@ -468,7 +467,9 @@ const Checkout: React.FC = () => {
               <div className="border-t border-border-light mt-4 pt-4">
                 <div className="flex justify-between items-center text-lg">
                   <span className="font-semibold text-content-heading">Total Amount:</span>
-                  <span className="text-2xl font-bold text-accent-darker">₹{totalPrice}</span>
+                  <span className="text-2xl font-bold text-accent-darker tabular-nums">
+                    ₹{formatCartMoney(totalPrice)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -693,7 +694,9 @@ const Checkout: React.FC = () => {
               <div className="bg-accent-lighter rounded-lg p-4 mb-6">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-content-heading">Amount to Pay:</span>
-                  <span className="text-3xl font-bold text-content-headingSecondary">₹{totalPrice}</span>
+                  <span className="text-3xl font-bold text-content-headingSecondary tabular-nums">
+                    ₹{formatCartMoney(totalPrice)}
+                  </span>
                 </div>
               </div>
 

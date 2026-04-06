@@ -6,7 +6,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, Search } from 'lucide-react';
 import { LoadingSpinner } from '../../../components/common';
-import { getOrders, type OrderFromApi } from '../../../services/api/shopApi';
+import { getOrders, getMe, type OrderFromApi } from '../../../services/api/shopApi';
 
 const STATUS_BADGE_CLASS: Record<string, string> = {
   accepted: 'bg-green-100 text-green-800',
@@ -23,6 +23,13 @@ const AdminShopOrdersConfirmed: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [isMainAdmin, setIsMainAdmin] = useState(true);
+
+  useEffect(() => {
+    getMe()
+      .then((me) => setIsMainAdmin(me.admin_type === 'main_admin'))
+      .catch(() => setIsMainAdmin(false));
+  }, []);
 
   const fetchOrders = useCallback(async (searchTerm?: string) => {
     setLoading(true);
@@ -59,6 +66,11 @@ const AdminShopOrdersConfirmed: React.FC = () => {
 
   const displayOrderNo = (o: OrderFromApi) => o.order_no || `#${o.id}`;
   const statusLabel = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+  const displayAmount = (o: OrderFromApi) =>
+    !isMainAdmin && o.portion_subtotal != null && o.portion_subtotal !== ''
+      ? o.portion_subtotal
+      : o.total_amount;
 
   return (
     <div>
@@ -129,7 +141,7 @@ const AdminShopOrdersConfirmed: React.FC = () => {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
+                  {isMainAdmin ? 'Total' : 'Your portion'}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Action
@@ -157,7 +169,7 @@ const AdminShopOrdersConfirmed: React.FC = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                    ₹{o.total_amount}
+                    ₹{displayAmount(o)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                     <Link

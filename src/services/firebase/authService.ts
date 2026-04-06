@@ -61,6 +61,51 @@ export const checkAdminStatus = async (uid: string): Promise<boolean> => {
   }
 };
 
+/** Firestore `admins/{uid}` document shape (client-side read for routing UI). */
+export interface AdminFirestoreProfile {
+  role?: string;
+  admin_type?: string | null;
+  division_ids?: number[];
+}
+
+export async function getAdminFirestoreProfile(uid: string): Promise<AdminFirestoreProfile | null> {
+  try {
+    const adminDoc = await getDoc(doc(db, 'admins', uid));
+    if (!adminDoc.exists()) return null;
+    return adminDoc.data() as AdminFirestoreProfile;
+  } catch (error) {
+    console.error('Error reading admin profile:', error);
+    return null;
+  }
+}
+
+export function isDivisionAdminProfile(profile: AdminFirestoreProfile | null | undefined): boolean {
+  return profile?.role === 'admin' && profile?.admin_type === 'division_admin';
+}
+
+/**
+ * Where to send the user after login. Division admins are limited to `/admin/shop/**`.
+ */
+export async function resolveAdminLandingPath(
+  uid: string,
+  nextPath: string | null | undefined
+): Promise<string> {
+  const profile = await getAdminFirestoreProfile(uid);
+  const next = nextPath && nextPath.startsWith('/') ? nextPath : null;
+
+  if (isDivisionAdminProfile(profile)) {
+    if (next && next.startsWith('/admin/shop')) {
+      return next;
+    }
+    return '/admin/shop';
+  }
+
+  if (next && next.startsWith('/admin')) {
+    return next;
+  }
+  return '/admin';
+}
+
 /**
  * Get current authenticated user
  */

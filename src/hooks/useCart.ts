@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import type { ShopProduct, CartItem } from '../types';
+import { clampCartQuantity, roundCartQty } from '../utils/cartQuantity';
 
 const CART_STORAGE_KEY = 'tnforest_shop_cart';
 
@@ -59,23 +60,25 @@ export const useCart = (): UseCartReturn => {
   }, [cart]);
 
   const addToCart = useCallback((product: ShopProduct): void => {
-    // Ensure product has an id before adding to cart
     if (!product.id) {
       console.error('Cannot add product without ID to cart');
       return;
     }
-    
-    setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.id === product.id);
+    const maxStock = product.stock;
+    if (maxStock <= 0) return;
+
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === product.id);
       if (existingItem) {
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        const nextQty = clampCartQuantity(existingItem.quantity + 1, maxStock);
+        if (nextQty <= 0) return prevCart;
+        return prevCart.map((item) =>
+          item.id === product.id ? { ...item, quantity: nextQty } : item
         );
-      } else {
-        return [...prevCart, { ...product, id: product.id, quantity: 1 }];
       }
+      const startQty = clampCartQuantity(Math.min(1, maxStock), maxStock);
+      if (startQty <= 0) return prevCart;
+      return [...prevCart, { ...product, id: product.id, quantity: startQty }];
     });
   }, []);
 
@@ -84,15 +87,18 @@ export const useCart = (): UseCartReturn => {
   }, []);
 
   const updateQuantity = useCallback((productId: string, newQuantity: number): void => {
-    if (newQuantity <= 0) {
-      setCart(prevCart => prevCart.filter(item => item.id !== productId));
-    } else {
-      setCart(prevCart => prevCart.map(item =>
-        item.id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
-      ));
-    }
+    setCart((prevCart) => {
+      const item = prevCart.find((i) => i.id === productId);
+      if (!item) return prevCart;
+      const maxStock = item.stock;
+      const clamped = clampCartQuantity(newQuantity, maxStock);
+      if (clamped <= 0) {
+        return prevCart.filter((i) => i.id !== productId);
+      }
+      return prevCart.map((i) =>
+        i.id === productId ? { ...i, quantity: roundCartQty(clamped) } : i
+      );
+    });
   }, []);
 
   const clearCart = useCallback((): void => {
@@ -104,11 +110,12 @@ export const useCart = (): UseCartReturn => {
   }, []);
 
   const getTotalPrice = useCallback((): number => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [cart]);
 
+  /** Sum of line quantities (kg); can be fractional. */
   const getCartItemCount = useCallback((): number => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+    return roundCartQty(cart.reduce((total, item) => total + item.quantity, 0));
   }, [cart]);
 
   return {

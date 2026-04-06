@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { LoadingSpinner } from '../../../components/common';
@@ -12,6 +13,7 @@ import {
   deleteDivision,
   type ShopDivision,
 } from '../../../services/api/shopApi';
+import { getCurrentUser, getAdminFirestoreProfile } from '../../../services/firebase/authService';
 
 const formatDate = (iso: string) => {
   try {
@@ -26,6 +28,7 @@ const formatDate = (iso: string) => {
 };
 
 const AdminShopDivisions: React.FC = () => {
+  const navigate = useNavigate();
   const [divisions, setDivisions] = useState<ShopDivision[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +38,22 @@ const AdminShopDivisions: React.FC = () => {
   const [nameInput, setNameInput] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const confirmation = useConfirmation();
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const profile = await getAdminFirestoreProfile(user.uid);
+      if (cancelled) return;
+      if (profile?.role === 'admin' && profile?.admin_type === 'division_admin') {
+        navigate('/admin/shop', { replace: true });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   const fetchDivisions = useCallback(async () => {
     setLoading(true);

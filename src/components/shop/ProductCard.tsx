@@ -5,9 +5,11 @@ import type { ShopProduct } from '../../types';
 interface ProductCardProps {
   product: ShopProduct;
   addToCart: (product: ShopProduct) => void;
+  /** When the parent shows the product title once for multiple supplier rows, hide the duplicate heading. */
+  omitTitle?: boolean;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart, omitTitle = false }) => {
   // Derive inStock from stock > 0
   const inStock = product.stock > 0;
   
@@ -38,9 +40,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, addToCart }) => {
       </div>
       <div className="p-6">
         <div className="h-20 mb-4"> 
-          <h3 className="text-lg font-bold text-content-heading mb-1 line-clamp-2">
-            <span className="italic">{product.name}</span>
-          </h3>
+          {!omitTitle && (
+            <h3 className="text-lg font-bold text-content-heading mb-1 line-clamp-2">
+              <span className="italic">{product.name}</span>
+            </h3>
+          )}
+          {product.divisionName && (
+            <p
+              className={`text-primary-main font-medium mb-1 ${omitTitle ? 'text-base' : 'text-xs'}`}
+            >
+              {omitTitle ? product.divisionName : `Sold by: ${product.divisionName}`}
+            </p>
+          )}
           <p className="text-content-secondary text-xs line-clamp-2">
             {product.description}
           </p>

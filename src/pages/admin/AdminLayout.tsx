@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AdminSidebar from '../../components/admin/AdminSidebar';
-import { onAuthStateChange, isAuthenticatedAdmin } from '../../services/firebase/authService';
+import {
+  onAuthStateChange,
+  isAuthenticatedAdmin,
+  getCurrentUser,
+  getAdminFirestoreProfile,
+} from '../../services/firebase/authService';
 import { LoadingSpinner } from '../../components/common';
 import type { User } from 'firebase/auth';
 
@@ -34,6 +39,24 @@ const AdminLayout: React.FC = () => {
     // Cleanup listener on unmount
     return () => unsubscribe();
   }, [navigate, location.pathname]);
+
+  // Division admins may only use EcoStore (`/admin/shop/**`); keep them out of main CMS
+  useEffect(() => {
+    if (isLoading || !isAuthenticated) return;
+    const user = getCurrentUser();
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const profile = await getAdminFirestoreProfile(user.uid);
+      if (cancelled) return;
+      if (profile?.admin_type === 'division_admin' && !location.pathname.startsWith('/admin/shop')) {
+        navigate('/admin/shop', { replace: true });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoading, isAuthenticated, location.pathname, navigate]);
 
   // Show loading state while checking authentication
   if (isLoading) {

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, Shield, Leaf } from 'lucide-react';
-import { signIn } from '../../services/firebase/authService';
-import { getCurrentUser } from '../../services/firebase/authService';
+import { signIn, getCurrentUser, resolveAdminLandingPath } from '../../services/firebase/authService';
 
 const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -14,17 +13,21 @@ const AdminLogin: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const nextPath = location.search && new URLSearchParams(location.search).get('next');
-  const redirectTo =
-    nextPath && nextPath.startsWith('/admin') ? nextPath : '/admin';
+  const nextPath = new URLSearchParams(location.search).get('next');
 
-  // Check if user is already logged in
+  // Already logged in → land according to role (division admin → EcoStore only)
   useEffect(() => {
     const user = getCurrentUser();
-    if (user) {
-      navigate(redirectTo, { replace: true });
-    }
-  }, [navigate, redirectTo]);
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const path = await resolveAdminLandingPath(user.uid, nextPath);
+      if (!cancelled) navigate(path, { replace: true });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, location.search, nextPath]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,8 +35,9 @@ const AdminLogin: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await signIn(formData.email, formData.password);
-      navigate(redirectTo, { replace: true });
+      const cred = await signIn(formData.email, formData.password);
+      const path = await resolveAdminLandingPath(cred.user.uid, nextPath);
+      navigate(path, { replace: true });
     } catch (err: any) {
       setError(err.message || 'Login failed. Please try again.');
     } finally {

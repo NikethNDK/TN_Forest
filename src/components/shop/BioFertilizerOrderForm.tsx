@@ -4,7 +4,7 @@
  * Form for ordering bio-fertilizers with delivery/pickup options
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   FlaskConical,
   Mail,
@@ -17,6 +17,7 @@ import {
   Package,
 } from 'lucide-react';
 import type { ShopProduct, FertilizerOrderFormData, PickupLocation } from '../../types';
+import { groupProductsByCatalogId, pickDefaultListing } from '../../utils/shopCatalogGroups';
 
 interface BioFertilizerOrderFormProps {
   formData: FertilizerOrderFormData;
@@ -44,6 +45,16 @@ const BioFertilizerOrderForm: React.FC<BioFertilizerOrderFormProps> = ({
   closeToast,
   isFormValid,
 }) => {
+  const catalogGroups = useMemo(
+    () => groupProductsByCatalogId(availableFertilizers.filter((f) => f.id)),
+    [availableFertilizers]
+  );
+
+  const selectedGroup = useMemo(
+    () => catalogGroups.find((g) => g.key === formData.selectedProductId),
+    [catalogGroups, formData.selectedProductId]
+  );
+
   const selectedFertilizerDetails = availableFertilizers.find(
     (f) => f.id === formData.selectedFertilizer
   );
@@ -128,37 +139,90 @@ const BioFertilizerOrderForm: React.FC<BioFertilizerOrderFormProps> = ({
             </div>
           </div>
 
-          {/* Fertilizer Selection */}
-          <div>
-            <label
-              htmlFor="fertilizer"
-              className="block text-sm font-semibold text-content-heading mb-2"
-            >
-              Select Bio-Fertilizer <span className="text-status-error-main">*</span>
-            </label>
-            <div className="relative">
-              <FlaskConical className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted z-10" />
-              <select
-                id="fertilizer"
-                required
-                value={formData.selectedFertilizer}
-                onChange={(e) => updateFormField('selectedFertilizer', e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-form-inputBorder rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow text-content-primary appearance-none bg-background-paper"
+          {/* Fertilizer Selection: one row per catalog product; supplier row when multiple divisions */}
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="fertilizer-product"
+                className="block text-sm font-semibold text-content-heading mb-2"
               >
-                <option value="">-- Select a Bio-Fertilizer --</option>
-                {availableFertilizers
-                  .filter((f) => f.id)
-                  .map((fertilizer) => (
-                    <option key={fertilizer.id} value={fertilizer.id}>
-                      {fertilizer.name}
+                Product <span className="text-status-error-main">*</span>
+              </label>
+              <div className="relative">
+                <FlaskConical className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted z-10" />
+                <select
+                  id="fertilizer-product"
+                  required
+                  value={formData.selectedProductId}
+                  onChange={(e) => {
+                    const key = e.target.value;
+                    updateFormField('selectedProductId', key);
+                    const g = catalogGroups.find((x) => x.key === key);
+                    if (g && g.items.length > 0) {
+                      const def = pickDefaultListing(g.items);
+                      updateFormField('selectedFertilizer', def.id ?? '');
+                    } else {
+                      updateFormField('selectedFertilizer', '');
+                    }
+                  }}
+                  className="w-full pl-10 pr-4 py-3 border border-form-inputBorder rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow text-content-primary appearance-none bg-background-paper"
+                >
+                  <option value="">-- Select a product --</option>
+                  {catalogGroups.map((g) => (
+                    <option key={g.key} value={g.key}>
+                      {g.title}
                     </option>
                   ))}
-              </select>
+                </select>
+              </div>
             </div>
+
+            {selectedGroup && selectedGroup.items.length > 1 && (
+              <div>
+                <label
+                  htmlFor="fertilizer-supplier"
+                  className="block text-sm font-semibold text-content-heading mb-2"
+                >
+                  Supplier (research center) <span className="text-status-error-main">*</span>
+                </label>
+                <div className="relative">
+                  <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-content-muted z-10" />
+                  <select
+                    id="fertilizer-supplier"
+                    required
+                    value={formData.selectedFertilizer}
+                    onChange={(e) => updateFormField('selectedFertilizer', e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-form-inputBorder rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus transition-shadow text-content-primary appearance-none bg-background-paper"
+                  >
+                    {selectedGroup.items.map((row) => (
+                      <option key={row.id} value={row.id}>
+                        {row.divisionName ?? 'Supplier'}
+                        {row.stock > 0 ? ` — ${row.stock} ${row.unit} available` : ' — Out of stock'}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
             {selectedFertilizerDetails && (
-              <p className="mt-2 text-sm text-content-secondary">
-                {selectedFertilizerDetails.description}
-              </p>
+              <div className="space-y-2">
+                <p className="text-sm text-content-heading">
+                  <span className="font-semibold">Price: </span>
+                  <span className="font-shop-display font-bold text-primary-main tabular-nums">
+                    ₹{selectedFertilizerDetails.price}
+                  </span>
+                  <span className="text-content-muted mx-2">·</span>
+                  <span className="text-content-secondary">
+                    {selectedFertilizerDetails.stock > 0
+                      ? `${selectedFertilizerDetails.stock} ${selectedFertilizerDetails.unit} available`
+                      : 'Out of stock'}
+                  </span>
+                </p>
+                <p className="text-sm text-content-secondary leading-relaxed">
+                  {selectedFertilizerDetails.description}
+                </p>
+              </div>
             )}
           </div>
 

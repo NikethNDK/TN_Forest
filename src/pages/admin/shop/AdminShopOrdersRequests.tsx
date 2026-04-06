@@ -3,16 +3,31 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Inbox, Search } from 'lucide-react';
 import { LoadingSpinner } from '../../../components/common';
-import { getOrders, type OrderFromApi } from '../../../services/api/shopApi';
+import { getOrders, getMe, type OrderFromApi } from '../../../services/api/shopApi';
 
 const AdminShopOrdersRequests: React.FC = () => {
   const [orders, setOrders] = useState<OrderFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [isMainAdmin, setIsMainAdmin] = useState(true);
+  const [access, setAccess] = useState<'loading' | 'redirect' | 'ready'>('loading');
+
+  useEffect(() => {
+    getMe()
+      .then((me) => {
+        if (me.admin_type === 'division_admin') {
+          setAccess('redirect');
+          return;
+        }
+        setIsMainAdmin(me.admin_type === 'main_admin');
+        setAccess('ready');
+      })
+      .catch(() => setAccess('ready'));
+  }, []);
 
   const fetchOrders = useCallback(async (searchTerm?: string) => {
     setLoading(true);
@@ -31,8 +46,9 @@ const AdminShopOrdersRequests: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (access !== 'ready') return;
     fetchOrders();
-  }, [fetchOrders]);
+  }, [access, fetchOrders]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +64,23 @@ const AdminShopOrdersRequests: React.FC = () => {
   };
 
   const displayOrderNo = (o: OrderFromApi) => o.order_no || `#${o.id}`;
+
+  const displayAmount = (o: OrderFromApi) =>
+    !isMainAdmin && o.portion_subtotal != null && o.portion_subtotal !== ''
+      ? o.portion_subtotal
+      : o.total_amount;
+
+  if (access === 'loading') {
+    return (
+      <div className="flex justify-center py-12">
+        <LoadingSpinner message="Loading..." />
+      </div>
+    );
+  }
+
+  if (access === 'redirect') {
+    return <Navigate to="/admin/shop/orders/confirmed" replace />;
+  }
 
   return (
     <div>
@@ -115,7 +148,7 @@ const AdminShopOrdersRequests: React.FC = () => {
                   Customer
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
+                  {isMainAdmin ? 'Total' : 'Your portion'}
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Action
@@ -134,7 +167,7 @@ const AdminShopOrdersRequests: React.FC = () => {
                     <div className="text-gray-500">{o.delivery_email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                    ₹{o.total_amount}
+                    ₹{displayAmount(o)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                     <Link

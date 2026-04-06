@@ -7,6 +7,7 @@
 import { useState, useCallback } from 'react';
 import { createCustomOrder } from '../services/api/shopApi';
 import type { FertilizerOrderFormData, PickupLocation, ShopProduct } from '../types';
+import { groupProductsByCatalogId, pickDefaultListing } from '../utils/shopCatalogGroups';
 
 // Default pickup locations (research centers)
 const PICKUP_LOCATIONS: PickupLocation[] = [
@@ -21,6 +22,7 @@ const INITIAL_FORM_DATA: FertilizerOrderFormData = {
   name: '',
   email: '',
   phone: '',
+  selectedProductId: '',
   selectedFertilizer: '',
   quantity: '',
   transportation: '',

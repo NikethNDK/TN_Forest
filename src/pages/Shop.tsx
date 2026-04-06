@@ -5,7 +5,7 @@
  * cart functionality, and fertilizer order form.
  */
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ShoppingCart,
@@ -17,8 +17,13 @@ import {
   Loader2,
 } from 'lucide-react';
 import type { ShopProduct } from '../types';
-import ProductCard from '../components/shop/ProductCard';
+import CatalogProductCard from '../components/shop/CatalogProductCard';
 import CartSidebar from '../components/shop/CartSidebar';
+import {
+  groupProductsByCatalogId,
+  paginateGroups,
+  totalPagesForGroups,
+} from '../utils/shopCatalogGroups';
 import Pagination from '../components/shop/Pagination';
 import BioFertilizerOrderForm from '../components/shop/BioFertilizerOrderForm';
 import { getPublicProducts } from '../services/api/publicShopApi';
@@ -200,23 +205,26 @@ const Shop: React.FC = () => {
   const bioFertilizers = filteredProducts.filter((p) => p.category === 'Bio Fertilizers');
   const combinedSearchResults = searchTerm ? [...seedsSaplings, ...bioFertilizers] : [];
 
-  // Pagination helpers
-  const getPaginatedProducts = (productList: ShopProduct[], page: number): ShopProduct[] => {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return productList.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  };
+  const seedsGroups = useMemo(() => groupProductsByCatalogId(seedsSaplings), [seedsSaplings]);
+  const bioGroups = useMemo(() => groupProductsByCatalogId(bioFertilizers), [bioFertilizers]);
+  const searchGroups = useMemo(
+    () => groupProductsByCatalogId(combinedSearchResults),
+    [combinedSearchResults]
+  );
 
-  const getTotalPages = (productList: ShopProduct[]): number => {
-    return Math.ceil(productList.length / ITEMS_PER_PAGE);
-  };
+  const resolveListingImage = useCallback((p: ShopProduct) => {
+    if (p.imageUrl) return p.imageUrl;
+    if (p.category === 'Bio Fertilizers') return getBioFertilizerImageUrl(p.name);
+    return undefined;
+  }, []);
 
   return (
     <div className="py-16 bg-background-page min-h-screen font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 font-shop-body">
           <Leaf className="h-10 w-10 text-accent-darker mx-auto mb-3" />
-          <h1 className="text-3xl md:text-4xl font-extrabold text-content-heading mb-4">
+          <h1 className="font-shop-display text-3xl md:text-4xl font-bold text-content-heading mb-4 tracking-tight">
           TamilNadu Forest Department's Research Eco-Store
           </h1>
           <p className="text-lg text-content-secondary max-w-4xl mx-auto leading-relaxed">
@@ -247,9 +255,9 @@ const Shop: React.FC = () => {
             >
               <ShoppingCart className="h-5 w-5 mr-2" />
               {showCart ? 'Hide Order' : 'View Order'}
-              {getCartItemCount() > 0 && (
-                <span className="absolute -top-3 -right-3 bg-status-error-main text-content-inverse text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold ring-2 ring-background-paper">
-                  {getCartItemCount()}
+              {cart.length > 0 && (
+                <span className="absolute -top-3 -right-3 bg-status-error-main text-content-inverse text-xs rounded-full h-6 min-w-[1.5rem] px-1 flex items-center justify-center font-bold ring-2 ring-background-paper tabular-nums">
+                  {cart.length}
                 </span>
               )}
             </button>
@@ -286,7 +294,7 @@ const Shop: React.FC = () => {
           <div>
             {searchTerm ? (
               // Search Results View
-              combinedSearchResults.length > 0 ? (
+              searchGroups.length > 0 ? (
                 <div>
                   <div className="mb-6">
                     <h2 className="text-3xl font-bold text-content-heading mb-2 flex items-center">
@@ -294,27 +302,25 @@ const Shop: React.FC = () => {
                       Search Results
                     </h2>
                     <p className="text-content-secondary">
-                      Found {combinedSearchResults.length} product
-                      {combinedSearchResults.length !== 1 ? 's' : ''} matching "
-                      {searchTerm}"
+                      Found {searchGroups.length} product
+                      {searchGroups.length !== 1 ? 's' : ''} matching &quot;{searchTerm}&quot;
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                    {getPaginatedProducts(combinedSearchResults, searchPage).map(
-                      (product) => (
-                        <ProductCard
-                          key={product.id}
-                          product={product}
-                          addToCart={addToCart}
-                        />
-                      )
-                    )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8 font-shop-body">
+                    {paginateGroups(searchGroups, searchPage, ITEMS_PER_PAGE).map((group) => (
+                      <CatalogProductCard
+                        key={group.key}
+                        offers={group.items}
+                        addToCart={addToCart}
+                        resolveImageUrl={resolveListingImage}
+                      />
+                    ))}
                   </div>
 
                   <Pagination
                     currentPage={searchPage}
-                    totalPages={getTotalPages(combinedSearchResults)}
+                    totalPages={totalPagesForGroups(searchGroups.length, ITEMS_PER_PAGE)}
                     onPageChange={setSearchPage}
                   />
                 </div>
@@ -350,7 +356,7 @@ const Shop: React.FC = () => {
                         }`}
                       />
                       Seeds
-                      {seedsSaplings.length > 0 && (
+                      {seedsGroups.length > 0 && (
                         <span
                           className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
                             activeTab === 'Seeds'
@@ -358,7 +364,7 @@ const Shop: React.FC = () => {
                               : 'bg-interactive-disabled text-interactive-disabledText'
                           }`}
                         >
-                          {seedsSaplings.length}
+                          {seedsGroups.length}
                         </span>
                       )}
                     </div>
@@ -383,7 +389,7 @@ const Shop: React.FC = () => {
                         }`}
                       />
                       Bio Fertilizers
-                      {bioFertilizers.length > 0 && (
+                      {bioGroups.length > 0 && (
                         <span
                           className={`ml-2 px-2 py-1 rounded-full text-xs font-bold ${
                             activeTab === 'Bio Fertilizers'
@@ -391,7 +397,7 @@ const Shop: React.FC = () => {
                               : 'bg-interactive-disabled text-interactive-disabledText'
                           }`}
                         >
-                          {bioFertilizers.length}
+                          {bioGroups.length}
                         </span>
                       )}
                     </div>
@@ -404,22 +410,21 @@ const Shop: React.FC = () => {
                 {/* Tab Content */}
                 <div className="bg-background-paper rounded-b-xl shadow-xl p-6 border-t-0">
                   {activeTab === 'Seeds' ? (
-                    seedsSaplings.length > 0 ? (
+                    seedsGroups.length > 0 ? (
                       <>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                          {getPaginatedProducts(seedsSaplings, seedsPage).map(
-                            (product) => (
-                              <ProductCard
-                                key={product.id}
-                                product={product}
-                                addToCart={addToCart}
-                              />
-                            )
-                          )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8 font-shop-body">
+                          {paginateGroups(seedsGroups, seedsPage, ITEMS_PER_PAGE).map((group) => (
+                            <CatalogProductCard
+                              key={group.key}
+                              offers={group.items}
+                              addToCart={addToCart}
+                              resolveImageUrl={resolveListingImage}
+                            />
+                          ))}
                         </div>
                         <Pagination
                           currentPage={seedsPage}
-                          totalPages={getTotalPages(seedsSaplings)}
+                          totalPages={totalPagesForGroups(seedsGroups.length, ITEMS_PER_PAGE)}
                           onPageChange={setSeedsPage}
                         />
                       </>
@@ -429,25 +434,21 @@ const Shop: React.FC = () => {
                         <p className="text-content-secondary">No seeds available at the moment.</p>
                       </div>
                     )
-                  ) : bioFertilizers.length > 0 ? (
+                  ) : bioGroups.length > 0 ? (
                     <>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-                        {getPaginatedProducts(bioFertilizers, bioFertilizersPage).map(
-                          (product) => (
-                            <ProductCard
-                              key={product.id}
-                              product={{
-                                ...product,
-                                imageUrl: product.imageUrl || getBioFertilizerImageUrl(product.name),
-                              }}
-                              addToCart={addToCart}
-                            />
-                          )
-                        )}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8 font-shop-body">
+                        {paginateGroups(bioGroups, bioFertilizersPage, ITEMS_PER_PAGE).map((group) => (
+                          <CatalogProductCard
+                            key={group.key}
+                            offers={group.items}
+                            addToCart={addToCart}
+                            resolveImageUrl={resolveListingImage}
+                          />
+                        ))}
                       </div>
                       <Pagination
                         currentPage={bioFertilizersPage}
-                        totalPages={getTotalPages(bioFertilizers)}
+                        totalPages={totalPagesForGroups(bioGroups.length, ITEMS_PER_PAGE)}
                         onPageChange={setBioFertilizersPage}
                       />
                     </>

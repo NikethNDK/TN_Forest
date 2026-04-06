@@ -1,8 +1,9 @@
-import { Route, Navigate } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 import AdminShopLayout from '../pages/admin/shop/AdminShopLayout';
 import AdminShopOverview from '../pages/admin/shop/AdminShopOverview';
 import AdminShopDivisions from '../pages/admin/shop/AdminShopDivisions.tsx';
 import AdminShopProducts from '../pages/admin/shop/AdminShopProducts.tsx';
+import ShopOrdersDefaultRedirect from '../pages/admin/shop/ShopOrdersDefaultRedirect';
 import AdminShopOrdersRequests from '../pages/admin/shop/AdminShopOrdersRequests.tsx';
 import AdminShopOrdersConfirmed from '../pages/admin/shop/AdminShopOrdersConfirmed.tsx';
 import AdminOrderDetail from '../pages/admin/AdminOrderDetail';
@@ -13,7 +14,7 @@ export const adminShopRoutes = (
       <Route index element={<AdminShopOverview />} />
       <Route path="divisions" element={<AdminShopDivisions />} />
       <Route path="products" element={<AdminShopProducts />} />
-      <Route path="orders" element={<Navigate to="/admin/shop/orders/requests" replace />} />
+      <Route path="orders" element={<ShopOrdersDefaultRedirect />} />
       <Route path="orders/requests" element={<AdminShopOrdersRequests />} />
       <Route path="orders/confirmed" element={<AdminShopOrdersConfirmed />} />
       <Route path="orders/:orderId" element={<AdminOrderDetail />} />

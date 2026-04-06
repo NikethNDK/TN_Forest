@@ -21,7 +21,9 @@ const publicClient = axios.create({
 
 /** Raw product from GET /api/public/products/ (snake_case). */
 interface PublicProductRaw {
+  /** Supplier listing id */
   id: number;
+  product_id: number;
   division: number;
   division_name: string;
   name: string;
@@ -39,6 +41,8 @@ interface PublicProductRaw {
 function mapToShopProduct(raw: PublicProductRaw): ShopProduct {
   return {
     id: String(raw.id),
+    productId: String(raw.product_id),
+    divisionName: raw.division_name || undefined,
     name: raw.name,
     description: raw.description ?? '',
     price: parseFloat(raw.price) || 0,

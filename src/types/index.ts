@@ -92,7 +92,10 @@ export interface ShopDivision {
 
 // Shop Product type
 export interface ShopProduct {
-  id?: string; // Firestore document ID
+  id?: string; // Listing id when using Django API (supplier row)
+  productId?: string; // Global catalog id from Django API
+  /** Supplier / research center name when using Django listings API */
+  divisionName?: string;
   name: string;
   description: string;
   price: number;
@@ -304,6 +307,9 @@ export interface FertilizerOrderFormData {
   name: string;
   email: string;
   phone: string;
+  /** Catalog group key (`productId`); drives supplier sub-select when multiple listings exist. */
+  selectedProductId: string;
+  /** Listing id (supplier line) for checkout / API. */
   selectedFertilizer: string;
   quantity: string;
   transportation: string;

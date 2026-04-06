@@ -56,6 +56,9 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
+        /** Eco-store product cards — distinctive pairing (see index.html font links) */
+        'shop-display': ['Fraunces', 'Georgia', 'serif'],
+        'shop-body': ['"Source Sans 3"', 'system-ui', 'sans-serif'],
       },
     },
   },

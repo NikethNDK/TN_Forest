@@ -19,16 +19,21 @@ import {
   Loader2,
   AlertTriangle,
 } from 'lucide-react';
-import { getOrderById, acceptOrder, declineOrder } from '../../services/api/shopApi';
+import { getOrderById, acceptOrder, declineOrder, getMe } from '../../services/api/shopApi';
 import type { OrderFromApi } from '../../services/api/shopApi';
 
 /** Map API order to UI shape (deliveryDetails, items with name/price/quantity/unit, orderNo). */
 function mapOrderToDisplay(api: OrderFromApi) {
+  const portion =
+    api.portion_subtotal != null && api.portion_subtotal !== ''
+      ? Number(api.portion_subtotal)
+      : null;
   return {
     id: String(api.id),
     orderNo: api.order_no ?? `#${api.id}`,
     status: api.status,
     totalAmount: Number(api.total_amount),
+    portionSubtotal: portion,
     transactionId: api.transaction_id,
     deliveryDetails: {
       name: api.delivery_name,
@@ -39,12 +44,13 @@ function mapOrderToDisplay(api: OrderFromApi) {
       state: api.delivery_state,
       pincode: api.delivery_pincode,
     },
-    items: api.items.map((it, idx) => ({
+    items: api.items.map((it) => ({
       id: it.id,
       name: it.product_name,
       quantity: it.quantity,
       unit: it.unit ?? '',
       price: Number(it.price),
+      divisionName: it.division_name ?? undefined,
       imageIcon: undefined as string | undefined,
     })),
     createdAt: api.created_at,
@@ -63,6 +69,13 @@ const AdminOrderDetail: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isMainAdmin, setIsMainAdmin] = useState(true);
+
+  useEffect(() => {
+    getMe()
+      .then((me) => setIsMainAdmin(me.admin_type === 'main_admin'))
+      .catch(() => setIsMainAdmin(false));
+  }, []);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -148,7 +161,9 @@ const AdminOrderDetail: React.FC = () => {
 
   // Error state
   if (error) {
-    const backTo = location.pathname.startsWith('/admin/shop') ? '/admin/shop/orders/requests' : '/admin';
+    const backToEcoStore =
+      isMainAdmin ? '/admin/shop/orders/requests' : '/admin/shop/orders/confirmed';
+    const backTo = location.pathname.startsWith('/admin/shop') ? backToEcoStore : '/admin';
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -159,7 +174,11 @@ const AdminOrderDetail: React.FC = () => {
             onClick={() => navigate(backTo)}
             className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
           >
-            {backTo.includes('/shop') ? 'Back to Requested orders' : 'Back to Admin'}
+            {backTo.includes('/confirmed')
+              ? 'Back to Confirmed orders'
+              : backTo.includes('/shop')
+                ? 'Back to Requested orders'
+                : 'Back to Admin'}
           </button>
         </div>
       </div>
@@ -170,16 +189,17 @@ const AdminOrderDetail: React.FC = () => {
     return null;
   }
 
-  const { deliveryDetails, items, totalAmount, transactionId, status, createdAt, orderNo } = order;
+  const { deliveryDetails, items, totalAmount, portionSubtotal, transactionId, status, createdAt, orderNo } = order;
+  const displayPrimaryAmount = isMainAdmin ? totalAmount : portionSubtotal ?? totalAmount;
 
   const isFromEcoStore = location.pathname.startsWith('/admin/shop');
   const backHref = isFromEcoStore
-    ? status === 'pending'
+    ? isMainAdmin && status === 'pending'
       ? '/admin/shop/orders/requests'
       : '/admin/shop/orders/confirmed'
     : '/admin';
   const backLabel = isFromEcoStore
-    ? status === 'pending'
+    ? isMainAdmin && status === 'pending'
       ? 'Back to Requested orders'
       : 'Back to Confirmed orders'
     : 'Back to Dashboard';
@@ -305,8 +325,15 @@ const AdminOrderDetail: React.FC = () => {
             </div>
             
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <p className="text-sm text-green-700 font-medium mb-1">Total Amount</p>
-              <p className="text-3xl font-bold text-green-800">₹{totalAmount}</p>
+              <p className="text-sm text-green-700 font-medium mb-1">
+                {isMainAdmin ? 'Total amount' : "Your division's portion"}
+              </p>
+              <p className="text-3xl font-bold text-green-800">₹{displayPrimaryAmount}</p>
+              {!isMainAdmin && portionSubtotal != null && (
+                <p className="text-xs text-gray-500 mt-2">
+                  Full order total (all divisions): ₹{totalAmount}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -326,6 +353,9 @@ const AdminOrderDetail: React.FC = () => {
                 <span className="text-2xl mr-4">{item.imageIcon || '🌿'}</span>
                 <div>
                   <p className="font-medium text-gray-800">{item.name}</p>
+                  {item.divisionName && (
+                    <p className="text-xs text-gray-500">Sold by: {item.divisionName}</p>
+                  )}
                   <p className="text-sm text-gray-500">
                     {item.quantity} {item.unit} × ₹{item.price}
                   </p>
@@ -337,13 +367,15 @@ const AdminOrderDetail: React.FC = () => {
         </div>
         
         <div className="border-t border-gray-200 mt-4 pt-4 flex justify-between items-center">
-          <span className="text-lg font-semibold text-gray-800">Total</span>
-          <span className="text-2xl font-bold text-green-700">₹{totalAmount}</span>
+          <span className="text-lg font-semibold text-gray-800">
+            {isMainAdmin ? 'Total' : 'Your portion'}
+          </span>
+          <span className="text-2xl font-bold text-green-700">₹{displayPrimaryAmount}</span>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      {status === 'pending' && (
+      {/* Action Buttons — main admin only; division admin sees scoped lines only */}
+      {status === 'pending' && isMainAdmin && (
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
           <button
             onClick={handleAcceptOrder}

@@ -94,7 +94,10 @@ export async function deleteDivision(id: number): Promise<void> {
 // --- Products (Django API snake_case → camelCase for UI) ---
 
 export interface ShopProductApi {
+  /** Supplier listing id (URLs and checkout use this). */
   id: number;
+  /** Global catalog product id. */
+  product_id: number;
   division: number;
   division_name: string;
   name: string;
@@ -105,12 +108,14 @@ export interface ShopProductApi {
   image_url: string | null;
   image_public_id: string | null;
   image_icon: string;
+  visible_on_shop: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export interface ShopProductFromApi {
   id: number;
+  productId: number;
   division: number;
   divisionName: string;
   name: string;
@@ -121,6 +126,7 @@ export interface ShopProductFromApi {
   imageUrl: string | null;
   imagePublicId: string | null;
   imageIcon: string;
+  visibleOnShop: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -128,6 +134,7 @@ export interface ShopProductFromApi {
 function normalizeProduct(raw: ShopProductApi): ShopProductFromApi {
   return {
     id: raw.id,
+    productId: raw.product_id,
     division: raw.division,
     divisionName: raw.division_name,
     name: raw.name,
@@ -138,21 +145,39 @@ function normalizeProduct(raw: ShopProductApi): ShopProductFromApi {
     imageUrl: raw.image_url || null,
     imagePublicId: raw.image_public_id || null,
     imageIcon: raw.image_icon || '',
+    visibleOnShop: raw.visible_on_shop ?? true,
     createdAt: raw.created_at,
     updatedAt: raw.updated_at,
   };
 }
 
-export interface CreateProductPayload {
+/** One row for multi-division create: division + stock (kg). */
+export interface CreateProductListingRow {
   division: number;
+  stock: number;
+  listing_price?: number;
+}
+
+export interface CreateProductPayload {
   name: string;
   description: string;
   price: number;
-  stock: number;
   category: string;
   image_url?: string | null;
   image_public_id?: string | null;
   image_icon?: string | null;
+  /** Multi-supplier create: N division rows (preferred for main admin). */
+  listings?: CreateProductListingRow[];
+  /** Legacy single listing (same as one row in `listings`). */
+  division?: number;
+  stock?: number;
+  visible_on_shop?: boolean;
+}
+
+/** Response from POST /api/inventory/products/ after multi-listing support. */
+export interface CreateProductResult {
+  productId: number;
+  listings: ShopProductFromApi[];
 }
 
 export interface UpdateProductPayload {
@@ -165,6 +190,7 @@ export interface UpdateProductPayload {
   image_url?: string | null;
   image_public_id?: string | null;
   image_icon?: string | null;
+  visible_on_shop?: boolean;
 }
 
 /** Paginated list response from GET /api/inventory/products/ */
@@ -177,6 +203,8 @@ export interface ProductsPaginatedResponse {
 
 export interface ProductsListParams {
   division?: number;
+  /** Global catalog product id — returns all supplier rows for that product (admin). */
+  product?: number;
   category?: string;
   ordering?: string;
 }
@@ -197,6 +225,7 @@ export async function getProductsPaginated(
     page_size: pageSize,
   };
   if (params?.division !== undefined) requestParams.division = params.division;
+  if (params?.product !== undefined) requestParams.product = params.product;
   if (params?.category !== undefined && params.category !== '') requestParams.category = params.category;
   if (params?.ordering !== undefined && params.ordering !== '') requestParams.ordering = params.ordering;
   const { data } = await shopClient.get<{
@@ -218,19 +247,51 @@ export async function getProduct(id: number): Promise<ShopProductFromApi> {
   return normalizeProduct(data);
 }
 
-export async function createProduct(payload: CreateProductPayload): Promise<ShopProductFromApi> {
-  const body = {
-    division: payload.division,
+export async function createProduct(payload: CreateProductPayload): Promise<CreateProductResult> {
+  const body: Record<string, unknown> = {
     name: payload.name.trim(),
     description: payload.description,
     price: payload.price,
-    stock: payload.stock,
     category: payload.category.trim(),
     image_url: payload.image_url ?? null,
     image_public_id: payload.image_public_id ?? null,
     image_icon: payload.image_icon ?? '',
   };
-  const { data } = await shopClient.post<ShopProductApi>('/api/inventory/products/', body);
+  if (payload.visible_on_shop !== undefined) body.visible_on_shop = payload.visible_on_shop;
+  if (payload.listings && payload.listings.length > 0) {
+    body.listings = payload.listings.map((row) => ({
+      division: row.division,
+      stock: row.stock,
+      ...(row.listing_price != null ? { listing_price: row.listing_price } : {}),
+    }));
+  } else if (payload.division !== undefined && payload.stock !== undefined) {
+    body.division = payload.division;
+    body.stock = payload.stock;
+  }
+  const { data } = await shopClient.post<{ product_id: number; listings: ShopProductApi[] }>(
+    '/api/inventory/products/',
+    body
+  );
+  return {
+    productId: data.product_id,
+    listings: data.listings.map(normalizeProduct),
+  };
+}
+
+/** Add another division supplier row to an existing global product (main admin). */
+export async function addProductListing(
+  productId: number,
+  payload: { division: number; stock: number; listing_price?: number }
+): Promise<ShopProductFromApi> {
+  const body: Record<string, unknown> = {
+    division: payload.division,
+    stock: payload.stock,
+  };
+  if (payload.listing_price != null) body.listing_price = payload.listing_price;
+  const { data } = await shopClient.post<ShopProductApi>(
+    `/api/inventory/products/${productId}/listings/`,
+    body
+  );
   return normalizeProduct(data);
 }
 
@@ -245,6 +306,7 @@ export async function updateProduct(id: number, payload: UpdateProductPayload): 
   if (payload.image_url !== undefined) body.image_url = payload.image_url;
   if (payload.image_public_id !== undefined) body.image_public_id = payload.image_public_id;
   if (payload.image_icon !== undefined) body.image_icon = payload.image_icon ?? '';
+  if (payload.visible_on_shop !== undefined) body.visible_on_shop = payload.visible_on_shop;
   const { data } = await shopClient.patch<ShopProductApi>(`/api/inventory/products/${id}/`, body);
   return normalizeProduct(data);
 }
@@ -256,8 +318,9 @@ export async function deleteProduct(id: number): Promise<void> {
 // --- Orders (POST create is public; list/detail/accept/decline require auth) ---
 
 export interface CreateOrderPayload {
-  items: { product_id?: number; product_name: string; quantity: number; unit?: string; price: string | number }[];
-  total_amount: string;
+  items: { listing_id: number; quantity: number; unit?: string }[];
+  /** Ignored by server; totals are computed from listings. */
+  total_amount?: string;
   delivery_name: string;
   delivery_email: string;
   delivery_phone?: string;
@@ -274,13 +337,19 @@ export interface OrderItemApi {
   quantity: number;
   unit: string;
   price: string;
+  division: number | null;
+  division_name?: string | null;
+  listing: number | null;
 }
 
 export interface OrderFromApi {
   id: number;
   order_no?: string | null;
   status: string;
+  /** Full order total (main admin). */
   total_amount: string;
+  /** Sum of line totals for this admin’s divisions only (division admin); null for main admin. */
+  portion_subtotal?: string | null;
   transaction_id: string;
   delivery_name: string;
   delivery_email: string;

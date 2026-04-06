@@ -1,12 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, GitBranch, Package, Menu, X, LogOut, Inbox, CheckCircle } from 'lucide-react';
-import { signOutUser } from '../../services/firebase/authService';
+import { signOutUser, getCurrentUser, getAdminFirestoreProfile } from '../../services/firebase/authService';
 
 const StoreSidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
+  const [isDivisionAdmin, setIsDivisionAdmin] = useState(false);
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      const profile = await getAdminFirestoreProfile(user.uid);
+      if (!cancelled) {
+        setIsDivisionAdmin(profile?.role === 'admin' && profile?.admin_type === 'division_admin');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -23,7 +39,10 @@ const StoreSidebar: React.FC = () => {
   const isProductsActive = location.pathname === '/admin/shop/products';
   const isOrdersActive = location.pathname.startsWith('/admin/shop/orders');
   const isRequestsActive = location.pathname.startsWith('/admin/shop/orders/requests');
-  const isConfirmedActive = location.pathname.startsWith('/admin/shop/orders/confirmed');
+  const isOrderDetailPath = /^\/admin\/shop\/orders\/\d+$/.test(location.pathname);
+  const isConfirmedActive =
+    location.pathname.startsWith('/admin/shop/orders/confirmed') ||
+    (isDivisionAdmin && isOrderDetailPath);
 
   return (
     <>
@@ -62,20 +81,22 @@ const StoreSidebar: React.FC = () => {
             <span className="font-medium">Overview</span>
           </Link>
 
-          <Link
-            to="/admin/shop/divisions"
-            onClick={() => setIsOpen(false)}
-            className={`
+          {!isDivisionAdmin && (
+            <Link
+              to="/admin/shop/divisions"
+              onClick={() => setIsOpen(false)}
+              className={`
               flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
               ${isDivisionsActive
                 ? 'bg-green-700 text-lime-400'
                 : 'text-green-100 hover:bg-green-800 hover:text-white'
               }
             `}
-          >
-            <GitBranch className="h-5 w-5" />
-            <span className="font-medium">Divisions</span>
-          </Link>
+            >
+              <GitBranch className="h-5 w-5" />
+              <span className="font-medium">Divisions</span>
+            </Link>
+          )}
 
           <Link
             to="/admin/shop/products"
@@ -92,20 +113,22 @@ const StoreSidebar: React.FC = () => {
             <span className="font-medium">Products</span>
           </Link>
 
-          <Link
-            to="/admin/shop/orders/requests"
-            onClick={() => setIsOpen(false)}
-            className={`
+          {!isDivisionAdmin && (
+            <Link
+              to="/admin/shop/orders/requests"
+              onClick={() => setIsOpen(false)}
+              className={`
               flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
-              ${isRequestsActive || (isOrdersActive && !isConfirmedActive)
+              ${isRequestsActive || (isOrdersActive && !isConfirmedActive && !isOrderDetailPath)
                 ? 'bg-green-700 text-lime-400'
                 : 'text-green-100 hover:bg-green-800 hover:text-white'
               }
             `}
-          >
-            <Inbox className="h-5 w-5" />
-            <span className="font-medium">Requested orders</span>
-          </Link>
+            >
+              <Inbox className="h-5 w-5" />
+              <span className="font-medium">Requested orders</span>
+            </Link>
+          )}
 
           <Link
             to="/admin/shop/orders/confirmed"
@@ -123,13 +146,24 @@ const StoreSidebar: React.FC = () => {
           </Link>
 
           <div className="pt-4 border-t border-green-800 mt-4 space-y-2">
-            <Link
-              to="/admin"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-green-100 hover:bg-green-800 hover:text-white transition-colors"
-            >
-              <span className="font-medium">← Back to Admin</span>
-            </Link>
+            {!isDivisionAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-green-100 hover:bg-green-800 hover:text-white transition-colors"
+              >
+                <span className="font-medium">← Back to Admin</span>
+              </Link>
+            )}
+            {isDivisionAdmin && (
+              <Link
+                to="/"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-green-100 hover:bg-green-800 hover:text-white transition-colors"
+              >
+                <span className="font-medium">← Back to website</span>
+              </Link>
+            )}
             <button
               onClick={() => {
                 setIsOpen(false);
