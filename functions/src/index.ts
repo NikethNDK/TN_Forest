@@ -124,17 +124,22 @@ function validateFile(fileType: string, fileSize: number): { valid: boolean; err
 }
 
 /**
- * Verifies that the user is authenticated and is an admin
+ * Verifies that the user is authenticated and is a main admin (CMS uploads).
+ * Division admins must not use Cloudinary upload/delete from the public-site admin tools.
  */
-async function verifyAdmin(uid: string): Promise<void> {
+async function verifyMainAdmin(uid: string): Promise<void> {
   try {
-    // Check Firestore for admin status (matches frontend checkAdminStatus logic)
     const adminDoc = await admin.firestore().collection('admins').doc(uid).get();
-    
-    if (!adminDoc.exists || adminDoc.data()?.role !== 'admin') {
+    const data = adminDoc.data();
+    const adminType = data?.admin_type;
+    const isMain =
+      adminType === 'main_admin' ||
+      adminType === 'main_type';
+
+    if (!adminDoc.exists || data?.role !== 'admin' || !isMain) {
       throw new functions.https.HttpsError(
         'permission-denied',
-        'Admin access required. You do not have permission to upload files.'
+        'Main admin access required. You do not have permission for this operation.'
       );
     }
   } catch (error) {
@@ -168,8 +173,8 @@ export const generateUploadSignature = functions.https.onCall(
       );
     }
 
-    // Verify admin status
-    await verifyAdmin(context.auth.uid);
+    // Verify main admin (division admins cannot obtain upload signatures)
+    await verifyMainAdmin(context.auth.uid);
 
     // Validate request data
     if (!data.fileType || !data.fileSize) {
@@ -282,8 +287,7 @@ export const deleteCloudinaryImage = functions.https.onCall(
       );
     }
 
-    // Verify admin status
-    await verifyAdmin(context.auth.uid);
+    await verifyMainAdmin(context.auth.uid);
 
     // Validate request data
     if (!data.publicId) {

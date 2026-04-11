@@ -1,13 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, GitBranch, Package, Menu, X, LogOut, Inbox, CheckCircle } from 'lucide-react';
+import {
+  LayoutDashboard,
+  GitBranch,
+  Package,
+  Menu,
+  X,
+  LogOut,
+  Inbox,
+  CheckCircle,
+  Users,
+} from 'lucide-react';
 import { signOutUser, getCurrentUser, getAdminFirestoreProfile } from '../../services/firebase/authService';
+import { getMe } from '../../services/api/shopApi';
 
 const StoreSidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isDivisionAdmin, setIsDivisionAdmin] = useState(false);
+  const [isMainAdmin, setIsMainAdmin] = useState(false);
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -17,6 +29,25 @@ const StoreSidebar: React.FC = () => {
       const profile = await getAdminFirestoreProfile(user.uid);
       if (!cancelled) {
         setIsDivisionAdmin(profile?.role === 'admin' && profile?.admin_type === 'division_admin');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const me = await getMe();
+        if (!cancelled) {
+          setIsMainAdmin(me.admin_type === 'main_admin' || me.admin_type === 'main_type');
+        }
+      } catch {
+        if (!cancelled) setIsMainAdmin(false);
       }
     })();
     return () => {
@@ -36,6 +67,7 @@ const StoreSidebar: React.FC = () => {
 
   const isOverviewActive = location.pathname === '/admin/shop' || location.pathname === '/admin/shop/';
   const isDivisionsActive = location.pathname === '/admin/shop/divisions';
+  const isDivisionAdminsActive = location.pathname === '/admin/shop/division-admins';
   const isProductsActive = location.pathname === '/admin/shop/products';
   const isOrdersActive = location.pathname.startsWith('/admin/shop/orders');
   const isRequestsActive = location.pathname.startsWith('/admin/shop/orders/requests');
@@ -95,6 +127,23 @@ const StoreSidebar: React.FC = () => {
             >
               <GitBranch className="h-5 w-5" />
               <span className="font-medium">Divisions</span>
+            </Link>
+          )}
+
+          {isMainAdmin && (
+            <Link
+              to="/admin/shop/division-admins"
+              onClick={() => setIsOpen(false)}
+              className={`
+              flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+              ${isDivisionAdminsActive
+                ? 'bg-green-700 text-lime-400'
+                : 'text-green-100 hover:bg-green-800 hover:text-white'
+              }
+            `}
+            >
+              <Users className="h-5 w-5" />
+              <span className="font-medium">Division admins</span>
             </Link>
           )}
 

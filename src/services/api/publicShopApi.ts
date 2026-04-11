@@ -11,7 +11,11 @@ const getBaseUrl = (): string => {
   if (!url || typeof url !== 'string') {
     throw new Error('VITE_SHOP_API_URL is not set. Add it to your .env file.');
   }
-  return url.replace(/\/$/, '');
+  let normalized = url.trim().replace(/\/$/, '');
+  if (normalized.endsWith('/api')) {
+    normalized = normalized.slice(0, -4);
+  }
+  return normalized.replace(/\/$/, '');
 };
 
 const publicClient = axios.create({

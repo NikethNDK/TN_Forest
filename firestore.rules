@@ -1,0 +1,114 @@
+rules_version = '2';
+
+// admins: server-side writes only (Firebase Admin SDK / Django). Clients may read their own doc.
+// IMPORTANT: If you deploy this file as your entire ruleset, collections not listed below will be denied.
+// Merge this `match /admins/...` block into your full rules in the Firebase Console, or add your
+// existing collection rules below this block before deploying.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/admins/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Admins collection - users can read their own admin document to check status
+    match /admins/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if isAdmin();
+    }
+    
+    // Public collections - readable by everyone, writable only by admins
+    match /divisions/{document=**} {
+      allow read: if true; // Public read access
+      allow write: if isAdmin();
+    }
+    
+    match /contactLocations/{document=**} {
+    	allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /publications/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /publicationCategories/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /news/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /events/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /faculty/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /sliderImages/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /galleryImages/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /contact/{document=**} {
+      allow read: if isAdmin(); // Only admins can read contact submissions
+      allow write: if true; // Anyone can submit contact forms
+    }
+    
+    match /about/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /shopProducts/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    
+    match /orders/{orderId} {
+    	allow create: if true;
+      allow read: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /stats/{document=**} {
+    allow read: if true;
+    allow write: if true;
+    allow update: if true;
+    }
+    
+    match /blogs/{document=**} {
+    	allow read: if true;
+      allow write: if true;
+      allow update:if true
+    }
+    
+    // Default deny for any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

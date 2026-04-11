@@ -13,7 +13,12 @@ export const getShopApiBaseUrl = (): string => {
   if (!url || typeof url !== 'string') {
     throw new Error('VITE_SHOP_API_URL is not set. Add it to your .env file.');
   }
-  return url.replace(/\/$/, '');
+  let normalized = url.trim().replace(/\/$/, '');
+  // Paths already include `/api/...`. If env is `http://host:port/api`, requests would hit `/api/api/...` (404).
+  if (normalized.endsWith('/api')) {
+    normalized = normalized.slice(0, -4);
+  }
+  return normalized.replace(/\/$/, '');
 };
 
 const getBaseUrl = getShopApiBaseUrl;
@@ -63,6 +68,82 @@ export interface MeResponse {
 export async function getMe(): Promise<MeResponse> {
   const { data } = await shopClient.get<MeResponse>('/api/users/me/');
   return data;
+}
+
+// --- Division admins (main admin only) ---
+
+export interface DivisionAdminDivisionRef {
+  id: number;
+  name: string;
+}
+
+export interface DivisionAdminListItem {
+  firebase_uid: string;
+  admin_type: string;
+  division_ids: number[];
+  email: string | null;
+  divisions: DivisionAdminDivisionRef[];
+}
+
+export interface DivisionAdminsListResponse {
+  results: DivisionAdminListItem[];
+  count: number;
+}
+
+export interface CreateDivisionAdminPayload {
+  email: string;
+  password: string;
+  division_ids: number[];
+}
+
+export interface CreateDivisionAdminResponse {
+  firebase_uid: string;
+  admin_type: string;
+  division_ids: number[];
+  email: string;
+}
+
+export async function getDivisionAdmins(limit = 100): Promise<DivisionAdminsListResponse> {
+  const { data } = await shopClient.get<DivisionAdminsListResponse>('/api/users/division-admins/', {
+    params: { limit },
+  });
+  return data;
+}
+
+export async function createDivisionAdmin(
+  payload: CreateDivisionAdminPayload
+): Promise<CreateDivisionAdminResponse> {
+  const { data } = await shopClient.post<CreateDivisionAdminResponse>(
+    '/api/users/division-admins/',
+    payload
+  );
+  return data;
+}
+
+export interface UpdateDivisionAdminPayload {
+  email: string;
+  /** Omit or empty to leave password unchanged. */
+  password?: string;
+  division_ids: number[];
+}
+
+export async function updateDivisionAdmin(
+  firebaseUid: string,
+  payload: UpdateDivisionAdminPayload
+): Promise<CreateDivisionAdminResponse> {
+  const { data } = await shopClient.patch<CreateDivisionAdminResponse>(
+    `/api/users/division-admins/${encodeURIComponent(firebaseUid)}/`,
+    {
+      email: payload.email,
+      password: payload.password ?? '',
+      division_ids: payload.division_ids,
+    }
+  );
+  return data;
+}
+
+export async function deleteDivisionAdmin(firebaseUid: string): Promise<void> {
+  await shopClient.delete(`/api/users/division-admins/${encodeURIComponent(firebaseUid)}/`);
 }
 
 // --- Divisions ---
