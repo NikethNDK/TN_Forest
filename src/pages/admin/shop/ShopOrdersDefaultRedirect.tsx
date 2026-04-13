@@ -4,7 +4,7 @@ import { LoadingSpinner } from '../../../components/common';
 import { getMe } from '../../../services/api/shopApi';
 
 /**
- * `/admin/shop/orders` — main admin → requested queue; division admin → confirmed only.
+ * `/admin/shop/orders` — main admin → requested queue; division admin → pending (action) queue.
  */
 const ShopOrdersDefaultRedirect: React.FC = () => {
   const [target, setTarget] = useState<string | null>(null);
@@ -14,7 +14,7 @@ const ShopOrdersDefaultRedirect: React.FC = () => {
       .then((me) =>
         setTarget(
           me.admin_type === 'division_admin'
-            ? '/admin/shop/orders/confirmed'
+            ? '/admin/shop/orders/pending'
             : '/admin/shop/orders/requests'
         )
       )

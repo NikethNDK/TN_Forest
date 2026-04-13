@@ -478,17 +478,19 @@ const AdminShopProducts: React.FC = () => {
     setPage(1);
   };
 
-  const managedDivisionName =
+  const managedDivisionLabel =
     adminType === 'division_admin' && divisionIds.length > 0
-      ? divisions.find((d) => divisionIds.includes(d.id))?.name ?? `Division ${divisionIds[0]}`
+      ? divisionIds
+          .map((id) => divisions.find((d) => d.id === id)?.name ?? `Division ${id}`)
+          .join(', ')
       : null;
 
   return (
     <div>
-      {managedDivisionName && (
+      {managedDivisionLabel && (
         <p className="text-sm text-gray-600 mb-4">
-          You are managing <span className="font-semibold text-gray-800">{managedDivisionName}</span> only. Contact the
-          main admin to change catalog details.
+          You are managing{' '}
+          <span className="font-semibold text-gray-800">{managedDivisionLabel}</span>.
         </p>
       )}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">

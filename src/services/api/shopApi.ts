@@ -43,13 +43,29 @@ shopClient.interceptors.request.use(async (config) => {
   return config;
 });
 
+/** Thrown by shopClient on error responses; includes HTTP status when available. */
+export class ShopApiError extends Error {
+  readonly status: number | undefined;
+
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = 'ShopApiError';
+    this.status = status;
+  }
+}
+
+export function isShopApiError(err: unknown): err is ShopApiError {
+  return err instanceof ShopApiError;
+}
+
 shopClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError<{ detail?: string; name?: string[]; message?: string }>) => {
     const data = error.response?.data;
+    const status = error.response?.status;
     const message =
       data?.detail ?? (Array.isArray(data?.name) ? data?.name[0] : undefined) ?? data?.message ?? error.message ?? 'Request failed';
-    throw new Error(typeof message === 'string' ? message : 'Request failed');
+    throw new ShopApiError(typeof message === 'string' ? message : 'Request failed', status);
   }
 );
 
@@ -412,6 +428,14 @@ export interface CreateOrderPayload {
   transaction_id?: string;
 }
 
+export type OrderDecisionRollup =
+  | 'awaiting_decisions'
+  | 'fully_accepted'
+  | 'fully_rejected'
+  | 'partially_accepted';
+
+export type OrderItemDecisionStatus = 'pending' | 'accepted' | 'rejected';
+
 export interface OrderItemApi {
   id: number;
   product_name: string;
@@ -421,12 +445,19 @@ export interface OrderItemApi {
   division: number | null;
   division_name?: string | null;
   listing: number | null;
+  decision_status: OrderItemDecisionStatus;
+  decision_source?: string | null;
+  decided_at?: string | null;
+  decided_by?: number | null;
+  rejection_reason?: string;
 }
 
 export interface OrderFromApi {
   id: number;
   order_no?: string | null;
   status: string;
+  /** Aggregate of line-level accept/reject decisions. */
+  decision_rollup: OrderDecisionRollup;
   /** Full order total (main admin). */
   total_amount: string;
   /** Sum of line totals for this admin’s divisions only (division admin); null for main admin. */
@@ -474,6 +505,23 @@ export async function acceptOrder(id: number): Promise<OrderFromApi> {
 /** Decline order and send customer email (admin). Requires auth. */
 export async function declineOrder(id: number): Promise<OrderFromApi> {
   const { data } = await shopClient.post<OrderFromApi>(`/api/orders/${id}/decline/`);
+  return data;
+}
+
+export interface OrderItemDecisionPayload {
+  item_id: number;
+  decision: 'accepted' | 'rejected';
+  rejection_reason?: string;
+}
+
+/** Accept/reject specific line items (division or main admin). Requires auth. */
+export async function postOrderItemDecisions(
+  orderId: number,
+  items: OrderItemDecisionPayload[]
+): Promise<OrderFromApi> {
+  const { data } = await shopClient.post<OrderFromApi>(`/api/orders/${orderId}/items/decisions/`, {
+    items,
+  });
   return data;
 }
 

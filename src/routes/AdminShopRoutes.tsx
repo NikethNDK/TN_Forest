@@ -6,6 +6,7 @@ import AdminShopProducts from '../pages/admin/shop/AdminShopProducts.tsx';
 import ShopOrdersDefaultRedirect from '../pages/admin/shop/ShopOrdersDefaultRedirect';
 import AdminShopOrdersRequests from '../pages/admin/shop/AdminShopOrdersRequests.tsx';
 import AdminShopOrdersConfirmed from '../pages/admin/shop/AdminShopOrdersConfirmed.tsx';
+import AdminShopOrdersPendingDivision from '../pages/admin/shop/AdminShopOrdersPendingDivision';
 import AdminShopDivisionAdmins from '../pages/admin/shop/AdminShopDivisionAdmins';
 import AdminOrderDetail from '../pages/admin/AdminOrderDetail';
 
@@ -18,6 +19,7 @@ export const adminShopRoutes = (
       <Route path="products" element={<AdminShopProducts />} />
       <Route path="orders" element={<ShopOrdersDefaultRedirect />} />
       <Route path="orders/requests" element={<AdminShopOrdersRequests />} />
+      <Route path="orders/pending" element={<AdminShopOrdersPendingDivision />} />
       <Route path="orders/confirmed" element={<AdminShopOrdersConfirmed />} />
       <Route path="orders/:orderId" element={<AdminOrderDetail />} />
     </Route>

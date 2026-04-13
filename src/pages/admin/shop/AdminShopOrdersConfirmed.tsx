@@ -25,20 +25,24 @@ const AdminShopOrdersConfirmed: React.FC = () => {
   const [search, setSearch] = useState('');
   const [isMainAdmin, setIsMainAdmin] = useState(true);
 
-  useEffect(() => {
-    getMe()
-      .then((me) => setIsMainAdmin(me.admin_type === 'main_admin'))
-      .catch(() => setIsMainAdmin(false));
-  }, []);
-
   const fetchOrders = useCallback(async (searchTerm?: string) => {
     setLoading(true);
     setError(null);
     try {
+      const me = await getMe();
+      const main = me.admin_type === 'main_admin';
+      setIsMainAdmin(main);
       const list = await getOrders(
         searchTerm !== undefined && searchTerm.trim() !== '' ? { search: searchTerm.trim() } : undefined
       );
-      setOrders(list.filter((o) => o.status !== 'pending'));
+      if (main) {
+        const rollup = (o: (typeof list)[0]) => o.decision_rollup ?? 'awaiting_decisions';
+        setOrders(list.filter((o) => o.status !== 'pending' || rollup(o) !== 'awaiting_decisions'));
+      } else {
+        setOrders(
+          list.filter((o) => !(o.items ?? []).some((i) => i.decision_status === 'pending'))
+        );
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load orders';
       setError(message);

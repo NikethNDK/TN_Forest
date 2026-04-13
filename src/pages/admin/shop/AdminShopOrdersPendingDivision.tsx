@@ -1,5 +1,6 @@
 /**
- * Requested orders list (pending only). EcoStore Admin.
+ * Division admin: orders that still have at least one pending line for this admin's division(s).
+ * Same table UX as Confirmed orders; filter uses scoped line items from GET /api/orders/.
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -8,25 +9,38 @@ import { Inbox, Search } from 'lucide-react';
 import { LoadingSpinner } from '../../../components/common';
 import { getOrders, getMe, type OrderFromApi } from '../../../services/api/shopApi';
 
-const AdminShopOrdersRequests: React.FC = () => {
+const STATUS_BADGE_CLASS: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-800',
+  accepted: 'bg-green-100 text-green-800',
+  declined: 'bg-red-100 text-red-800',
+  confirmed: 'bg-blue-100 text-blue-800',
+  processing: 'bg-amber-100 text-amber-800',
+  shipped: 'bg-indigo-100 text-indigo-800',
+  delivered: 'bg-gray-100 text-gray-800',
+  cancelled: 'bg-gray-100 text-gray-600',
+};
+
+function hasPendingScopedLine(o: OrderFromApi): boolean {
+  return (o.items ?? []).some((i) => i.decision_status === 'pending');
+}
+
+const AdminShopOrdersPendingDivision: React.FC = () => {
   const [orders, setOrders] = useState<OrderFromApi[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [isMainAdmin, setIsMainAdmin] = useState(true);
-  const [access, setAccess] = useState<'loading' | 'redirect' | 'ready'>('loading');
+  const [access, setAccess] = useState<'loading' | 'ready' | 'redirect'>('loading');
 
   useEffect(() => {
     getMe()
       .then((me) => {
-        if (me.admin_type === 'division_admin') {
+        if (me.admin_type !== 'division_admin') {
           setAccess('redirect');
           return;
         }
-        setIsMainAdmin(me.admin_type === 'main_admin');
         setAccess('ready');
       })
-      .catch(() => setAccess('ready'));
+      .catch(() => setAccess('redirect'));
   }, []);
 
   const fetchOrders = useCallback(async (searchTerm?: string) => {
@@ -36,8 +50,7 @@ const AdminShopOrdersRequests: React.FC = () => {
       const list = await getOrders(
         searchTerm !== undefined && searchTerm.trim() !== '' ? { search: searchTerm.trim() } : undefined
       );
-      const rollup = (o: (typeof list)[0]) => o.decision_rollup ?? 'awaiting_decisions';
-      setOrders(list.filter((o) => o.status === 'pending' && rollup(o) === 'awaiting_decisions'));
+      setOrders(list.filter(hasPendingScopedLine));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load orders';
       setError(message);
@@ -65,11 +78,10 @@ const AdminShopOrdersRequests: React.FC = () => {
   };
 
   const displayOrderNo = (o: OrderFromApi) => o.order_no || `#${o.id}`;
+  const statusLabel = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
   const displayAmount = (o: OrderFromApi) =>
-    !isMainAdmin && o.portion_subtotal != null && o.portion_subtotal !== ''
-      ? o.portion_subtotal
-      : o.total_amount;
+    o.portion_subtotal != null && o.portion_subtotal !== '' ? o.portion_subtotal : o.total_amount;
 
   if (access === 'loading') {
     return (
@@ -80,16 +92,17 @@ const AdminShopOrdersRequests: React.FC = () => {
   }
 
   if (access === 'redirect') {
-    return <Navigate to="/admin/shop/orders/confirmed" replace />;
+    return <Navigate to="/admin/shop/orders/requests" replace />;
   }
 
   return (
     <div>
       <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
         <Inbox className="h-7 w-7 text-green-600" />
-        Requested orders
+        Pending orders
       </h2>
-      <p className="text-gray-600 mb-6">Orders awaiting accept or decline.</p>
+      <p className="text-gray-600 mb-2">Orders with line items awaiting your division&apos;s accept or reject.</p>
+      <p className="text-gray-500 text-sm mb-6">Open an order to act on your lines. You only see your division&apos;s portion.</p>
 
       <form onSubmit={handleSearchSubmit} className="mb-6 flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px]">
@@ -128,11 +141,11 @@ const AdminShopOrdersRequests: React.FC = () => {
 
       {loading ? (
         <div className="flex items-center justify-center py-12">
-          <LoadingSpinner message="Loading requested orders..." />
+          <LoadingSpinner message="Loading pending orders..." />
         </div>
       ) : orders.length === 0 ? (
         <div className="py-12 text-center text-gray-500 bg-gray-50 rounded-lg border border-gray-200">
-          No requested orders.
+          No pending orders for your division.
         </div>
       ) : (
         <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -149,7 +162,10 @@ const AdminShopOrdersRequests: React.FC = () => {
                   Customer
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {isMainAdmin ? 'Total' : 'Your portion'}
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Your portion
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Action
@@ -166,6 +182,15 @@ const AdminShopOrdersRequests: React.FC = () => {
                   <td className="px-6 py-4 text-sm text-gray-700">
                     <div>{o.delivery_name}</div>
                     <div className="text-gray-500">{o.delivery_email}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${
+                        STATUS_BADGE_CLASS[o.status] ?? 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {statusLabel(o.status)}
+                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
                     ₹{displayAmount(o)}
@@ -188,4 +213,4 @@ const AdminShopOrdersRequests: React.FC = () => {
   );
 };
 
-export default AdminShopOrdersRequests;
+export default AdminShopOrdersPendingDivision;
