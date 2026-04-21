@@ -256,7 +256,15 @@ const AdminOrderDetail: React.FC = () => {
       setTimeout(() => navigate(isFromEcoStore ? '/admin/shop/orders/confirmed' : '/admin'), 2000);
     } catch (err) {
       console.error('Error accepting order:', err);
-      setActionMessage({ type: 'error', message: 'Failed to accept order. Please try again.' });
+      const msg = err instanceof Error ? err.message : 'Failed to accept order. Please try again.';
+      if (msg.toLowerCase().includes('insufficient stock')) {
+        setActionMessage({
+          type: 'error',
+          message: `Acceptance blocked: ${msg}`,
+        });
+      } else {
+        setActionMessage({ type: 'error', message: msg });
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -295,12 +303,15 @@ const AdminOrderDetail: React.FC = () => {
       setActionMessage({ type: 'success', message: 'Line item updated.' });
       await refreshOrder();
     } catch (err) {
-      const msg =
+      const rawMsg =
         isShopApiError(err) && err.status === 409
           ? 'This line was already decided. Refresh the page.'
           : err instanceof Error
             ? err.message
             : 'Failed to update line item.';
+      const msg = rawMsg.toLowerCase().includes('insufficient stock')
+        ? `Acceptance blocked: ${rawMsg}`
+        : rawMsg;
       setActionMessage({ type: 'error', message: msg });
     } finally {
       setSubmittingItemId(null);
