@@ -40,7 +40,14 @@ const AdminShopOrdersConfirmed: React.FC = () => {
         setOrders(list.filter((o) => o.status !== 'pending' || rollup(o) !== 'awaiting_decisions'));
       } else {
         setOrders(
-          list.filter((o) => !(o.items ?? []).some((i) => i.decision_status === 'pending'))
+          list.filter(
+            (o) =>
+              !(o.items ?? []).some(
+                (i) =>
+                  i.decision_status === 'pending' ||
+                  (i.decision_status === 'accepted' && i.fulfillment_status !== 'delivered')
+              )
+          )
         );
       }
     } catch (err) {

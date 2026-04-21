@@ -10,6 +10,8 @@ import {
   Inbox,
   CheckCircle,
   Users,
+  Truck,
+  RotateCcw,
 } from 'lucide-react';
 import { signOutUser, getCurrentUser, getAdminFirestoreProfile } from '../../services/firebase/authService';
 import { getMe } from '../../services/api/shopApi';
@@ -72,6 +74,8 @@ const StoreSidebar: React.FC = () => {
   const isOrdersActive = location.pathname.startsWith('/admin/shop/orders');
   const isRequestsActive = location.pathname.startsWith('/admin/shop/orders/requests');
   const isPendingDivisionActive = location.pathname.startsWith('/admin/shop/orders/pending');
+  const isFulfillmentActive = location.pathname.startsWith('/admin/shop/orders/fulfillment');
+  const isRefundsActive = location.pathname.startsWith('/admin/shop/orders/refunds');
   const isOrderDetailPath = /^\/admin\/shop\/orders\/\d+$/.test(location.pathname);
   const isConfirmedActive =
     location.pathname.startsWith('/admin/shop/orders/confirmed') ||
@@ -194,6 +198,40 @@ const StoreSidebar: React.FC = () => {
             >
               <Inbox className="h-5 w-5" />
               <span className="font-medium">Pending orders</span>
+            </Link>
+          )}
+
+          {isDivisionAdmin && (
+            <Link
+              to="/admin/shop/orders/fulfillment"
+              onClick={() => setIsOpen(false)}
+              className={`
+              flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+              ${isFulfillmentActive
+                ? 'bg-green-700 text-lime-400'
+                : 'text-green-100 hover:bg-green-800 hover:text-white'
+              }
+            `}
+            >
+              <Truck className="h-5 w-5" />
+              <span className="font-medium">Fulfillment queue</span>
+            </Link>
+          )}
+
+          {isMainAdmin && (
+            <Link
+              to="/admin/shop/orders/refunds"
+              onClick={() => setIsOpen(false)}
+              className={`
+              flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+              ${isRefundsActive
+                ? 'bg-green-700 text-lime-400'
+                : 'text-green-100 hover:bg-green-800 hover:text-white'
+              }
+            `}
+            >
+              <RotateCcw className="h-5 w-5" />
+              <span className="font-medium">Refund queue</span>
             </Link>
           )}
 

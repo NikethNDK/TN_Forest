@@ -26,9 +26,17 @@ import {
   declineOrder,
   getMe,
   postOrderItemDecisions,
+  postOrderItemFulfillment,
+  postOrderItemRefunds,
   isShopApiError,
 } from '../../services/api/shopApi';
-import type { OrderDecisionRollup, OrderFromApi, OrderItemDecisionStatus } from '../../services/api/shopApi';
+import type {
+  OrderDecisionRollup,
+  OrderFromApi,
+  OrderItemDecisionStatus,
+  OrderItemFulfillmentStatus,
+  OrderItemRefundStatus,
+} from '../../services/api/shopApi';
 
 function decisionRollupLabel(rollup: OrderDecisionRollup): string {
   switch (rollup) {
@@ -73,6 +81,36 @@ function itemDecisionLabel(s: OrderItemDecisionStatus): string {
   }
 }
 
+function fulfillmentLabel(s: OrderItemFulfillmentStatus): string {
+  switch (s) {
+    case 'not_started':
+      return 'Not started';
+    case 'shipped':
+      return 'Shipped';
+    case 'out_for_delivery':
+      return 'Out for delivery';
+    case 'delivered':
+      return 'Delivered';
+    default:
+      return s;
+  }
+}
+
+function refundLabel(s: OrderItemRefundStatus): string {
+  switch (s) {
+    case 'not_applicable':
+      return 'Not applicable';
+    case 'refund_pending':
+      return 'Refund pending';
+    case 'refunded':
+      return 'Refunded';
+    case 'refund_failed':
+      return 'Refund failed';
+    default:
+      return s;
+  }
+}
+
 /** Map API order to UI shape (deliveryDetails, items with name/price/quantity/unit, orderNo). */
 function mapOrderToDisplay(api: OrderFromApi) {
   const portion =
@@ -85,6 +123,8 @@ function mapOrderToDisplay(api: OrderFromApi) {
     orderNo: api.order_no ?? `#${api.id}`,
     status: api.status,
     decisionRollup: rollup as OrderDecisionRollup,
+    fulfillmentRollup: api.fulfillment_rollup ?? 'not_applicable',
+    refundRollup: api.refund_rollup ?? 'not_applicable',
     totalAmount: Number(api.total_amount),
     portionSubtotal: portion,
     transactionId: api.transaction_id,
@@ -106,7 +146,10 @@ function mapOrderToDisplay(api: OrderFromApi) {
       divisionId: it.division,
       divisionName: it.division_name ?? undefined,
       decisionStatus: (it.decision_status ?? 'pending') as OrderItemDecisionStatus,
+      fulfillmentStatus: (it.fulfillment_status ?? 'not_started') as OrderItemFulfillmentStatus,
+      refundStatus: (it.refund_status ?? 'not_applicable') as OrderItemRefundStatus,
       rejectionReason: (it.rejection_reason ?? '').trim() || undefined,
+      refundReference: (it.refund_reference ?? '').trim() || undefined,
       imageIcon: undefined as string | undefined,
     })),
     createdAt: api.created_at,
@@ -181,10 +224,20 @@ const AdminOrderDetail: React.FC = () => {
     return new Date(timestamp).toLocaleString('en-IN', { dateStyle: 'full', timeStyle: 'short' });
   };
 
-  const canActOnItem = (item: OrderDisplay['items'][0]): boolean => {
+  const canDecideItem = (item: OrderDisplay['items'][0]): boolean => {
     if (item.decisionStatus !== 'pending') return false;
     if (isMainAdmin) return true;
     return item.divisionId != null && divisionIds.includes(item.divisionId);
+  };
+
+  const canUpdateFulfillment = (item: OrderDisplay['items'][0]): boolean => {
+    if (!isDivisionAdmin) return false;
+    if (item.decisionStatus !== 'accepted') return false;
+    return item.divisionId != null && divisionIds.includes(item.divisionId);
+  };
+
+  const canUpdateRefund = (item: OrderDisplay['items'][0]): boolean => {
+    return isMainAdmin && item.decisionStatus === 'rejected';
   };
 
   const handleAcceptOrder = async () => {
@@ -254,6 +307,24 @@ const AdminOrderDetail: React.FC = () => {
     }
   };
 
+  const handleFulfillmentUpdate = async (itemId: number, fulfillmentStatus: OrderItemFulfillmentStatus) => {
+    if (!orderId) return;
+    const id = parseInt(orderId, 10);
+    if (Number.isNaN(id)) return;
+    setSubmittingItemId(itemId);
+    setActionMessage(null);
+    try {
+      await postOrderItemFulfillment(id, [{ item_id: itemId, fulfillment_status: fulfillmentStatus }]);
+      setActionMessage({ type: 'success', message: 'Fulfillment status updated.' });
+      await refreshOrder();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update fulfillment.';
+      setActionMessage({ type: 'error', message: msg });
+    } finally {
+      setSubmittingItemId(null);
+    }
+  };
+
   const openRejectModal = (itemId: number) => {
     setRejectReasonDraft('');
     setRejectModalItemId(itemId);
@@ -290,6 +361,27 @@ const AdminOrderDetail: React.FC = () => {
           : err instanceof Error
             ? err.message
             : 'Failed to reject line item.';
+      setActionMessage({ type: 'error', message: msg });
+    } finally {
+      setSubmittingItemId(null);
+    }
+  };
+
+  const handleRefundUpdate = async (
+    itemId: number,
+    refundStatus: Exclude<OrderItemRefundStatus, 'not_applicable'>
+  ) => {
+    if (!orderId) return;
+    const id = parseInt(orderId, 10);
+    if (Number.isNaN(id)) return;
+    setSubmittingItemId(itemId);
+    setActionMessage(null);
+    try {
+      await postOrderItemRefunds(id, [{ item_id: itemId, refund_status: refundStatus }]);
+      setActionMessage({ type: 'success', message: 'Refund status updated.' });
+      await refreshOrder();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to update refund status.';
       setActionMessage({ type: 'error', message: msg });
     } finally {
       setSubmittingItemId(null);
@@ -354,11 +446,15 @@ const AdminOrderDetail: React.FC = () => {
     createdAt,
     orderNo,
     decisionRollup,
+    fulfillmentRollup,
+    refundRollup,
   } = order;
   const displayPrimaryAmount = isMainAdmin ? totalAmount : portionSubtotal ?? totalAmount;
 
   const hasPendingLine = items.some((i) => i.decisionStatus === 'pending');
-  const userHasLineActions = items.some((item) => canActOnItem(item));
+  const hasDecisionActions = items.some((item) => canDecideItem(item));
+  const hasFulfillmentActions = items.some((item) => canUpdateFulfillment(item));
+  const userHasLineActions = items.some((item) => canDecideItem(item) || canUpdateFulfillment(item) || canUpdateRefund(item));
 
   const isFromEcoStore = location.pathname.startsWith('/admin/shop');
   const inMainQueue =
@@ -369,9 +465,11 @@ const AdminOrderDetail: React.FC = () => {
         ? '/admin/shop/orders/requests'
         : '/admin/shop/orders/confirmed'
       : isDivisionAdmin
-        ? userHasLineActions
+        ? hasDecisionActions
           ? '/admin/shop/orders/pending'
-          : '/admin/shop/orders/confirmed'
+          : hasFulfillmentActions
+            ? '/admin/shop/orders/fulfillment'
+            : '/admin/shop/orders/confirmed'
         : '/admin/shop/orders/confirmed'
     : '/admin';
   const backLabel = isFromEcoStore
@@ -380,9 +478,11 @@ const AdminOrderDetail: React.FC = () => {
         ? 'Back to Requested orders'
         : 'Back to Confirmed orders'
       : isDivisionAdmin
-        ? userHasLineActions
+        ? hasDecisionActions
           ? 'Back to Pending orders'
-          : 'Back to Confirmed orders'
+          : hasFulfillmentActions
+            ? 'Back to Fulfillment queue'
+            : 'Back to Confirmed orders'
         : 'Back to Confirmed orders'
     : 'Back to Dashboard';
 
@@ -464,6 +564,12 @@ const AdminOrderDetail: React.FC = () => {
           className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${decisionRollupBadgeClass(decisionRollup)}`}
         >
           Decisions: {decisionRollupLabel(decisionRollup)}
+        </span>
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+          Fulfillment: {fulfillmentRollup}
+        </span>
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
+          Refunds: {refundRollup}
         </span>
         <span className="text-sm text-gray-500 w-full sm:w-auto sm:ml-2">Placed on: {formatDate(createdAt)}</span>
       </div>
@@ -549,7 +655,11 @@ const AdminOrderDetail: React.FC = () => {
         <div className="divide-y divide-gray-100">
           {items.map((item, index) => {
             const acting = submittingItemId === item.id;
-            const showRowActions = canActOnItem(item);
+            const showDecisionActions = canDecideItem(item);
+            const showFulfillmentActions = canUpdateFulfillment(item);
+            const showRefundActions = canUpdateRefund(item);
+            const fulfillmentLocked = item.fulfillmentStatus === 'delivered';
+            const refundLocked = item.refundStatus === 'refunded';
             return (
               <div
                 key={item.id || index}
@@ -569,11 +679,26 @@ const AdminOrderDetail: React.FC = () => {
                         <span className="block text-gray-500 mt-0.5">Reason: {item.rejectionReason}</span>
                       ) : null}
                     </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Fulfillment:{' '}
+                      <span className="font-medium text-gray-700">
+                        {fulfillmentLabel(item.fulfillmentStatus)}
+                      </span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Refund:{' '}
+                      <span className="font-medium text-gray-700">
+                        {refundLabel(item.refundStatus)}
+                      </span>
+                      {item.refundReference ? (
+                        <span className="block text-gray-500 mt-0.5">Ref: {item.refundReference}</span>
+                      ) : null}
+                    </p>
                   </div>
                 </div>
                 <div className="flex flex-col items-stretch sm:items-end gap-2 flex-shrink-0">
                   <p className="font-bold text-green-700 text-right">₹{item.price * item.quantity}</p>
-                  {showRowActions ? (
+                  {showDecisionActions ? (
                     <div className="flex flex-wrap gap-2 justify-end">
                       <button
                         type="button"
@@ -593,6 +718,52 @@ const AdminOrderDetail: React.FC = () => {
                         <XCircle className="h-4 w-4 mr-1" />
                         Reject
                       </button>
+                    </div>
+                  ) : null}
+                  {showFulfillmentActions ? (
+                    <div className="flex items-center gap-2 justify-end">
+                      <select
+                        value={item.fulfillmentStatus}
+                        onChange={(e) =>
+                          handleFulfillmentUpdate(
+                            item.id,
+                            e.target.value as OrderItemFulfillmentStatus
+                          )
+                        }
+                        disabled={acting || isProcessing || fulfillmentLocked}
+                        className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                      >
+                        <option value="not_started">Not started</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="out_for_delivery">Out for delivery</option>
+                        <option value="delivered">Delivered</option>
+                      </select>
+                      {fulfillmentLocked ? (
+                        <span className="text-xs text-gray-500">Locked</span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {showRefundActions ? (
+                    <div className="flex flex-wrap gap-2 justify-end">
+                      <button
+                        type="button"
+                        onClick={() => handleRefundUpdate(item.id, 'refund_pending')}
+                        disabled={acting || isProcessing || refundLocked}
+                        className="inline-flex items-center justify-center px-3 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Mark Pending
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRefundUpdate(item.id, 'refunded')}
+                        disabled={acting || isProcessing || refundLocked}
+                        className="inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Mark Refunded
+                      </button>
+                      {refundLocked ? (
+                        <span className="text-xs text-gray-500 self-center">Locked</span>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

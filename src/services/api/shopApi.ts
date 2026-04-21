@@ -435,6 +435,16 @@ export type OrderDecisionRollup =
   | 'partially_accepted';
 
 export type OrderItemDecisionStatus = 'pending' | 'accepted' | 'rejected';
+export type OrderItemFulfillmentStatus =
+  | 'not_started'
+  | 'shipped'
+  | 'out_for_delivery'
+  | 'delivered';
+export type OrderItemRefundStatus =
+  | 'not_applicable'
+  | 'refund_pending'
+  | 'refunded'
+  | 'refund_failed';
 
 export interface OrderItemApi {
   id: number;
@@ -450,6 +460,18 @@ export interface OrderItemApi {
   decided_at?: string | null;
   decided_by?: number | null;
   rejection_reason?: string;
+  fulfillment_status?: OrderItemFulfillmentStatus;
+  fulfillment_updated_at?: string | null;
+  fulfillment_updated_by?: number | null;
+  shipped_at?: string | null;
+  out_for_delivery_at?: string | null;
+  delivered_at?: string | null;
+  refund_status?: OrderItemRefundStatus;
+  refund_updated_at?: string | null;
+  refund_updated_by?: number | null;
+  refunded_at?: string | null;
+  refund_reference?: string;
+  refund_note?: string;
 }
 
 export interface OrderFromApi {
@@ -458,6 +480,10 @@ export interface OrderFromApi {
   status: string;
   /** Aggregate of line-level accept/reject decisions. */
   decision_rollup: OrderDecisionRollup;
+  /** Aggregate of accepted-line fulfillment progress. */
+  fulfillment_rollup?: string;
+  /** Aggregate of rejected-line refund progress. */
+  refund_rollup?: string;
   /** Full order total (main admin). */
   total_amount: string;
   /** Sum of line totals for this admin’s divisions only (division admin); null for main admin. */
@@ -522,6 +548,49 @@ export async function postOrderItemDecisions(
   const { data } = await shopClient.post<OrderFromApi>(`/api/orders/${orderId}/items/decisions/`, {
     items,
   });
+  return data;
+}
+
+export interface OrderItemFulfillmentPayload {
+  item_id: number;
+  fulfillment_status: OrderItemFulfillmentStatus;
+}
+
+/** Division admin: update fulfillment states for owned accepted line items. */
+export async function postOrderItemFulfillment(
+  orderId: number,
+  items: OrderItemFulfillmentPayload[]
+): Promise<OrderFromApi> {
+  const { data } = await shopClient.post<OrderFromApi>(`/api/orders/${orderId}/items/fulfillment/`, {
+    items,
+  });
+  return data;
+}
+
+export interface OrderItemRefundPayload {
+  item_id: number;
+  refund_status: Exclude<OrderItemRefundStatus, 'not_applicable'>;
+  refund_reference?: string;
+  refund_note?: string;
+}
+
+/** Main admin: update refund status for rejected line items. */
+export async function postOrderItemRefunds(
+  orderId: number,
+  items: OrderItemRefundPayload[]
+): Promise<OrderFromApi> {
+  const { data } = await shopClient.post<OrderFromApi>(`/api/orders/${orderId}/items/refunds/`, {
+    items,
+  });
+  return data;
+}
+
+/** Main admin: list refund queue (pending first, refunded below). */
+export async function getRefundQueueOrders(params?: { search?: string }): Promise<OrderFromApi[]> {
+  const config = params?.search?.trim()
+    ? { params: { search: params.search.trim() } }
+    : {};
+  const { data } = await shopClient.get<OrderFromApi[]>('/api/orders/refunds/', config);
   return data;
 }
 
