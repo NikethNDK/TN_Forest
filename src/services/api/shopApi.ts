@@ -69,6 +69,17 @@ shopClient.interceptors.response.use(
   }
 );
 
+publicShopClient.interceptors.response.use(
+  (response) => response,
+  (error: AxiosError<{ detail?: string; name?: string[]; message?: string }>) => {
+    const data = error.response?.data;
+    const status = error.response?.status;
+    const message =
+      data?.detail ?? (Array.isArray(data?.name) ? data?.name[0] : undefined) ?? data?.message ?? error.message ?? 'Request failed';
+    throw new ShopApiError(typeof message === 'string' ? message : 'Request failed', status);
+  }
+);
+
 export type { ShopDivision };
 
 // --- Me (current user + admin profile) ---
@@ -488,6 +499,10 @@ export interface OrderFromApi {
   total_amount: string;
   /** Sum of line totals for this admin’s divisions only (division admin); null for main admin. */
   portion_subtotal?: string | null;
+  /** Signed token for guest payment APIs when Razorpay is enabled on the backend. */
+  order_access_token?: string;
+  /** Backend signals Razorpay checkout flow. */
+  payment_required?: boolean;
   transaction_id: string;
   delivery_name: string;
   delivery_email: string;
@@ -504,6 +519,72 @@ export interface OrderFromApi {
 /** Create order (guest or auth). No token required. */
 export async function createOrder(payload: CreateOrderPayload): Promise<OrderFromApi> {
   const { data } = await publicShopClient.post<OrderFromApi>('/api/orders/', payload);
+  return data;
+}
+
+export interface CreateRazorpayOrderResponse {
+  razorpay_order_id: string;
+  amount: number;
+  currency: string;
+  key: string;
+  receipt: string;
+}
+
+/** Public: create Razorpay order for an existing shop order (authorize, manual capture). */
+export async function createRazorpayPaymentOrder(
+  orderId: number,
+  orderAccessToken: string
+): Promise<CreateRazorpayOrderResponse> {
+  const { data } = await publicShopClient.post<CreateRazorpayOrderResponse>(
+    '/api/payments/create-order/',
+    { order_id: orderId, order_access_token: orderAccessToken }
+  );
+  return data;
+}
+
+export interface VerifyRazorpayPaymentPayload {
+  order_id: number;
+  order_access_token: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+export interface VerifyRazorpayPaymentResponse {
+  status: string;
+  order_id: number;
+  order: OrderFromApi;
+  message?: string;
+}
+
+export async function verifyRazorpayPayment(
+  payload: VerifyRazorpayPaymentPayload
+): Promise<VerifyRazorpayPaymentResponse> {
+  const { data } = await publicShopClient.post<VerifyRazorpayPaymentResponse>(
+    '/api/payments/verify-authorization/',
+    payload
+  );
+  return data;
+}
+
+export interface PaymentStatusResponse {
+  payment_status: string;
+  amount_authorized_paise?: number;
+  amount_captured_paise?: number;
+  currency?: string;
+  authorized_at?: string | null;
+  razorpay_enabled?: boolean;
+  order?: OrderFromApi;
+}
+
+export async function getPaymentStatus(
+  orderId: number,
+  orderAccessToken: string
+): Promise<PaymentStatusResponse> {
+  const { data } = await publicShopClient.get<PaymentStatusResponse>(
+    `/api/payments/${orderId}/status/`,
+    { headers: { Authorization: `Bearer ${orderAccessToken}` } }
+  );
   return data;
 }
 

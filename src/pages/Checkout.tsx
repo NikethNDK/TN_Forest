@@ -21,7 +21,13 @@ import {
 } from 'lucide-react';
 import type { CheckoutDeliveryDetails } from '../types';
 import { useCart } from '../hooks/useCart';
-import { createOrder } from '../services/api/shopApi';
+import {
+  createOrder,
+  createRazorpayPaymentOrder,
+  verifyRazorpayPayment,
+  isShopApiError,
+  type OrderFromApi,
+} from '../services/api/shopApi';
 import { formatCartMoney, formatCartQtyForDisplay } from '../utils/cartQuantity';
 
 // ============ VALIDATION & SANITIZATION UTILITIES ============
@@ -144,6 +150,37 @@ const INITIAL_DELIVERY_DETAILS: CheckoutDeliveryDetails = {
 const PAYMENT_UPI_ID = 'forestconservation@sbi';
 const PAYMENT_ACCOUNT_NAME = 'EM CUM DEPUTY CONSERVATOR';
 
+const WANTS_RAZORPAY_CHECKOUT = import.meta.env.VITE_RAZORPAY_CHECKOUT_ENABLED === 'true';
+
+type RazorpaySuccessResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+};
+
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (ev: string, fn: (r: unknown) => void) => void;
+    };
+  }
+}
+
+function loadRazorpayScript(): Promise<void> {
+  if (document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) {
+    return Promise.resolve();
+  }
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Failed to load Razorpay'));
+    document.body.appendChild(s);
+  });
+}
+
 /**
  * Location state interface for pre-filled data from fertilizer form
  */
@@ -168,6 +205,13 @@ const Checkout: React.FC = () => {
   const [orderPlaced, setOrderPlaced] = useState<boolean>(false);
   const [orderId, setOrderId] = useState<string>('');
   const [orderNo, setOrderNo] = useState<string>('');
+  const [usedRazorpay, setUsedRazorpay] = useState<boolean>(false);
+  const [razorpayPaymentId, setRazorpayPaymentId] = useState<string>('');
+  const [pendingPaymentRetry, setPendingPaymentRetry] = useState<{
+    orderId: number;
+    token: string;
+    orderNo: string;
+  } | null>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -270,18 +314,19 @@ const Checkout: React.FC = () => {
       }
     });
 
-    // Validate transaction ID
-    const txnError = validateField('transactionId', transactionId);
-    if (txnError) {
-      newErrors.transactionId = txnError;
-      isValid = false;
+    if (!WANTS_RAZORPAY_CHECKOUT) {
+      const txnError = validateField('transactionId', transactionId);
+      if (txnError) {
+        newErrors.transactionId = txnError;
+        isValid = false;
+      }
     }
 
     setErrors(newErrors);
-    // Mark all fields as touched
     setTouched({
       name: true, email: true, phone: true, address: true,
-      city: true, state: true, pincode: true, transactionId: true
+      city: true, state: true, pincode: true,
+      ...(WANTS_RAZORPAY_CHECKOUT ? {} : { transactionId: true }),
     });
 
     return isValid;
@@ -302,7 +347,7 @@ const Checkout: React.FC = () => {
       city.trim() &&
       state.trim() &&
       pincode.trim() &&
-      transactionId.trim()
+      (WANTS_RAZORPAY_CHECKOUT || transactionId.trim())
     );
 
     // Check no validation errors exist
@@ -311,15 +356,129 @@ const Checkout: React.FC = () => {
     return allFieldsFilled && noErrors;
   };
 
+  const openRazorpayModal = (
+    meta: { orderId: number; orderNo: string; accessToken: string },
+    rzOrder: Awaited<ReturnType<typeof createRazorpayPaymentOrder>>
+  ): Promise<void> =>
+    new Promise((resolve) => {
+      const RazorpayCtor = window.Razorpay;
+      if (!RazorpayCtor) {
+        resolve();
+        return;
+      }
+      let checkoutComplete = false;
+      const contactDigits = deliveryDetails.phone.replace(/\D/g, '').replace(/^91/, '').slice(-10);
+
+      const rzp = new RazorpayCtor({
+        key: rzOrder.key,
+        amount: rzOrder.amount,
+        currency: rzOrder.currency,
+        name: 'Tamil Nadu Forest — Shop',
+        description: `Order ${meta.orderNo}`,
+        order_id: rzOrder.razorpay_order_id,
+        prefill: {
+          name: deliveryDetails.name.trim(),
+          email: deliveryDetails.email.trim(),
+          contact: contactDigits,
+        },
+        handler: async (response: RazorpaySuccessResponse) => {
+          checkoutComplete = true;
+          try {
+            await verifyRazorpayPayment({
+              order_id: meta.orderId,
+              order_access_token: meta.accessToken,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            setOrderId(String(meta.orderId));
+            setOrderNo(meta.orderNo);
+            setUsedRazorpay(true);
+            setRazorpayPaymentId(response.razorpay_payment_id);
+            setOrderPlaced(true);
+            setPendingPaymentRetry(null);
+          } catch (verifyErr) {
+            console.error(verifyErr);
+            const msg = isShopApiError(verifyErr)
+              ? verifyErr.message
+              : 'Payment verification failed. Please contact support with your order number.';
+            alert(msg);
+            setPendingPaymentRetry({
+              orderId: meta.orderId,
+              token: meta.accessToken,
+              orderNo: meta.orderNo,
+            });
+          }
+          resolve();
+        },
+        modal: {
+          ondismiss: () => {
+            if (!checkoutComplete) {
+              setPendingPaymentRetry({
+                orderId: meta.orderId,
+                token: meta.accessToken,
+                orderNo: meta.orderNo,
+              });
+            }
+            resolve();
+          },
+        },
+        theme: { color: '#166534' },
+      });
+
+      rzp.on('payment.failed', () => {
+        checkoutComplete = true;
+        setPendingPaymentRetry({
+          orderId: meta.orderId,
+          token: meta.accessToken,
+          orderNo: meta.orderNo,
+        });
+        alert('Payment failed. You can try again.');
+        resolve();
+      });
+
+      rzp.open();
+    });
+
+  const handleRetryRazorpayPayment = async (): Promise<void> => {
+    if (!pendingPaymentRetry) return;
+    setIsSubmitting(true);
+    try {
+      await loadRazorpayScript();
+      if (!window.Razorpay) {
+        alert('Could not load Razorpay. Check your network and try again.');
+        return;
+      }
+      const rzOrder = await createRazorpayPaymentOrder(
+        pendingPaymentRetry.orderId,
+        pendingPaymentRetry.token
+      );
+      await openRazorpayModal(
+        {
+          orderId: pendingPaymentRetry.orderId,
+          orderNo: pendingPaymentRetry.orderNo,
+          accessToken: pendingPaymentRetry.token,
+        },
+        rzOrder
+      );
+    } catch (error) {
+      console.error('Retry payment failed', error);
+      const msg = isShopApiError(error) ? error.message : 'Could not start payment. Please try again.';
+      alert(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handlePlaceOrder = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    
-    // Validate all fields before submission
+
     if (!validateAllFields()) {
       return;
     }
 
     setIsSubmitting(true);
+    setPendingPaymentRetry(null);
 
     try {
       const totalAmount = getTotalPrice();
@@ -336,7 +495,7 @@ const Checkout: React.FC = () => {
 
       const sanitizedTransactionId = transactionId.replace(/[^a-zA-Z0-9\-]/g, '').slice(0, 30);
 
-      const order = await createOrder({
+      const order: OrderFromApi = await createOrder({
         items: cart.map((item) => ({
           listing_id: Number(item.id),
           quantity: item.quantity,
@@ -350,17 +509,38 @@ const Checkout: React.FC = () => {
         delivery_city: sanitizedDeliveryDetails.city,
         delivery_state: sanitizedDeliveryDetails.state,
         delivery_pincode: sanitizedDeliveryDetails.pincode,
-        transaction_id: sanitizedTransactionId,
+        transaction_id: WANTS_RAZORPAY_CHECKOUT ? sanitizedTransactionId || '' : sanitizedTransactionId,
       });
 
       setOrderId(String(order.id));
       setOrderNo(order.order_no ?? `#${order.id}`);
-      setOrderPlaced(true);
       clearCart();
+
+      const accessToken = order.order_access_token;
+      const useRazorpay =
+        WANTS_RAZORPAY_CHECKOUT && Boolean(order.payment_required && accessToken);
+
+      if (useRazorpay && accessToken) {
+        await loadRazorpayScript();
+        if (!window.Razorpay) {
+          throw new Error('Could not load Razorpay.');
+        }
+        const rzOrder = await createRazorpayPaymentOrder(order.id, accessToken);
+        const meta = {
+          orderId: order.id,
+          orderNo: order.order_no ?? `#${order.id}`,
+          accessToken,
+        };
+        await openRazorpayModal(meta, rzOrder);
+      } else {
+        setUsedRazorpay(false);
+        setRazorpayPaymentId('');
+        setOrderPlaced(true);
+      }
     } catch (error) {
-      // Log generic error without sensitive details
-      console.error('Order placement failed');
-      alert('Failed to place order. Please try again.');
+      console.error('Order placement failed', error);
+      const msg = isShopApiError(error) ? error.message : 'Failed to place order. Please try again.';
+      alert(msg);
     } finally {
       setIsSubmitting(false);
     }
@@ -376,13 +556,24 @@ const Checkout: React.FC = () => {
               <CheckCircle className="h-12 w-12 text-primary-main" />
             </div>
             <h1 className="text-3xl font-bold text-content-heading mb-4">
-              Order Placed Successfully!
+              {usedRazorpay ? 'Payment Authorized' : 'Order Placed Successfully!'}
             </h1>
             <p className="text-content-secondary mb-6">
-              Thank you for your order. We have received your payment details and will
-              verify the transaction shortly.
+              {usedRazorpay ? (
+                <>
+                  Thank you. Your card or UPI payment is authorized and your order is queued for
+                  nursery review. You will be contacted at{' '}
+                  <strong>{deliveryDetails.email}</strong> or <strong>{deliveryDetails.phone}</strong>{' '}
+                  if anything is needed.
+                </>
+              ) : (
+                <>
+                  Thank you for your order. We have received your payment details and will verify
+                  the transaction shortly.
+                </>
+              )}
             </p>
-            
+
             <div className="bg-primary-lightest rounded-lg p-4 mb-6">
               <p className="text-sm text-content-secondary mb-1">Your order number</p>
               <p className="text-xl font-bold text-content-headingSecondary font-mono">{orderNo || orderId}</p>
@@ -390,14 +581,29 @@ const Checkout: React.FC = () => {
             </div>
 
             <div className="bg-status-info-lightest rounded-lg p-4 mb-8">
-              <p className="text-sm text-content-primary">
-                <strong>Transaction ID:</strong> {transactionId}
-              </p>
-              <p className="text-sm text-content-secondary mt-2">
-                Our team will verify your payment and contact you at{' '}
-                <strong>{deliveryDetails.email}</strong> or{' '}
-                <strong>{deliveryDetails.phone}</strong> within 24-48 hours.
-              </p>
+              {usedRazorpay ? (
+                <>
+                  <p className="text-sm text-content-primary">
+                    <strong>Payment reference:</strong>{' '}
+                    <span className="font-mono">{razorpayPaymentId}</span>
+                  </p>
+                  <p className="text-sm text-content-secondary mt-2">
+                    Funds are held until line items are accepted or rejected; captures and any refunds
+                    follow the decisions shown in your confirmation email when available.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-content-primary">
+                    <strong>Transaction ID:</strong> {transactionId}
+                  </p>
+                  <p className="text-sm text-content-secondary mt-2">
+                    Our team will verify your payment and contact you at{' '}
+                    <strong>{deliveryDetails.email}</strong> or{' '}
+                    <strong>{deliveryDetails.phone}</strong> within 24-48 hours.
+                  </p>
+                </>
+              )}
             </div>
 
             <button
@@ -658,37 +864,57 @@ const Checkout: React.FC = () => {
                 Payment
               </h2>
 
-              {/* QR Code Section */}
-              <div className="bg-gradient-to-br from-primary-lightest to-accent-lightest rounded-xl p-6 mb-6">
-                <div className="text-center">
-                  <p className="text-sm text-content-secondary mb-4">
-                    Scan the QR code below to pay via UPI
+              {pendingPaymentRetry && WANTS_RAZORPAY_CHECKOUT && (
+                <div className="mb-6 rounded-lg border border-status-warning-main/40 bg-status-warning-lightest p-4 text-left">
+                  <p className="text-sm font-semibold text-content-heading">Payment not completed</p>
+                  <p className="mt-1 text-sm text-content-secondary">
+                    Order <span className="font-mono">{pendingPaymentRetry.orderNo}</span> was created.
+                    Complete payment to confirm authorization.
                   </p>
-                  
-                  {/* QR Code Placeholder */}
-                  <div className="inline-block bg-background-paper p-4 rounded-xl shadow-md mb-4">
-                    {/* <div className="w-48 h-48 bg-background-muted rounded-lg flex items-center justify-center border-2 border-dashed border-border-default">
-                      <div className="text-center">
-                        <QrCode className="h-16 w-16 text-content-muted mx-auto mb-2" />
-                        <p className="text-xs text-content-tertiary">
-                          QR Code
-                        </p>
-                      </div>
-                    </div> */}
-                      <img 
-                        src="/QR_CODE.jpeg" 
-                        alt="Payment QR Code" 
-                        className="w-48 h-48"
-                      />
-                  </div>
-
-                  <div className="bg-background-paper rounded-lg p-3 shadow-sm">
-                    <p className="text-xs text-content-tertiary">UPI ID</p>
-                    <p className="font-mono font-bold text-content-headingSecondary">{PAYMENT_UPI_ID}</p>
-                    <p className="text-xs text-content-tertiary mt-1">{PAYMENT_ACCOUNT_NAME}</p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void handleRetryRazorpayPayment()}
+                    disabled={isSubmitting}
+                    className="mt-3 rounded-lg bg-interactive-primaryDefault px-4 py-2 text-sm font-semibold text-interactive-primaryText hover:bg-interactive-primaryHover disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Retry payment
+                  </button>
                 </div>
-              </div>
+              )}
+
+              {!WANTS_RAZORPAY_CHECKOUT && (
+                <>
+                  {/* QR Code Section */}
+                  <div className="mb-6 bg-gradient-to-br from-primary-lightest to-accent-lightest rounded-xl p-6">
+                    <div className="text-center">
+                      <p className="text-sm text-content-secondary mb-4">
+                        Scan the QR code below to pay via UPI
+                      </p>
+
+                      <div className="inline-block bg-background-paper p-4 rounded-xl shadow-md mb-4">
+                        <img src="/QR_CODE.jpeg" alt="Payment QR Code" className="w-48 h-48" />
+                      </div>
+
+                      <div className="bg-background-paper rounded-lg p-3 shadow-sm">
+                        <p className="text-xs text-content-tertiary">UPI ID</p>
+                        <p className="font-mono font-bold text-content-headingSecondary">{PAYMENT_UPI_ID}</p>
+                        <p className="text-xs text-content-tertiary mt-1">{PAYMENT_ACCOUNT_NAME}</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {WANTS_RAZORPAY_CHECKOUT && (
+                <div className="mb-6 rounded-lg border border-border-default bg-primary-lightest p-4">
+                  <p className="text-sm font-semibold text-content-heading">Secure online payment</p>
+                  <p className="mt-2 text-sm text-content-secondary">
+                    After you place the order, Razorpay Checkout will open for cards, UPI, or netbanking.
+                    Your payment is authorized first; the nursery decision happens next, then capture or
+                    release follows automatically.
+                  </p>
+                </div>
+              )}
 
               {/* Amount to Pay */}
               <div className="bg-accent-lighter rounded-lg p-4 mb-6">
@@ -700,40 +926,46 @@ const Checkout: React.FC = () => {
                 </div>
               </div>
 
-              {/* Transaction ID Input */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-content-heading mb-2">
-                  Transaction ID / UTR Number <span className="text-status-error-main">*</span>
-                </label>
-                <p className="text-xs text-content-tertiary mb-2">
-                  After making the payment, enter the Transaction ID or UTR number from your payment app (8-30 characters)
-                </p>
-                <input
-                  type="text"
-                  value={transactionId}
-                  onChange={(e) => handleTransactionIdChange(e.target.value)}
-                  onBlur={() => handleFieldBlur('transactionId', transactionId)}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus font-mono ${
-                    errors.transactionId && touched.transactionId ? 'border-status-error-main bg-status-error-lightest' : 'border-border-default'
-                  }`}
-                  placeholder="Enter Transaction ID"
-                  maxLength={30}
-                  required
-                />
-                {errors.transactionId && touched.transactionId && (
-                  <p className="text-status-error-main text-xs mt-1">{errors.transactionId}</p>
-                )}
-              </div>
+              {!WANTS_RAZORPAY_CHECKOUT && (
+                <div className="mb-6">
+                  <label className="block text-sm font-semibold text-content-heading mb-2">
+                    Transaction ID / UTR Number <span className="text-status-error-main">*</span>
+                  </label>
+                  <p className="text-xs text-content-tertiary mb-2">
+                    After making the payment, enter the Transaction ID or UTR number from your payment app
+                    (8-30 characters)
+                  </p>
+                  <input
+                    type="text"
+                    value={transactionId}
+                    onChange={(e) => handleTransactionIdChange(e.target.value)}
+                    onBlur={() => handleFieldBlur('transactionId', transactionId)}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-form-inputFocus focus:border-form-inputFocus font-mono ${
+                      errors.transactionId && touched.transactionId
+                        ? 'border-status-error-main bg-status-error-lightest'
+                        : 'border-border-default'
+                    }`}
+                    placeholder="Enter Transaction ID"
+                    maxLength={30}
+                    required
+                  />
+                  {errors.transactionId && touched.transactionId && (
+                    <p className="text-status-error-main text-xs mt-1">{errors.transactionId}</p>
+                  )}
+                </div>
+              )}
 
-              {/* Info Alert */}
               <div className="bg-status-info-lightest border border-status-info-border rounded-lg p-4 mb-6">
                 <div className="flex items-start">
                   <AlertCircle className="h-5 w-5 text-status-info-main mr-2 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-status-info-text">
-                    <p className="font-semibold mb-1">Payment Verification</p>
+                    <p className="font-semibold mb-1">
+                      {WANTS_RAZORPAY_CHECKOUT ? 'Authorize then review' : 'Payment Verification'}
+                    </p>
                     <p>
-                      Your order will be confirmed once we verify your payment. This usually
-                      takes 24-48 hours. We'll contact you via email/phone once verified.
+                      {WANTS_RAZORPAY_CHECKOUT
+                        ? 'Authorization confirms your order in the queue. Capture happens only after final accept/reject decisions on line items.'
+                        : 'Your order will be confirmed once we verify your payment. This usually takes 24-48 hours. We will contact you via email or phone once verified.'}
                     </p>
                   </div>
                 </div>
@@ -741,6 +973,7 @@ const Checkout: React.FC = () => {
 
               {/* Place Order Button */}
               <button
+                type="button"
                 onClick={handlePlaceOrder}
                 disabled={!isFormValid() || isSubmitting}
                 className={`w-full py-4 rounded-lg font-bold text-lg transition-all duration-300 flex items-center justify-center ${
@@ -776,7 +1009,7 @@ const Checkout: React.FC = () => {
                 ) : (
                   <>
                     <CheckCircle className="h-5 w-5 mr-2" />
-                    Place Order
+                    {WANTS_RAZORPAY_CHECKOUT ? 'Place order and pay' : 'Place Order'}
                   </>
                 )}
               </button>
