@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Info, ShoppingBag, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
+import { X, Info, ShoppingBag, Bell, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { NewsItem, Event } from '../../types';
 
@@ -9,8 +9,18 @@ interface WelcomeModalProps {
 }
 
 const STORAGE_KEY = 'welcomeModalSeen';
+const NEW_BADGE_GIF = '/gifs/918d2206-118a-11ee-9109-ab0118dc5509.gif';
 
-const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
+/** Temporary hardcoded notifications until CMS/API is wired */
+const NOTIFICATIONS = [
+  {
+    title: 'Recruitment Notification for Various Posts',
+    pdfUrl: '/notifications/notification corrected.pdf',
+    isNew: true,
+  },
+] as const;
+
+const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, events }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [showFloatingIcon, setShowFloatingIcon] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -39,9 +49,9 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
     navigate('/shop');
   };
 
-  // Get 2 latest news and 2 upcoming events
-  const displayNews = latestNews.slice(0, 2);
-  const displayEvents = events.slice(0, 2);
+  // Latest news (used when Latest News section below is uncommented)
+  // const displayNews = _latestNews.slice(0, 2);
+  const displayEvents = events.slice(0, 6);
 
   return (
     <>
@@ -94,6 +104,46 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
                 </button>
               </div>
 
+              {/* Notifications Section */}
+              <div className="bg-mission-vision-card-bg rounded-xl p-4 md:p-5 mb-4 border-l-4 border-home-card-border">
+                <div className="flex items-center gap-2 mb-3">
+                  <Bell className="h-5 w-5 text-home-heading shrink-0" />
+                  <h3 className="text-lg font-bold text-home-heading flex-1">Notifications</h3>
+                </div>
+                <div className="space-y-3">
+                  {NOTIFICATIONS.map((notification) => (
+                    <div
+                      key={notification.title}
+                      className="bg-background-paper rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow border border-home-card-border/30"
+                    >
+                      <div className="flex items-start gap-3">
+                        {notification.isNew && (
+                          <img
+                            src={NEW_BADGE_GIF}
+                            alt="New"
+                            className="h-11 w-auto shrink-0 object-contain mt-0.5"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-home-heading text-sm mb-2 leading-snug">
+                            {notification.title}
+                          </h4>
+                          <a
+                            href={encodeURI(notification.pdfUrl)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
+                          >
+                            View PDF
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Latest News Section */}
               {/* {displayNews.length > 0 && (
                 <div className="mb-4">
@@ -136,32 +186,47 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
 
               {/* Upcoming Events Section */}
               {/* {displayEvents.length > 0 && (
-                <div>
-                  <h3 className="text-lg font-bold text-content-heading mb-3 flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-accent-darker" />
-                    Upcoming Events
-                  </h3>
-                  <div className="space-y-3">
-                    {displayEvents.map((event, index) => (
-                      <div key={index} className="bg-background-paper border-l-4 border-accent-dark rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
-                        <p className="text-xs text-content-tertiary mb-1 flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" /> {event.date}
-                        </p>
-                        <h4 className="font-bold text-content-headingSecondary mb-1 text-sm">{event.title}</h4>
-                        <p className="text-xs text-content-secondary mb-2 line-clamp-2">{event.excerpt}</p>
-                        {(event.link || event.pdfUrl) && (
-                          <a
-                            href={event.link || event.pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"
-                          >
-                            {event.pdfUrl && !event.link ? 'View PDF' : 'View details'}
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                <div className="bg-news-events-ticker-body rounded-xl shadow-elevated overflow-hidden">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-news-events-ticker-header">
+                    <Calendar className="h-5 w-5 text-white shrink-0" />
+                    <h3 className="font-serif font-semibold text-white text-sm md:text-base">
+                      Upcoming Events
+                    </h3>
+                  </div>
+                  <div className="p-4 md:p-5">
+                    <div className="space-y-0">
+                      {displayEvents.map((event) => (
+                        <div
+                          key={event.id ?? `${event.title}-${event.date}`}
+                          className="py-3 group rounded transition-colors hover:bg-news-events-ticker-header/10 border-b border-home-card-border/30 last:border-b-0"
+                        >
+                          <p className="text-xs text-home-text-secondary mb-1 flex items-center">
+                            <Calendar className="h-3 w-3 mr-1" /> {event.date}
+                          </p>
+                          <h4 className="font-bold text-home-heading mb-1 text-sm">{event.title}</h4>
+                          <p className="text-xs text-home-text-secondary mb-2 line-clamp-2">{event.excerpt}</p>
+                          {event.blogSlug ? (
+                            <Link
+                              to={`/blog/${event.blogSlug}`}
+                              className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
+                            >
+                              Read more
+                              <span className="ml-1 group-hover:ml-2 transition-all">→</span>
+                            </Link>
+                          ) : (event.link || event.pdfUrl) && (
+                            <a
+                              href={event.link || event.pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
+                            >
+                              {event.pdfUrl && !event.link ? 'View PDF' : 'View details'}
+                              <ExternalLink className="h-3 w-3 ml-1" />
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )} */}
