@@ -12,6 +12,7 @@ import {
   Users,
   Truck,
   RotateCcw,
+  Wallet,
 } from 'lucide-react';
 import { signOutUser, getCurrentUser, getAdminFirestoreProfile } from '../../services/firebase/authService';
 import { getMe } from '../../services/api/shopApi';
@@ -76,6 +77,7 @@ const StoreSidebar: React.FC = () => {
   const isPendingDivisionActive = location.pathname.startsWith('/admin/shop/orders/pending');
   const isFulfillmentActive = location.pathname.startsWith('/admin/shop/orders/fulfillment');
   const isRefundsActive = location.pathname.startsWith('/admin/shop/orders/refunds');
+  const isPayoutsActive = location.pathname.startsWith('/admin/shop/payouts');
   const isOrderDetailPath = /^\/admin\/shop\/orders\/\d+$/.test(location.pathname);
   const isConfirmedActive =
     location.pathname.startsWith('/admin/shop/orders/confirmed') ||
@@ -232,6 +234,23 @@ const StoreSidebar: React.FC = () => {
             >
               <RotateCcw className="h-5 w-5" />
               <span className="font-medium">Refund queue</span>
+            </Link>
+          )}
+
+          {isMainAdmin && (
+            <Link
+              to="/admin/shop/payouts"
+              onClick={() => setIsOpen(false)}
+              className={`
+              flex items-center gap-3 px-4 py-3 rounded-lg transition-colors
+              ${isPayoutsActive
+                ? 'bg-green-700 text-lime-400'
+                : 'text-green-100 hover:bg-green-800 hover:text-white'
+              }
+            `}
+            >
+              <Wallet className="h-5 w-5" />
+              <span className="font-medium">Payouts</span>
             </Link>
           )}
 

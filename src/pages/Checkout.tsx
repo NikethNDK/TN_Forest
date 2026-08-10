@@ -25,10 +25,43 @@ import {
   createOrder,
   createRazorpayPaymentOrder,
   verifyRazorpayPayment,
+  getPaymentStatus,
   isShopApiError,
   type OrderFromApi,
 } from '../services/api/shopApi';
 import { formatCartMoney, formatCartQtyForDisplay } from '../utils/cartQuantity';
+
+const PENDING_PAYMENT_STORAGE_KEY = 'tnfrd_pending_razorpay_payment';
+
+type PendingPaymentRetry = {
+  orderId: number;
+  token: string;
+  orderNo: string;
+};
+
+function readPendingPayment(): PendingPaymentRetry | null {
+  try {
+    const raw = sessionStorage.getItem(PENDING_PAYMENT_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PendingPaymentRetry;
+    if (!parsed?.orderId || !parsed?.token) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writePendingPayment(value: PendingPaymentRetry | null): void {
+  try {
+    if (!value) {
+      sessionStorage.removeItem(PENDING_PAYMENT_STORAGE_KEY);
+      return;
+    }
+    sessionStorage.setItem(PENDING_PAYMENT_STORAGE_KEY, JSON.stringify(value));
+  } catch {
+    // sessionStorage may be unavailable; in-memory state still works for this tab.
+  }
+}
 
 // ============ VALIDATION & SANITIZATION UTILITIES ============
 
@@ -207,13 +240,50 @@ const Checkout: React.FC = () => {
   const [orderNo, setOrderNo] = useState<string>('');
   const [usedRazorpay, setUsedRazorpay] = useState<boolean>(false);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState<string>('');
-  const [pendingPaymentRetry, setPendingPaymentRetry] = useState<{
-    orderId: number;
-    token: string;
-    orderNo: string;
-  } | null>(null);
+  const [pendingPaymentRetry, setPendingPaymentRetry] = useState<PendingPaymentRetry | null>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const persistPendingPayment = (value: PendingPaymentRetry | null) => {
+    setPendingPaymentRetry(value);
+    writePendingPayment(value);
+  };
+
+  // Restore unpaid Razorpay checkout after refresh, and confirm status via API.
+  useEffect(() => {
+    const saved = readPendingPayment();
+    if (!saved) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const status = await getPaymentStatus(saved.orderId, saved.token);
+        if (cancelled) return;
+        if (status.payment_status === 'authorized' || status.payment_status === 'captured') {
+          writePendingPayment(null);
+          setPendingPaymentRetry(null);
+          setOrderId(String(saved.orderId));
+          setOrderNo(saved.orderNo);
+          setUsedRazorpay(true);
+          setRazorpayPaymentId(status.order?.transaction_id || '');
+          setOrderPlaced(true);
+          clearCart();
+          return;
+        }
+        // Token may be refreshed while payment is still created.
+        const token = status.order_access_token || saved.token;
+        const next = { ...saved, token };
+        setPendingPaymentRetry(next);
+        writePendingPayment(next);
+      } catch {
+        if (!cancelled) {
+          setPendingPaymentRetry(saved);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [clearCart]);
 
   // Pre-fill form data from navigation state (from fertilizer order form)
   useEffect(() => {
@@ -229,12 +299,12 @@ const Checkout: React.FC = () => {
     }
   }, [location.state]);
 
-  // Redirect to shop if cart is empty
+  // Redirect to shop if cart is empty — but keep the page when a Razorpay retry is pending.
   useEffect(() => {
-    if (cart.length === 0 && !orderPlaced) {
+    if (cart.length === 0 && !orderPlaced && !pendingPaymentRetry) {
       navigate('/shop');
     }
-  }, [cart, navigate, orderPlaced]);
+  }, [cart, navigate, orderPlaced, pendingPaymentRetry]);
 
   /**
    * Update delivery field with sanitization and validation
@@ -391,19 +461,26 @@ const Checkout: React.FC = () => {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
             });
+            // Confirm async webhook path as well (idempotent when already authorized).
+            try {
+              await getPaymentStatus(meta.orderId, meta.accessToken);
+            } catch {
+              // Verify already succeeded; status poll is best-effort.
+            }
             setOrderId(String(meta.orderId));
             setOrderNo(meta.orderNo);
             setUsedRazorpay(true);
             setRazorpayPaymentId(response.razorpay_payment_id);
             setOrderPlaced(true);
-            setPendingPaymentRetry(null);
+            persistPendingPayment(null);
+            clearCart();
           } catch (verifyErr) {
             console.error(verifyErr);
             const msg = isShopApiError(verifyErr)
               ? verifyErr.message
               : 'Payment verification failed. Please contact support with your order number.';
             alert(msg);
-            setPendingPaymentRetry({
+            persistPendingPayment({
               orderId: meta.orderId,
               token: meta.accessToken,
               orderNo: meta.orderNo,
@@ -414,7 +491,7 @@ const Checkout: React.FC = () => {
         modal: {
           ondismiss: () => {
             if (!checkoutComplete) {
-              setPendingPaymentRetry({
+              persistPendingPayment({
                 orderId: meta.orderId,
                 token: meta.accessToken,
                 orderNo: meta.orderNo,
@@ -428,7 +505,7 @@ const Checkout: React.FC = () => {
 
       rzp.on('payment.failed', () => {
         checkoutComplete = true;
-        setPendingPaymentRetry({
+        persistPendingPayment({
           orderId: meta.orderId,
           token: meta.accessToken,
           orderNo: meta.orderNo,
@@ -483,7 +560,7 @@ const Checkout: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    setPendingPaymentRetry(null);
+    persistPendingPayment(null);
 
     try {
       const totalAmount = getTotalPrice();
@@ -528,13 +605,18 @@ const Checkout: React.FC = () => {
 
       setOrderId(String(order.id));
       setOrderNo(order.order_no ?? `#${order.id}`);
-      clearCart();
 
       const accessToken = order.order_access_token;
       const useRazorpay =
         WANTS_RAZORPAY_CHECKOUT && Boolean(order.payment_required && accessToken);
 
       if (useRazorpay && accessToken) {
+        // Keep cart until payment succeeds so empty-cart redirect cannot wipe retry UI.
+        persistPendingPayment({
+          orderId: order.id,
+          token: accessToken,
+          orderNo: order.order_no ?? `#${order.id}`,
+        });
         await loadRazorpayScript();
         if (!window.Razorpay) {
           throw new Error('Could not load Razorpay.');
@@ -547,6 +629,7 @@ const Checkout: React.FC = () => {
         };
         await openRazorpayModal(meta, rzOrder);
       } else {
+        clearCart();
         setUsedRazorpay(false);
         setRazorpayPaymentId('');
         setOrderPlaced(true);

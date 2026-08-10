@@ -87,6 +87,8 @@ export interface ShopDivision {
   id: number;
   name: string;
   is_internal?: boolean;
+  payout_contact_email?: string;
+  payout_contact_phone?: string;
   has_bank_account?: boolean;
   bank_account_last4?: string;
   created_at: string;

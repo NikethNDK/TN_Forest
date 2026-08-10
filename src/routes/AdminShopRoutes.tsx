@@ -9,6 +9,7 @@ import AdminShopOrdersConfirmed from '../pages/admin/shop/AdminShopOrdersConfirm
 import AdminShopOrdersPendingDivision from '../pages/admin/shop/AdminShopOrdersPendingDivision';
 import AdminShopOrdersFulfillmentDivision from '../pages/admin/shop/AdminShopOrdersFulfillmentDivision';
 import AdminShopOrdersRefundQueue from '../pages/admin/shop/AdminShopOrdersRefundQueue';
+import AdminShopPayouts from '../pages/admin/shop/AdminShopPayouts';
 import AdminShopDivisionAdmins from '../pages/admin/shop/AdminShopDivisionAdmins';
 import AdminOrderDetail from '../pages/admin/AdminOrderDetail';
 
@@ -19,6 +20,7 @@ export const adminShopRoutes = (
       <Route path="divisions" element={<AdminShopDivisions />} />
       <Route path="division-admins" element={<AdminShopDivisionAdmins />} />
       <Route path="products" element={<AdminShopProducts />} />
+      <Route path="payouts" element={<AdminShopPayouts />} />
       <Route path="orders" element={<ShopOrdersDefaultRedirect />} />
       <Route path="orders/requests" element={<AdminShopOrdersRequests />} />
       <Route path="orders/pending" element={<AdminShopOrdersPendingDivision />} />

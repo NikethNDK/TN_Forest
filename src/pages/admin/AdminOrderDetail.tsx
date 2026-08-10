@@ -128,6 +128,11 @@ function mapOrderToDisplay(api: OrderFromApi) {
     totalAmount: Number(api.total_amount),
     portionSubtotal: portion,
     transactionId: api.transaction_id,
+    paymentStatus: api.payment_status ?? null,
+    paymentAmountAuthorizedPaise: api.payment_amount_authorized_paise ?? null,
+    paymentAmountCapturedPaise: api.payment_amount_captured_paise ?? null,
+    paymentAmountRefundedPaise: api.payment_amount_refunded_paise ?? null,
+    paymentSafetyCaptured: api.payment_safety_captured ?? null,
     deliveryDetails: {
       name: api.delivery_name,
       email: api.delivery_email,
@@ -453,6 +458,11 @@ const AdminOrderDetail: React.FC = () => {
     totalAmount,
     portionSubtotal,
     transactionId,
+    paymentStatus,
+    paymentAmountAuthorizedPaise,
+    paymentAmountCapturedPaise,
+    paymentAmountRefundedPaise,
+    paymentSafetyCaptured,
     status,
     createdAt,
     orderNo,
@@ -638,11 +648,56 @@ const AdminOrderDetail: React.FC = () => {
           </h2>
 
           <div className="space-y-4">
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-sm text-amber-700 font-medium mb-1">Transaction ID</p>
-              <p className="font-mono text-lg font-bold text-amber-900">{transactionId}</p>
-              <p className="text-xs text-amber-600 mt-2">Please verify this transaction in your UPI/Bank app</p>
-            </div>
+            {paymentStatus ? (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                <p className="text-sm text-blue-700 font-medium">Razorpay payment</p>
+                <p className="text-sm text-blue-900">
+                  Status:{' '}
+                  <span className="font-semibold uppercase tracking-wide">{paymentStatus}</span>
+                  {paymentSafetyCaptured ? (
+                    <span className="ml-2 text-xs font-medium text-amber-700">(safety captured)</span>
+                  ) : null}
+                </p>
+                {transactionId ? (
+                  <p className="text-xs font-mono text-blue-800 break-all">
+                    Payment ID: {transactionId}
+                  </p>
+                ) : null}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm text-blue-900 pt-1">
+                  <p>
+                    Authorized:{' '}
+                    <strong>
+                      ₹
+                      {((paymentAmountAuthorizedPaise ?? 0) / 100).toFixed(2)}
+                    </strong>
+                  </p>
+                  <p>
+                    Captured:{' '}
+                    <strong>
+                      ₹
+                      {((paymentAmountCapturedPaise ?? 0) / 100).toFixed(2)}
+                    </strong>
+                  </p>
+                  <p>
+                    Refunded:{' '}
+                    <strong>
+                      ₹
+                      {((paymentAmountRefundedPaise ?? 0) / 100).toFixed(2)}
+                    </strong>
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <p className="text-sm text-amber-700 font-medium mb-1">Transaction ID</p>
+                <p className="font-mono text-lg font-bold text-amber-900">
+                  {transactionId || '—'}
+                </p>
+                <p className="text-xs text-amber-600 mt-2">
+                  Manual UPI / bank reference — verify in your UPI/Bank app
+                </p>
+              </div>
+            )}
 
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <p className="text-sm text-green-700 font-medium mb-1">

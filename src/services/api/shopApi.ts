@@ -633,6 +633,12 @@ export interface OrderFromApi {
   /** Backend signals Razorpay checkout flow. */
   payment_required?: boolean;
   transaction_id: string;
+  /** Razorpay PaymentTransaction status when present. */
+  payment_status?: string | null;
+  payment_amount_authorized_paise?: number | null;
+  payment_amount_captured_paise?: number | null;
+  payment_amount_refunded_paise?: number | null;
+  payment_safety_captured?: boolean | null;
   delivery_name: string;
   delivery_email: string;
   delivery_phone: string;
@@ -708,9 +714,13 @@ export interface PaymentStatusResponse {
   payment_status: string;
   amount_authorized_paise?: number;
   amount_captured_paise?: number;
+  amount_refunded_paise?: number;
   currency?: string;
   authorized_at?: string | null;
+  captured_at?: string | null;
+  safety_captured?: boolean;
   razorpay_enabled?: boolean;
+  order_access_token?: string;
   order?: OrderFromApi;
 }
 
