@@ -199,6 +199,135 @@ export async function deleteDivision(id: number): Promise<void> {
   await shopClient.delete(`/api/divisions/${id}/`);
 }
 
+// --- Division payouts: internal toggle, bank accounts, IFSC, reports ---
+
+export async function setDivisionInternal(id: number, isInternal: boolean): Promise<ShopDivision> {
+  const { data } = await shopClient.patch<ShopDivision>(`/api/divisions/${id}/`, {
+    is_internal: isInternal,
+  });
+  return data;
+}
+
+export interface DivisionBankAccount {
+  account_holder_name: string;
+  account_last4: string;
+  ifsc_code: string;
+  bank_name: string;
+  account_type: string;
+  is_verified: boolean;
+  has_fund_account: boolean;
+}
+
+export interface UpsertBankAccountPayload {
+  account_number: string;
+  account_holder_name: string;
+  ifsc_code: string;
+  account_type?: string;
+}
+
+/** Returns the masked account; null if none on file. */
+export async function getDivisionBankAccount(id: number): Promise<DivisionBankAccount | null> {
+  try {
+    const { data } = await shopClient.get<DivisionBankAccount>(`/api/divisions/${id}/bank-account/`);
+    return data;
+  } catch (err) {
+    if (isShopApiError(err) && err.status === 404) return null;
+    throw err;
+  }
+}
+
+export async function upsertDivisionBankAccount(
+  id: number,
+  payload: UpsertBankAccountPayload
+): Promise<DivisionBankAccount & { suggest_switch_to_external?: boolean }> {
+  const { data } = await shopClient.put<DivisionBankAccount & { suggest_switch_to_external?: boolean }>(
+    `/api/divisions/${id}/bank-account/`,
+    payload
+  );
+  return data;
+}
+
+export interface IfscInfo {
+  ifsc: string;
+  bank: string;
+  branch: string;
+  verified: boolean;
+}
+
+export async function validateIfsc(code: string): Promise<IfscInfo> {
+  const { data } = await shopClient.get<IfscInfo>(`/api/divisions/ifsc/${encodeURIComponent(code)}/`);
+  return data;
+}
+
+export interface DivisionReportRow {
+  division_id: number;
+  division_name: string;
+  is_internal: boolean;
+  gross_earned: string;
+  order_count: number;
+  line_count: number;
+  payout_paid: string;
+  payout_pending: string;
+  payout_failed_count: number;
+}
+
+export interface DivisionReportOrderRow {
+  order_id: number;
+  order_no: string;
+  order_item_id: number;
+  product_name: string;
+  quantity: string;
+  unit: string;
+  price: string;
+  line_total: string;
+  delivered_at: string;
+  payout_status: string;
+}
+
+function reportQuery(params?: { from?: string; to?: string }): string {
+  const q = new URLSearchParams();
+  if (params?.from) q.set('from', params.from);
+  if (params?.to) q.set('to', params.to);
+  const s = q.toString();
+  return s ? `?${s}` : '';
+}
+
+export async function getDivisionReports(params?: { from?: string; to?: string }): Promise<DivisionReportRow[]> {
+  const { data } = await shopClient.get<{ results: DivisionReportRow[] }>(
+    `/api/divisions/reports/${reportQuery(params)}`
+  );
+  return data.results;
+}
+
+export async function getDivisionReportOrders(
+  id: number,
+  params?: { from?: string; to?: string }
+): Promise<DivisionReportOrderRow[]> {
+  const { data } = await shopClient.get<{ results: DivisionReportOrderRow[] }>(
+    `/api/divisions/reports/${id}/orders/${reportQuery(params)}`
+  );
+  return data.results;
+}
+
+/** Trigger a CSV download of the division report via an authenticated blob fetch. */
+export async function downloadDivisionReportCsv(params?: { from?: string; to?: string }): Promise<void> {
+  const q = new URLSearchParams();
+  if (params?.from) q.set('from', params.from);
+  if (params?.to) q.set('to', params.to);
+  q.set('format', 'csv');
+  const { data } = await shopClient.get(`/api/divisions/reports/?${q.toString()}`, {
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(data as Blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'division_report.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+}
+
 // --- Products (Django API snake_case → camelCase for UI) ---
 
 export interface ShopProductApi {
@@ -516,9 +645,17 @@ export interface OrderFromApi {
   items: OrderItemApi[];
 }
 
-/** Create order (guest or auth). No token required. */
-export async function createOrder(payload: CreateOrderPayload): Promise<OrderFromApi> {
-  const { data } = await publicShopClient.post<OrderFromApi>('/api/orders/', payload);
+/** Create order (guest or auth). No token required.
+ * Pass an idempotencyKey so a retried/double submit returns the same order
+ * instead of creating a duplicate (backend dedups on the Idempotency-Key header). */
+export async function createOrder(
+  payload: CreateOrderPayload,
+  idempotencyKey?: string
+): Promise<OrderFromApi> {
+  const config = idempotencyKey
+    ? { headers: { 'Idempotency-Key': idempotencyKey } }
+    : undefined;
+  const { data } = await publicShopClient.post<OrderFromApi>('/api/orders/', payload, config);
   return data;
 }
 

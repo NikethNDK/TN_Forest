@@ -86,6 +86,9 @@ export interface Division {
 export interface ShopDivision {
   id: number;
   name: string;
+  is_internal?: boolean;
+  has_bank_account?: boolean;
+  bank_account_last4?: string;
   created_at: string;
   updated_at: string;
 }

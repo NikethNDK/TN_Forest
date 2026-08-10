@@ -473,6 +473,11 @@ const Checkout: React.FC = () => {
   const handlePlaceOrder = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
+    // Guard against double-submit (rapid double-click before the button disables).
+    if (isSubmitting) {
+      return;
+    }
+
     if (!validateAllFields()) {
       return;
     }
@@ -495,22 +500,31 @@ const Checkout: React.FC = () => {
 
       const sanitizedTransactionId = transactionId.replace(/[^a-zA-Z0-9\-]/g, '').slice(0, 30);
 
-      const order: OrderFromApi = await createOrder({
-        items: cart.map((item) => ({
-          listing_id: Number(item.id),
-          quantity: item.quantity,
-          unit: item.unit ?? '',
-        })),
-        total_amount: totalAmount.toFixed(2),
-        delivery_name: sanitizedDeliveryDetails.name,
-        delivery_email: sanitizedDeliveryDetails.email,
-        delivery_phone: sanitizedDeliveryDetails.phone,
-        delivery_address: sanitizedDeliveryDetails.address,
-        delivery_city: sanitizedDeliveryDetails.city,
-        delivery_state: sanitizedDeliveryDetails.state,
-        delivery_pincode: sanitizedDeliveryDetails.pincode,
-        transaction_id: WANTS_RAZORPAY_CHECKOUT ? sanitizedTransactionId || '' : sanitizedTransactionId,
-      });
+      // Idempotency key so a network retry of this submit can't create a duplicate order.
+      const idempotencyKey =
+        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+      const order: OrderFromApi = await createOrder(
+        {
+          items: cart.map((item) => ({
+            listing_id: Number(item.id),
+            quantity: item.quantity,
+            unit: item.unit ?? '',
+          })),
+          total_amount: totalAmount.toFixed(2),
+          delivery_name: sanitizedDeliveryDetails.name,
+          delivery_email: sanitizedDeliveryDetails.email,
+          delivery_phone: sanitizedDeliveryDetails.phone,
+          delivery_address: sanitizedDeliveryDetails.address,
+          delivery_city: sanitizedDeliveryDetails.city,
+          delivery_state: sanitizedDeliveryDetails.state,
+          delivery_pincode: sanitizedDeliveryDetails.pincode,
+          transaction_id: WANTS_RAZORPAY_CHECKOUT ? sanitizedTransactionId || '' : sanitizedTransactionId,
+        },
+        idempotencyKey
+      );
 
       setOrderId(String(order.id));
       setOrderNo(order.order_no ?? `#${order.id}`);
