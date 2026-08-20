@@ -190,6 +190,7 @@ export interface NewsItem {
   pdfUrl?: string;  // Optional PDF file URL (Firebase Storage)
   pdfPublicId?: string;  // Storage path for PDF deletion
   blogSlug?: string;  // When set, news card links to /blog/:blogSlug instead of link/pdf
+  showOnWelcomeModal?: boolean;  // When true, item is listed on the home welcome popup
   createdAt?: any;  // Firestore Timestamp
   updatedAt?: any;  // Firestore Timestamp
   order?: number;  // For sorting
@@ -205,6 +206,7 @@ export interface Event {
   pdfUrl?: string;  // Optional PDF file URL (Firebase Storage)
   pdfPublicId?: string;  // Storage path for PDF deletion
   blogSlug?: string;  // When set, event card links to /blog/:blogSlug instead of link/pdf
+  showOnWelcomeModal?: boolean;  // When true, item is listed on the home welcome popup
   createdAt?: any;  // Firestore Timestamp
   updatedAt?: any;  // Firestore Timestamp
   order?: number;  // For sorting

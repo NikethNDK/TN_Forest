@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Info, ShoppingBag, Bell, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
+import { X, Info, ShoppingBag, Newspaper, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import type { NewsItem, Event } from '../../types';
 
@@ -9,18 +9,41 @@ interface WelcomeModalProps {
 }
 
 const STORAGE_KEY = 'welcomeModalSeen';
-const NEW_BADGE_GIF = '/gifs/918d2206-118a-11ee-9109-ab0118dc5509.gif';
 
-/** Temporary hardcoded notifications until CMS/API is wired */
-const NOTIFICATIONS = [
-  {
-    title: 'Recruitment Notification for Various Posts',
-    pdfUrl: '/notifications/notification corrected.pdf',
-    isNew: true,
-  },
-] as const;
+const ItemLink: React.FC<{
+  item: NewsItem | Event;
+  fallbackLabel: string;
+}> = ({ item, fallbackLabel }) => {
+  if (item.blogSlug) {
+    return (
+      <Link
+        to={`/blog/${item.blogSlug}`}
+        className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
+      >
+        Read more
+        <ExternalLink className="h-3 w-3 ml-1" />
+      </Link>
+    );
+  }
 
-const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, events }) => {
+  if (item.link || item.pdfUrl) {
+    return (
+      <a
+        href={item.link || item.pdfUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
+      >
+        {item.pdfUrl && !item.link ? 'View PDF' : fallbackLabel}
+        <ExternalLink className="h-3 w-3 ml-1" />
+      </a>
+    );
+  }
+
+  return null;
+};
+
+const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews, events }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [showFloatingIcon, setShowFloatingIcon] = useState<boolean>(false);
   const navigate = useNavigate();
@@ -49,25 +72,21 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, ev
     navigate('/shop');
   };
 
-  // Latest news (used when Latest News section below is uncommented)
-  // const displayNews = _latestNews.slice(0, 2);
-  const displayEvents = events.slice(0, 6);
+  const displayNews = latestNews.filter((item) => item.showOnWelcomeModal);
+  const displayEvents = events.filter((item) => item.showOnWelcomeModal);
 
   return (
     <>
-      {/* Modal Overlay - Semi-transparent, allows background interaction */}
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-20 z-50 flex items-center justify-center lg:justify-end p-4 lg:pr-8 pointer-events-auto"
           onClick={handleClose}
         >
-          {/* Modal Container - Smaller size, stops event propagation */}
           <div 
             className="bg-background-home-body rounded-2xl shadow-2xl max-w-xl w-full max-h-[75vh] overflow-hidden flex flex-col pointer-events-auto transform transition-all"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="bg-home-heading p-4 md:p-5 flex items-center justify-between">
+            <div className="bg-home-heading p-4 md:p-5 flex items-center justify-between shrink-0">
               <h2 className="text-lg md:text-xl font-bold text-white flex items-center">
                 <Info className="h-5 w-5 md:h-6 md:w-6 mr-2" />
                 <span className="hidden sm:inline">Welcome to TamilNadu Forest Department's Research Wing</span>
@@ -82,9 +101,7 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, ev
               </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6">
-              {/* Shop Information Section */}
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 md:p-6">
               <div className="bg-mission-vision-card-bg rounded-xl p-4 md:p-5 mb-4 border-l-4 border-home-card-border">
                 <div className="flex items-center mb-3">
                   <ShoppingBag className="h-5 w-5 text-home-heading mr-2" />
@@ -92,8 +109,6 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, ev
                 </div>
                 <p className="text-sm text-home-text mb-3 leading-relaxed">
                   Discover high-quality seeds, saplings, and bio-fertilizers directly from our research centers. 
-                  {/* All products are backed by our scientific research, ensuring the best 
-                  quality for your afforestation and cultivation projects. */}
                 </p>
                 <button
                   onClick={handleShopNavigation}
@@ -104,88 +119,39 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, ev
                 </button>
               </div>
 
-              {/* Notifications Section */}
-              <div className="bg-mission-vision-card-bg rounded-xl p-4 md:p-5 mb-4 border-l-4 border-home-card-border">
-                <div className="flex items-center gap-2 mb-3">
-                  <Bell className="h-5 w-5 text-home-heading shrink-0" />
-                  <h3 className="text-lg font-bold text-home-heading flex-1">Notifications</h3>
-                </div>
-                <div className="space-y-3">
-                  {NOTIFICATIONS.map((notification) => (
-                    <div
-                      key={notification.title}
-                      className="bg-background-paper rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow border border-home-card-border/30"
-                    >
-                      <div className="flex items-start gap-3">
-                        {notification.isNew && (
-                          <img
-                            src={NEW_BADGE_GIF}
-                            alt="New"
-                            className="h-11 w-auto shrink-0 object-contain mt-0.5"
-                          />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-home-heading text-sm mb-2 leading-snug">
-                            {notification.title}
-                          </h4>
-                          <a
-                            href={encodeURI(notification.pdfUrl)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
-                          >
-                            View PDF
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </a>
+              {displayNews.length > 0 && (
+                <div className="bg-news-events-ticker-body rounded-xl shadow-elevated overflow-hidden mb-4">
+                  <div className="flex items-center gap-2 px-4 py-3 bg-news-events-ticker-header">
+                    <Newspaper className="h-5 w-5 text-white shrink-0" />
+                    <h3 className="font-serif font-semibold text-white text-sm md:text-base">
+                      Latest News
+                    </h3>
+                  </div>
+                  <div className="p-4 md:p-5">
+                    <div className="space-y-0">
+                      {displayNews.map((news) => (
+                        <div
+                          key={news.id ?? `${news.title}-${news.date}`}
+                          className="py-3 group rounded transition-colors hover:bg-news-events-ticker-header/10 border-b border-home-card-border/30 last:border-b-0"
+                        >
+                          {news.date && (
+                            <p className="text-xs text-home-text-secondary mb-1 flex items-center">
+                              <Calendar className="h-3 w-3 mr-1" /> {news.date}
+                            </p>
+                          )}
+                          <h4 className="font-bold text-home-heading mb-1 text-sm">{news.title}</h4>
+                          {news.excerpt && (
+                            <p className="text-xs text-home-text-secondary mb-2 line-clamp-2">{news.excerpt}</p>
+                          )}
+                          <ItemLink item={news} fallbackLabel="Read more" />
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Latest News Section */}
-              {/* {displayNews.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="text-lg font-bold text-content-heading mb-3 flex items-center">
-                    <Calendar className="h-4 w-4 mr-2 text-accent-darker" />
-                    Latest News
-                  </h3>
-                  <div className="space-y-3">
-                    {displayNews.map((news, index) => (
-                      <div key={index} className="bg-background-paper border-l-4 border-primary-main rounded-lg p-3 shadow-md hover:shadow-lg transition-shadow">
-                        <p className="text-xs text-content-tertiary mb-1 flex items-center">
-                          <Calendar className="h-3 w-3 mr-1" /> {news.date}
-                        </p>
-                        <h4 className="font-bold text-content-headingSecondary mb-1 text-sm">{news.title}</h4>
-                        <p className="text-xs text-content-secondary mb-2 line-clamp-2">{news.excerpt}</p>
-                        {news.blogSlug ? (
-                          <Link
-                            to={`/blog/${news.blogSlug}`}
-                            className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"
-                          >
-                            Read more
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </Link>
-                        ) : (news.link || news.pdfUrl) && (
-                          <a
-                            href={news.link || news.pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-content-link hover:text-accent-darker text-xs font-semibold inline-flex items-center"
-                          >
-                            {news.pdfUrl && !news.link ? 'View PDF' : 'Read more'}
-                            <ExternalLink className="h-3 w-3 ml-1" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
                   </div>
                 </div>
-              )} */}
+              )}
 
-              {/* Upcoming Events Section */}
-              {/* {displayEvents.length > 0 && (
+              {displayEvents.length > 0 && (
                 <div className="bg-news-events-ticker-body rounded-xl shadow-elevated overflow-hidden">
                   <div className="flex items-center gap-2 px-4 py-3 bg-news-events-ticker-header">
                     <Calendar className="h-5 w-5 text-white shrink-0" />
@@ -200,42 +166,27 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, ev
                           key={event.id ?? `${event.title}-${event.date}`}
                           className="py-3 group rounded transition-colors hover:bg-news-events-ticker-header/10 border-b border-home-card-border/30 last:border-b-0"
                         >
-                          <p className="text-xs text-home-text-secondary mb-1 flex items-center">
-                            <Calendar className="h-3 w-3 mr-1" /> {event.date}
-                          </p>
-                          <h4 className="font-bold text-home-heading mb-1 text-sm">{event.title}</h4>
-                          <p className="text-xs text-home-text-secondary mb-2 line-clamp-2">{event.excerpt}</p>
-                          {event.blogSlug ? (
-                            <Link
-                              to={`/blog/${event.blogSlug}`}
-                              className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
-                            >
-                              Read more
-                              <span className="ml-1 group-hover:ml-2 transition-all">→</span>
-                            </Link>
-                          ) : (event.link || event.pdfUrl) && (
-                            <a
-                              href={event.link || event.pdfUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-home-heading hover:text-home-heading/90 text-xs font-semibold inline-flex items-center"
-                            >
-                              {event.pdfUrl && !event.link ? 'View PDF' : 'View details'}
-                              <ExternalLink className="h-3 w-3 ml-1" />
-                            </a>
+                          {event.date && (
+                            <p className="text-xs text-home-text-secondary mb-1 flex items-center">
+                              <Calendar className="h-3 w-3 mr-1" /> {event.date}
+                            </p>
                           )}
+                          <h4 className="font-bold text-home-heading mb-1 text-sm">{event.title}</h4>
+                          {event.excerpt && (
+                            <p className="text-xs text-home-text-secondary mb-2 line-clamp-2">{event.excerpt}</p>
+                          )}
+                          <ItemLink item={event} fallbackLabel="View details" />
                         </div>
                       ))}
                     </div>
                   </div>
                 </div>
-              )} */}
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Floating Icon */}
       {showFloatingIcon && (
         <button
           onClick={handleFloatingIconClick}
@@ -250,4 +201,3 @@ const WelcomeModal: React.FC<WelcomeModalProps> = ({ latestNews: _latestNews, ev
 };
 
 export default WelcomeModal;
-

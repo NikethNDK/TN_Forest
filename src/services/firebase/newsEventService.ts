@@ -25,6 +25,42 @@ import type { NewsItem, Event } from '../../types';
 const NEWS_COLLECTION = 'news';
 const EVENTS_COLLECTION = 'events';
 
+const mapNewsItem = (docSnapshot: { id: string; data: () => Record<string, any> }): NewsItem => {
+  const data = docSnapshot.data();
+  return {
+    id: docSnapshot.id,
+    date: data.date || '',
+    title: data.title || '',
+    excerpt: data.excerpt || '',
+    link: data.link || undefined,
+    pdfUrl: data.pdfUrl || undefined,
+    pdfPublicId: data.pdfPublicId || undefined,
+    blogSlug: data.blogSlug || undefined,
+    showOnWelcomeModal: !!data.showOnWelcomeModal,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+    order: data.order
+  };
+};
+
+const mapEventItem = (docSnapshot: { id: string; data: () => Record<string, any> }): Event => {
+  const data = docSnapshot.data();
+  return {
+    id: docSnapshot.id,
+    date: data.date || '',
+    title: data.title || '',
+    excerpt: data.excerpt || '',
+    link: data.link || undefined,
+    pdfUrl: data.pdfUrl || undefined,
+    pdfPublicId: data.pdfPublicId || undefined,
+    blogSlug: data.blogSlug || undefined,
+    showOnWelcomeModal: !!data.showOnWelcomeModal,
+    createdAt: data.createdAt,
+    updatedAt: data.updatedAt,
+    order: data.order
+  };
+};
+
 // ==================== NEWS OPERATIONS ====================
 
 /**
@@ -38,20 +74,7 @@ export const getAllNews = async (): Promise<NewsItem[]> => {
     
     const news: NewsItem[] = [];
     querySnapshot.forEach((docSnapshot) => {
-      const data = docSnapshot.data();
-      news.push({
-        id: docSnapshot.id,
-        date: data.date || '',
-        title: data.title || '',
-        excerpt: data.excerpt || '',
-        link: data.link || undefined,
-        pdfUrl: data.pdfUrl || undefined,
-        pdfPublicId: data.pdfPublicId || undefined,
-        blogSlug: data.blogSlug || undefined,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        order: data.order
-      });
+      news.push(mapNewsItem(docSnapshot));
     });
     
     return news;
@@ -73,20 +96,7 @@ export const getNewsById = async (id: string): Promise<NewsItem | null> => {
       return null;
     }
     
-    const data = docSnapshot.data();
-    return {
-      id: docSnapshot.id,
-      date: data.date || '',
-      title: data.title || '',
-      excerpt: data.excerpt || '',
-      link: data.link || undefined,
-      pdfUrl: data.pdfUrl || undefined,
-      pdfPublicId: data.pdfPublicId || undefined,
-      blogSlug: data.blogSlug || undefined,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      order: data.order
-    };
+    return mapNewsItem(docSnapshot);
   } catch (error) {
     console.error('Error fetching news item:', error);
     throw new Error('Failed to fetch news item');
@@ -107,6 +117,7 @@ export const addNewsItem = async (news: Omit<NewsItem, 'id' | 'createdAt' | 'upd
       pdfUrl: news.pdfUrl?.trim() || '',
       pdfPublicId: news.pdfPublicId?.trim() || '',
       blogSlug: news.blogSlug?.trim() || '',
+      showOnWelcomeModal: !!news.showOnWelcomeModal,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       order: Date.now() // Use timestamp for ordering
@@ -125,7 +136,7 @@ export const addNewsItem = async (news: Omit<NewsItem, 'id' | 'createdAt' | 'upd
  */
 export const updateNewsItem = async (
   id: string,
-  updates: Partial<Pick<NewsItem, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId' | 'blogSlug'>>
+  updates: Partial<Pick<NewsItem, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId' | 'blogSlug' | 'showOnWelcomeModal'>>
 ): Promise<void> => {
   try {
     const newsRef = doc(db, NEWS_COLLECTION, id);
@@ -153,6 +164,9 @@ export const updateNewsItem = async (
     }
     if (updates.blogSlug !== undefined) {
       updateData.blogSlug = updates.blogSlug.trim() || '';
+    }
+    if (updates.showOnWelcomeModal !== undefined) {
+      updateData.showOnWelcomeModal = !!updates.showOnWelcomeModal;
     }
     
     await updateDoc(newsRef, updateData);
@@ -203,20 +217,7 @@ export const subscribeToNews = (
       (querySnapshot) => {
         const news: NewsItem[] = [];
         querySnapshot.forEach((docSnapshot) => {
-          const data = docSnapshot.data();
-          news.push({
-            id: docSnapshot.id,
-            date: data.date || '',
-            title: data.title || '',
-            excerpt: data.excerpt || '',
-            link: data.link || undefined,
-            pdfUrl: data.pdfUrl || undefined,
-            pdfPublicId: data.pdfPublicId || undefined,
-            blogSlug: data.blogSlug || undefined,
-            createdAt: data.createdAt,
-            updatedAt: data.updatedAt,
-            order: data.order
-          });
+          news.push(mapNewsItem(docSnapshot));
         });
         callback(news);
       },
@@ -250,20 +251,7 @@ export const getAllEvents = async (): Promise<Event[]> => {
     
     const events: Event[] = [];
     querySnapshot.forEach((docSnapshot) => {
-      const data = docSnapshot.data();
-      events.push({
-        id: docSnapshot.id,
-        date: data.date || '',
-        title: data.title || '',
-        excerpt: data.excerpt || '',
-        link: data.link || undefined,
-        pdfUrl: data.pdfUrl || undefined,
-        pdfPublicId: data.pdfPublicId || undefined,
-        blogSlug: data.blogSlug || undefined,
-        createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        order: data.order
-      });
+      events.push(mapEventItem(docSnapshot));
     });
     
     return events;
@@ -285,20 +273,7 @@ export const getEventById = async (id: string): Promise<Event | null> => {
       return null;
     }
     
-    const data = docSnapshot.data();
-    return {
-      id: docSnapshot.id,
-      date: data.date || '',
-      title: data.title || '',
-      excerpt: data.excerpt || '',
-      link: data.link || undefined,
-      pdfUrl: data.pdfUrl || undefined,
-      pdfPublicId: data.pdfPublicId || undefined,
-      blogSlug: data.blogSlug || undefined,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      order: data.order
-    };
+    return mapEventItem(docSnapshot);
   } catch (error) {
     console.error('Error fetching event:', error);
     throw new Error('Failed to fetch event');
@@ -319,6 +294,7 @@ export const addEventItem = async (event: Omit<Event, 'id' | 'createdAt' | 'upda
       pdfUrl: event.pdfUrl?.trim() || '',
       pdfPublicId: event.pdfPublicId?.trim() || '',
       blogSlug: event.blogSlug?.trim() || '',
+      showOnWelcomeModal: !!event.showOnWelcomeModal,
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       order: Date.now() // Use timestamp for ordering
@@ -337,7 +313,7 @@ export const addEventItem = async (event: Omit<Event, 'id' | 'createdAt' | 'upda
  */
 export const updateEventItem = async (
   id: string,
-  updates: Partial<Pick<Event, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId' | 'blogSlug'>>
+  updates: Partial<Pick<Event, 'date' | 'title' | 'excerpt' | 'link' | 'pdfUrl' | 'pdfPublicId' | 'blogSlug' | 'showOnWelcomeModal'>>
 ): Promise<void> => {
   try {
     const eventRef = doc(db, EVENTS_COLLECTION, id);
@@ -365,6 +341,9 @@ export const updateEventItem = async (
     }
     if (updates.blogSlug !== undefined) {
       updateData.blogSlug = updates.blogSlug.trim() || '';
+    }
+    if (updates.showOnWelcomeModal !== undefined) {
+      updateData.showOnWelcomeModal = !!updates.showOnWelcomeModal;
     }
     
     await updateDoc(eventRef, updateData);
@@ -415,20 +394,7 @@ export const subscribeToEvents = (
       (querySnapshot) => {
         const events: Event[] = [];
         querySnapshot.forEach((docSnapshot) => {
-          const data = docSnapshot.data();
-          events.push({
-            id: docSnapshot.id,
-            date: data.date || '',
-            title: data.title || '',
-            excerpt: data.excerpt || '',
-            link: data.link || undefined,
-            pdfUrl: data.pdfUrl || undefined,
-            pdfPublicId: data.pdfPublicId || undefined,
-            blogSlug: data.blogSlug || undefined,
-            createdAt: data.createdAt,
-            updatedAt: data.updatedAt,
-            order: data.order
-          });
+          events.push(mapEventItem(docSnapshot));
         });
         callback(events);
       },

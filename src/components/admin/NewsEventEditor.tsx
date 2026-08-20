@@ -70,6 +70,7 @@ const NewsEventEditor = <T extends NewsItem | Event>({
       link: undefined,
       pdfUrl: undefined,
       pdfPublicId: undefined,
+      showOnWelcomeModal: false,
       ...(itemType === 'news' ? { blogSlug: undefined } : {})
     } as T;
     setFormData(newItem);
@@ -305,7 +306,8 @@ const NewsEventEditor = <T extends NewsItem | Event>({
               link: '',
               pdfUrl: '',
               pdfPublicId: '',
-              blogSlug: slug
+              blogSlug: slug,
+              showOnWelcomeModal: !!formData.showOnWelcomeModal
             });
           } else {
             const newBlogId = await createBlog({ ...blogPayload, newsId: editingId });
@@ -316,7 +318,8 @@ const NewsEventEditor = <T extends NewsItem | Event>({
               link: '',
               pdfUrl: '',
               pdfPublicId: '',
-              blogSlug: slug
+              blogSlug: slug,
+              showOnWelcomeModal: !!formData.showOnWelcomeModal
             });
             await updateBlog(newBlogId, { newsId: editingId });
           }
@@ -329,7 +332,8 @@ const NewsEventEditor = <T extends NewsItem | Event>({
             link: '',
             pdfUrl: '',
             pdfPublicId: '',
-            blogSlug: slug
+            blogSlug: slug,
+            showOnWelcomeModal: !!formData.showOnWelcomeModal
           });
           await updateBlog(newBlogId, { newsId });
         }
@@ -345,6 +349,7 @@ const NewsEventEditor = <T extends NewsItem | Event>({
           link: formData.link ?? '',
           pdfUrl: formData.pdfUrl ?? '',
           pdfPublicId: formData.pdfPublicId ?? '',
+          showOnWelcomeModal: !!formData.showOnWelcomeModal,
           ...(itemType === 'news' ? { blogSlug: (formData as NewsItem).blogSlug ?? '' } : {})
         } as Partial<T>);
       } else if (onAdd) {
@@ -355,6 +360,7 @@ const NewsEventEditor = <T extends NewsItem | Event>({
           link: formData.link ?? '',
           pdfUrl: formData.pdfUrl ?? '',
           pdfPublicId: formData.pdfPublicId ?? '',
+          showOnWelcomeModal: !!formData.showOnWelcomeModal,
           ...(itemType === 'news' ? { blogSlug: (formData as NewsItem).blogSlug ?? '' } : {})
         } as Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'order'>);
       } else if (onItemsChange) {
@@ -490,6 +496,22 @@ const NewsEventEditor = <T extends NewsItem | Event>({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
               placeholder="Enter brief description"
             />
+          </div>
+
+          <div className="flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="show-on-welcome-modal"
+              checked={!!formData?.showOnWelcomeModal}
+              onChange={(e) => setFormData({ ...formData!, showOnWelcomeModal: e.target.checked } as T)}
+              className="h-4 w-4 mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+            />
+            <label htmlFor="show-on-welcome-modal" className="text-sm font-medium text-gray-700">
+              Show on home welcome popup
+              <span className="block font-normal text-gray-500">
+                Still appears in the Latest News / Events ticker. Checked items are listed in the welcome modal.
+              </span>
+            </label>
           </div>
 
           {itemType === 'news' && (
@@ -746,7 +768,14 @@ const NewsEventEditor = <T extends NewsItem | Event>({
             <div className="flex justify-between items-start">
               <div className="flex-1">
                 <p className="text-sm text-gray-500 mb-1">{item.date}</p>
-                <h4 className="font-semibold text-green-900 mb-2">{item.title}</h4>
+                <div className="flex items-center flex-wrap gap-2 mb-2">
+                  <h4 className="font-semibold text-green-900">{item.title}</h4>
+                  {item.showOnWelcomeModal && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                      On popup
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-600 mb-2 line-clamp-2">{item.excerpt}</p>
                 {itemType === 'news' && (item as NewsItem).blogSlug && (
                   <Link to={`/blog/${(item as NewsItem).blogSlug}`} className="text-sm text-green-600 hover:underline inline-flex items-center gap-1">
