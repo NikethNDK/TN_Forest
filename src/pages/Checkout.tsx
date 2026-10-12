@@ -658,14 +658,14 @@ const Checkout: React.FC = () => {
             <p className="text-content-secondary mb-6">
               {usedRazorpay ? (
                 <>
-                  Thank you. Your card or UPI payment is authorized and your order is queued for
-                  nursery review. You will be contacted at{' '}
+                  Thank you. Your product payment is held by your bank and your order is waiting for
+                  nursery review. We will contact you at{' '}
                   <strong>{deliveryDetails.email}</strong> or <strong>{deliveryDetails.phone}</strong>{' '}
                   if anything is needed.
                 </>
               ) : (
                 <>
-                  Thank you for your order. We have received your payment details and will verify
+                  Thank you for your order. We have received your payment details and will confirm
                   the transaction shortly.
                 </>
               )}
@@ -677,7 +677,17 @@ const Checkout: React.FC = () => {
               <p className="text-xs text-content-tertiary mt-1">Quote this for any support or queries.</p>
             </div>
 
-            <div className="bg-status-info-lightest rounded-lg p-4 mb-8">
+            <div className="rounded-lg border border-status-warning-main/40 bg-status-warning-lightest p-4 mb-4 text-left">
+              <p className="text-xs font-semibold uppercase tracking-wide text-status-warning-main mb-1">
+                Important
+              </p>
+              <p className="text-sm text-content-primary">
+                Delivery charges were not included in your online payment. They will be collected in
+                person when your order is delivered.
+              </p>
+            </div>
+
+            <div className="bg-status-info-lightest rounded-lg p-4 mb-8 text-left">
               {usedRazorpay ? (
                 <>
                   <p className="text-sm text-content-primary">
@@ -685,8 +695,9 @@ const Checkout: React.FC = () => {
                     <span className="font-mono">{razorpayPaymentId}</span>
                   </p>
                   <p className="text-sm text-content-secondary mt-2">
-                    Funds are held until line items are accepted or rejected; captures and any refunds
-                    follow the decisions shown in your confirmation email when available.
+                    Next: the nursery accepts or declines each item. Accepted items are packed and
+                    delivered. You are charged only for accepted items; declined items are not
+                    charged or are refunded.
                   </p>
                 </>
               ) : (
@@ -695,9 +706,9 @@ const Checkout: React.FC = () => {
                     <strong>Transaction ID:</strong> {transactionId}
                   </p>
                   <p className="text-sm text-content-secondary mt-2">
-                    Our team will verify your payment and contact you at{' '}
+                    We check the payment (usually within 24–48 hours) and contact you at{' '}
                     <strong>{deliveryDetails.email}</strong> or{' '}
-                    <strong>{deliveryDetails.phone}</strong> within 24-48 hours.
+                    <strong>{deliveryDetails.phone}</strong> once it is confirmed.
                   </p>
                 </>
               )}
@@ -767,12 +778,35 @@ const Checkout: React.FC = () => {
                 ))}
               </div>
 
-              <div className="border-t border-border-light mt-4 pt-4">
-                <div className="flex justify-between items-center text-lg">
-                  <span className="font-semibold text-content-heading">Total Amount:</span>
+              <div className="border-t border-border-light mt-4 pt-4 space-y-2 text-sm">
+                <div className="flex justify-between items-center text-content-secondary">
+                  <span>Subtotal</span>
+                  <span className="tabular-nums">₹{formatCartMoney(totalPrice)}</span>
+                </div>
+                <div className="flex justify-between items-center text-content-tertiary">
+                  <span>Delivery fee</span>
+                  <span className="italic">Collected on delivery</span>
+                </div>
+                <div className="flex justify-between items-center text-lg pt-2 border-t border-border-lightest">
+                  <span className="font-semibold text-content-heading">Amount due now</span>
                   <span className="text-2xl font-bold text-accent-darker tabular-nums">
                     ₹{formatCartMoney(totalPrice)}
                   </span>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-lg border border-status-warning-main/40 bg-status-warning-lightest p-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-status-warning-main flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-content-primary">
+                    <p className="font-semibold text-xs uppercase tracking-wide text-status-warning-main mb-1">
+                      Important
+                    </p>
+                    <p>
+                      This online total covers products only. Delivery charges are separate and will
+                      be collected in person when your order is delivered.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1004,11 +1038,11 @@ const Checkout: React.FC = () => {
 
               {WANTS_RAZORPAY_CHECKOUT && (
                 <div className="mb-6 rounded-lg border border-border-default bg-primary-lightest p-4">
-                  <p className="text-sm font-semibold text-content-heading">Secure online payment</p>
+                  <p className="text-sm font-semibold text-content-heading">How payment works</p>
                   <p className="mt-2 text-sm text-content-secondary">
-                    After you place the order, Razorpay Checkout will open for cards, UPI, or netbanking.
-                    Your payment is authorized first; the nursery decision happens next, then capture or
-                    release follows automatically.
+                    After you place the order, a secure payment window opens (UPI, card, or netbanking).
+                    Your bank holds the product amount now. We charge it only after the nursery accepts
+                    your items — if an item is declined, that part is not charged / is refunded.
                   </p>
                 </div>
               )}
@@ -1021,6 +1055,9 @@ const Checkout: React.FC = () => {
                     ₹{formatCartMoney(totalPrice)}
                   </span>
                 </div>
+                <p className="text-xs text-content-secondary mt-2">
+                  Products only · delivery fee collected at delivery
+                </p>
               </div>
 
               {!WANTS_RAZORPAY_CHECKOUT && (
@@ -1029,8 +1066,7 @@ const Checkout: React.FC = () => {
                     Transaction ID / UTR Number <span className="text-status-error-main">*</span>
                   </label>
                   <p className="text-xs text-content-tertiary mb-2">
-                    After making the payment, enter the Transaction ID or UTR number from your payment app
-                    (8-30 characters)
+                    After paying, enter the Transaction ID or UTR from your payment app (8–30 characters)
                   </p>
                   <input
                     type="text"
@@ -1056,14 +1092,26 @@ const Checkout: React.FC = () => {
                 <div className="flex items-start">
                   <AlertCircle className="h-5 w-5 text-status-info-main mr-2 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-status-info-text">
-                    <p className="font-semibold mb-1">
-                      {WANTS_RAZORPAY_CHECKOUT ? 'Authorize then review' : 'Payment Verification'}
-                    </p>
-                    <p>
-                      {WANTS_RAZORPAY_CHECKOUT
-                        ? 'Authorization confirms your order in the queue. Capture happens only after final accept/reject decisions on line items.'
-                        : 'Your order will be confirmed once we verify your payment. This usually takes 24-48 hours. We will contact you via email or phone once verified.'}
-                    </p>
+                    {WANTS_RAZORPAY_CHECKOUT ? (
+                      <>
+                        <p className="font-semibold mb-2">What happens next</p>
+                        <ol className="list-decimal list-inside space-y-1 text-content-secondary">
+                          <li>You pay online for the products.</li>
+                          <li>The nursery accepts or declines each item.</li>
+                          <li>Accepted items are packed and delivered.</li>
+                          <li>Delivery fee is collected in person at delivery.</li>
+                        </ol>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-semibold mb-1">After you pay (UPI / QR)</p>
+                        <p>
+                          Enter the Transaction ID from your payment app. We check the payment
+                          (usually within 24–48 hours) and contact you by email or phone once it is
+                          confirmed.
+                        </p>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
